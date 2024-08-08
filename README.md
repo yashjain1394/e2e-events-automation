@@ -1,1 +1,2 @@
-# Events-Automation
+# e2e-events-automation
+
