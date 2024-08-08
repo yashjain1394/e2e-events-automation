@@ -1,0 +1,24 @@
+{
+  "name": "e2e-events-automation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adobecom/e2e-events-automation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adobecom/e2e-events-automation/issues"
+  },
+  "homepage": "https://github.com/adobecom/e2e-events-automation#readme",
+  "devDependencies": {
+    "platform-ui-automation": "0.0.6",
+    "platform-ui-lib-adobe": "0.0.2"
+  }
+}
