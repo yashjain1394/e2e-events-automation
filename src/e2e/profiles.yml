@@ -1,0 +1,10 @@
+default: -p prod -b chrome --headless false --logconsole
+
+prod:
+  baseUrl: https://www.adobe.com
+
+stage:
+  baseUrl: https://www.stage.adobe.com
+
+dev: 
+  baseUrl: http://localhost:3000
