@@ -1,5 +1,4 @@
 const { EventsBasePage } = require('./eventsBase.page.js');
-const { CommonPage } = require('./common.page.js');
 const { expect } = require('@playwright/test');
 
 class EventsHubPage extends EventsBasePage {
@@ -214,7 +213,7 @@ class EventsHubPage extends EventsBasePage {
       expect(await viewEventLink.isVisible()).toBeTruthy();
       console.log(`Event Card with title ${eventTitle} is present`);
       await viewEventLink.click();
-
+      await viewEventLink.click();
     } catch (error) {
       console.error(`Failed to view event with title "${eventTitle}":`, error.message);
       throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
