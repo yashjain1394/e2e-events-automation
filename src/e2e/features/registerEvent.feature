@@ -1,8 +1,10 @@
+@registerEvent
 Feature: Event Registration
 
   Background:
     Given I am on the events hub page
 
+  @registration
   Scenario: Navigate to Events Hub
     Then I should see the Marquee displayed on the page
     Then I should see events displayed on the page
