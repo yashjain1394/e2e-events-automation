@@ -33,15 +33,26 @@ Then('I should see events displayed on the page', async function () {
   }
 });
 
-When('I select an event card with title from test data', async function () {
+// When('I select an event card with title from test data', async function () {
+//   try {
+//     this.eventTitle = testData.eventTitle;
+//     await this.page.viewEventByTitle(this.eventTitle);
+//   } catch (error) {
+//     console.error(`Failed to select the event card with title "${eventTitle}":`, error.message);
+//     //throw new Error(`Could not select the event card with title "${eventTitle}". Please verify the event title.`);
+//   }
+// });
+
+When('I select the event card at position {int}', async function (sequenceNumber) {
   try {
-    this.eventTitle = testData.eventTitle;
+    this.eventTitle = await this.page.getEventTitleBySequence(sequenceNumber);
     await this.page.viewEventByTitle(this.eventTitle);
   } catch (error) {
-    console.error(`Failed to select the event card with title "${eventTitle}":`, error.message);
-    //throw new Error(`Could not select the event card with title "${eventTitle}". Please verify the event title.`);
+    console.error(`Failed to select the event card at position ${sequenceNumber}:`, error.message);
+    throw new Error(`Could not select the event card at position ${sequenceNumber}. Please ensure the event cards are loaded correctly.`);
   }
 });
+
 
 Then('the banners on the event card should be displayed correctly', async function () {
   try {
@@ -114,10 +125,20 @@ Then('I should see the total number of pages and results displayed', async funct
   }
 });
 
-When('I click the "View event" button on an event card with title from test data', async function () {
+// When('I click the "View event" button on an event card with title from test data', async function () {
+//   try {
+//     const eventTitle = testData.eventTitle;
+//     await this.page.clickViewEventButton(eventTitle);
+//   } catch (error) {
+//     console.error(`Failed to click the "View event" button for the event with title "${testData.eventTitle}":`, error.message);
+//     throw new Error('Could not click the "View event" button as expected.');
+//   }
+// });
+
+When('I click the "View event" button on the event card at position {int}', async function (sequenceNumber) {
   try {
-    const eventTitle = testData.eventTitle;
-    await this.page.clickViewEventButton(eventTitle);
+    this.eventTitle = await this.page.getEventTitleBySequence(sequenceNumber);
+    await this.page.clickViewEventButton(this.eventTitle);
   } catch (error) {
     console.error(`Failed to click the "View event" button for the event with title "${testData.eventTitle}":`, error.message);
     throw new Error('Could not click the "View event" button as expected.');
@@ -127,7 +148,7 @@ When('I click the "View event" button on an event card with title from test data
 Then('I should navigate to the event detail page', async function () {
   try {
     this.context(EventDetailPage);
-    const expectedTitle = testData.eventTitle;
+    const expectedTitle = this.eventTitle;
     await this.page.verifyNavigationToEventDetailPage(expectedTitle);
     await this.page.verifyOnEventDetailPage(expectedTitle);
   } catch (error) {

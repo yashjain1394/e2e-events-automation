@@ -17,7 +17,10 @@ class EventDetailPage extends EventsBasePage {
 
     async verifyNavigationToEventDetailPage(expectedTitle) {
         try {
-            const normalizedTitle = expectedTitle.toLowerCase().replace(/\s+/g, '-');
+            const normalizedTitle = expectedTitle
+                .toLowerCase() 
+                .replace(/\s+/g, '-') 
+                .replace(/-+/g, '-');
             const expectedUrlPart = `/events/create-now/${normalizedTitle}`;
             await this.native.waitForURL(new RegExp(expectedUrlPart));
             const currentUrl = this.native.url();

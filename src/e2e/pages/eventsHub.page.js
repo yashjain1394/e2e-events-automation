@@ -12,6 +12,7 @@ class EventsHubPage extends EventsBasePage {
       cardsWrapper: `[data-testid='consonant-CardsGrid']`,
       eventCards: `.consonant-Card`,
       eventCard: (eventTitle) => `.consonant-Card:has(.consonant-Card-title[title="${eventTitle}"])`,
+      eventTitle : `[data-testid="consonant-Card-title"]`,
       eventCardContent: `.consonant-Card-content`,
       eventDateAndTime: `[data-testid='consonant-DateIntervalInfobit']`,
       viewEventLink: `//a[span[text()='View event']]`,
@@ -37,6 +38,7 @@ class EventsHubPage extends EventsBasePage {
     expect(count).toBeGreaterThan(0);
   }
 
+
   async viewEventByTitle(eventTitle) {
     try {
       const eventCardSelector = this.locators.eventCard(eventTitle);
@@ -47,11 +49,34 @@ class EventsHubPage extends EventsBasePage {
       expect(await viewEventLink.isVisible()).toBeTruthy();
       console.log(`Event Card with title ${eventTitle} is present`);
 
+
     } catch (error) {
       console.error(`Failed to view event with title "${eventTitle}":`, error.message);
       throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
     }
   }
+
+  async getEventTitleBySequence(sequenceNumber) {
+    try {
+      const eventCards = this. native.locator(this.locators.eventCards);
+      const eventCard = eventCards.nth(sequenceNumber - 1);
+  
+      await eventCard.waitFor({ state: 'visible' });
+  
+      const titleElement = eventCard.locator(this.locators.eventTitle);
+      await titleElement.waitFor({ state: 'visible' });
+  
+      const titleText = await titleElement.innerText();
+      console.log(`Event Card at position ${sequenceNumber} has title: "${titleText}"`);
+  
+      return titleText; 
+  
+    } catch (error) {
+      console.error(`Failed to view event card at position "${sequenceNumber}":`, error.message);
+      throw new Error(`Could not select or click on the event card at position "${sequenceNumber}".`);
+    }
+  }
+  
 
   async verifyBannersOnCard(eventTitle) {
     try {
