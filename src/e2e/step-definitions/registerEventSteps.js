@@ -188,8 +188,10 @@ Then('I click the RSVP Button', async function () {
 
 Then('I sign in with AdobeID', async function () {
   try {
+    const username = process.env.USERNAME || testData.userInfo.username; // Fallback to testData if not provided
+    const password = process.env.PASSWORD || testData.userInfo.password;
     this.context(AdobeIdSigninPage);
-    await this.page.signIn(testData.userInfo.username, testData.userInfo.password)
+    await this.page.signIn(username, password)
     console.log("Sign in done")
   }
   catch (error) {
