@@ -30,3 +30,11 @@ Feature: Event Registration
     Then I click the RSVP Button
     Then I sign in with AdobeID
     Then I again click the RSVP Button
+    Then I see the RSVP Form
+    Then I should see the event title I clicked on
+    #And I should see my email prefilled
+    #Then I fill all required information
+    # When I check the Terms and Conditions
+    #Then I click the Submit button
+    #Then I see the registration confirmation
+    #Then I close the confirmation

@@ -25,11 +25,20 @@ class EventsHubPage extends EventsBasePage {
 
   }
 
-  async verifyMarquee() {
-    //await this.commonPage.verifyElementVisible(this.locators.marquee);
-    const marqueElement = await this.native.waitForSelector(this.locators.marquee);
-    expect(await marqueElement.isVisible()).toBeTruthy();
+  async isElementVisible(elementLocator) {
+    try {
+      const element = await this.native.waitForSelector(elementLocator);
+      const isVisible = await element.isVisible();
+      expect(isVisible).toBe(true);
+    } catch (error) {
+      throw new Error(`Element located by ${elementLocator} was not visible: ${error.message}`);
+    }
   }
+  
+  // async verifyMarquee() {
+  //   const marqueElement = await this.native.waitForSelector(this.locators.marquee);
+  //   expect(await marqueElement.isVisible()).toBeTruthy();
+  // }
 
   async verifyEventsDisplayed() {
     await this.native.waitForSelector(this.locators.cardsWrapper);
@@ -37,7 +46,6 @@ class EventsHubPage extends EventsBasePage {
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
   }
-
 
   async viewEventByTitle(eventTitle) {
     try {
@@ -154,15 +162,15 @@ class EventsHubPage extends EventsBasePage {
     }
   }
 
-  async verifyPaginationControls() {
-    try {
-      const paginationControls = await this.native.waitForSelector(this.locators.paginationControlsSelector);
-      expect(await paginationControls.isVisible()).toBeTruthy();
-    } catch (error) {
-      console.error("Pagination controls verification failed:", error.message);
-      throw new Error("Failed to verify pagination controls.");
-    }
-  }
+  // async verifyPaginationControls() {
+  //   try {
+  //     const paginationControls = await this.native.waitForSelector(this.locators.paginationControlsSelector);
+  //     expect(await paginationControls.isVisible()).toBeTruthy();
+  //   } catch (error) {
+  //     console.error("Pagination controls verification failed:", error.message);
+  //     throw new Error("Failed to verify pagination controls.");
+  //   }
+  // }
 
   async verifyButtonIsClickable(buttonSelector) {
     try {

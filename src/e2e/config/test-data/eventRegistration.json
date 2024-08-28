@@ -2,6 +2,10 @@
     "eventTitle": "World UAT Expo",
     "userInfo": {
         "username": "adgaur+US+Complete+VISA+event-attendee+1@adobetest.com",
-        "password": "Bap@d0be"
-    }
+        "password": "Bap@d0be",
+        "firstName" : "",
+        "lastName" : ""
+    },
+    "companyName":"Test Company",
+    "jobTitle":"Other"
 }
