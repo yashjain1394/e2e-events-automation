@@ -37,6 +37,7 @@ class EventDetailPage extends EventsBasePage {
         try {
             const normalizedTitle = expectedTitle
                 .toLowerCase()
+                .replace(/['"`]/g, '')  
                 .replace(/\s+/g, '-')
                 .replace(/-+/g, '-');
             const expectedUrlPart = `/events/create-now/${normalizedTitle}`;

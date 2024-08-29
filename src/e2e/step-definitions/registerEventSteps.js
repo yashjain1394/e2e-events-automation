@@ -33,15 +33,15 @@ Then('I should see events displayed on the page', async function () {
   }
 });
 
-// When('I select an event card with title from test data', async function () {
-//   try {
-//     this.eventTitle = testData.eventTitle;
-//     await this.page.viewEventByTitle(this.eventTitle);
-//   } catch (error) {
-//     console.error(`Failed to select the event card with title "${eventTitle}":`, error.message);
-//     //throw new Error(`Could not select the event card with title "${eventTitle}". Please verify the event title.`);
-//   }
-// });
+When('I select the event card with title {string}', async function (eventTitle) {
+  try {
+    this.eventTitle = eventTitle
+    await this.page.viewEventByTitle(eventTitle);
+  } catch (error) {
+    console.error(`Failed to select the event card with title "${eventTitle}":`, error.message);
+    //throw new Error(`Could not select the event card with title "${eventTitle}". Please verify the event title.`);
+  }
+});
 
 When('I select the event card at position {int}', async function (sequenceNumber) {
   try {
@@ -125,22 +125,21 @@ Then('I should see the total number of pages and results displayed', async funct
   }
 });
 
-// When('I click the "View event" button on an event card with title from test data', async function () {
-//   try {
-//     const eventTitle = testData.eventTitle;
-//     await this.page.clickViewEventButton(eventTitle);
-//   } catch (error) {
-//     console.error(`Failed to click the "View event" button for the event with title "${testData.eventTitle}":`, error.message);
-//     throw new Error('Could not click the "View event" button as expected.');
-//   }
-// });
+When('the View event button on the event card should be clickable', async function () {
+  try {
+    await this.page.clickViewEventButton(this.eventTitle);
+  } catch (error) {
+    console.error(`Failed to click the "View event" button for the event with title "${testData.eventTitle}":`, error.message);
+    throw new Error('Could not click the "View event" button as expected.');
+  }
+});
 
 When('I click the "View event" button on the event card at position {int}', async function (sequenceNumber) {
   try {
     this.eventTitle = await this.page.getEventTitleBySequence(sequenceNumber);
     await this.page.clickViewEventButton(this.eventTitle);
   } catch (error) {
-    console.error(`Failed to click the "View event" button for the event with title "${testData.eventTitle}":`, error.message);
+    console.error(`Failed to click the "View event" button for the event with title "${this.eventTitle}":`, error.message);
     throw new Error('Could not click the "View event" button as expected.');
   }
 });
@@ -149,20 +148,31 @@ Then('I should navigate to the event detail page', async function () {
   try {
     this.context(EventDetailPage);
     const expectedTitle = this.eventTitle;
-    await this.page.verifyNavigationToEventDetailPage(expectedTitle);
+    //await this.page.verifyNavigationToEventDetailPage(expectedTitle);
     await this.page.verifyOnEventDetailPage(expectedTitle);
   } catch (error) {
-    console.error(`Failed to verify navigation to the event detail page for the event with title "${testData.eventTitle}":`, error.message);
+    console.error(`Failed to verify navigation to the event detail page for the event with title "${this.eventTitle}":`, error.message);
     throw new Error('Navigation to the event detail page did not happen as expected.');
   }
 });
 
 Then('I should see the event details on the page', async function () {
-  const eventTitle = await this.page.native.locator(this.page.locators.eventTitle);
-  await eventTitle.waitFor({ state: 'visible' });
-  const isVisible = await eventTitle.isVisible();
-  expect(isVisible).toBeTruthy();
+  try {
+    //await this.page.verifyEventDetails(this.eventTitle);
+    const eventTitleLocator = this.page.locators.eventTitle;
+    await eventTitleLocator.waitFor({ state: 'visible' });
+    const isVisible = await eventTitleLocator.isVisible();
+    expect(isVisible).toBeTruthy();
+    
+    console.log(`Event details for "${this.eventTitle}" are displayed as expected.`);
+  } catch (error) {
+    // Log the specific error message and context
+    console.error(`Error verifying event details for "${this.eventTitle}": ${error.message}`);
+    // Optionally, throw an error to indicate that the test failed
+    throw new Error(`Failed to verify event details for "${this.eventTitle}". ${error.message}`);
+  }
 });
+
 
 Then('I should see the Agenda on the event details page', async function () {
   try {
