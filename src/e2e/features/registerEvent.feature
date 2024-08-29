@@ -1,4 +1,4 @@
-
+@registerEvent
 Feature: Event Registration
 
   Background:
@@ -28,7 +28,6 @@ Feature: Event Registration
     And I should be able to click on specific page numbers
     And I should see the total number of pages and results displayed
 
-  @registerEvent
   Scenario: Navigate to an Event Detail Page
     #When I click the "View event" button on an event card with title from test data
     When I click the "View event" button on the event card at position 1
