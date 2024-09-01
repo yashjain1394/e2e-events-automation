@@ -7,6 +7,7 @@ const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/pa
 
 Given('I am on the events hub page', async function () {
   try {
+    console.log("Events :", this.eventNames)
     this.page = new EventsHubPage();
     await this.page.open();
   } catch (error) {
