@@ -12,10 +12,10 @@ class EventsHubPage extends EventsBasePage {
       cardsWrapper: `[data-testid='consonant-CardsGrid']`,
       eventCards: `.consonant-Card`,
       eventCard: (eventTitle) => `.consonant-Card:has(.consonant-Card-title[title="${eventTitle}"])`,
-      eventTitle : `[data-testid="consonant-Card-title"]`,
+      eventTitle: `[data-testid="consonant-Card-title"]`,
       eventCardContent: `.consonant-Card-content`,
       eventDateAndTime: `[data-testid='consonant-DateIntervalInfobit']`,
-      viewEventLink: `//a[span[text()='View event']]`,
+      viewEventLink: `a[daa-ll="View event"]`,
       paginationControlsSelector: `.consonant-Pagination`,
       nextButtonSelector: `.consonant-Pagination button[data-testid="consonant-Pagination-btn--next"]`,
       previousButtonSelector: `.consonant-Pagination button[data-testid="consonant-Pagination-btn--prev"]`,
@@ -34,7 +34,7 @@ class EventsHubPage extends EventsBasePage {
       throw new Error(`Element located by ${elementLocator} was not visible: ${error.message}`);
     }
   }
-  
+
   // async verifyMarquee() {
   //   const marqueElement = await this.native.waitForSelector(this.locators.marquee);
   //   expect(await marqueElement.isVisible()).toBeTruthy();
@@ -66,25 +66,25 @@ class EventsHubPage extends EventsBasePage {
 
   async getEventTitleBySequence(sequenceNumber) {
     try {
-      const eventCards = this. native.locator(this.locators.eventCards);
+      const eventCards = this.native.locator(this.locators.eventCards);
       const eventCard = eventCards.nth(sequenceNumber - 1);
-  
+
       await eventCard.waitFor({ state: 'visible' });
-  
+
       const titleElement = eventCard.locator(this.locators.eventTitle);
       await titleElement.waitFor({ state: 'visible' });
-  
+
       const titleText = await titleElement.innerText();
       console.log(`Event Card at position ${sequenceNumber} has title: "${titleText}"`);
-  
-      return titleText; 
-  
+
+      return titleText;
+
     } catch (error) {
       console.error(`Failed to view event card at position "${sequenceNumber}":`, error.message);
       throw new Error(`Could not select or click on the event card at position "${sequenceNumber}".`);
     }
   }
-  
+
 
   async verifyBannersOnCard(eventTitle) {
     try {
@@ -213,7 +213,7 @@ class EventsHubPage extends EventsBasePage {
       //const parentSelector = '.consonant-Pagination-summary';
       await this.native.waitForSelector(this.locators.paginationSummarySelector);
 
-      const childElement = await this.native.locator(`${this.locators.paginationSummarySelector} > *`); 
+      const childElement = await this.native.locator(`${this.locators.paginationSummarySelector} > *`);
       const summaryText = await childElement.textContent();
 
       const match = summaryText.match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)\s*results/);
@@ -237,21 +237,32 @@ class EventsHubPage extends EventsBasePage {
 
   async clickViewEventButton(eventTitle) {
     try {
-      const eventCardSelector = this.locators.eventCard(eventTitle);
-      const eventCard = await this.native.locator(eventCardSelector);
 
-      await eventCard.waitFor({ state: 'visible' });
-      const viewEventLink = await eventCard.locator(this.locators.viewEventLink);
-      await eventCard.waitFor({ state: 'visible' });
-      expect(await viewEventLink.isVisible()).toBeTruthy();
-      console.log(`Event Card with title ${eventTitle} is present`);
-      await viewEventLink.click();
-      await viewEventLink.click();
+        const eventCardSelector = this.locators.eventCard(eventTitle);
+        await this.native.waitForSelector(eventCardSelector);
+
+        const eventCard = await this.native.locator(eventCardSelector);
+        await eventCard.waitFor({ state: 'visible', timeout: 5000 });
+
+        const viewEventLink = await eventCard.locator(this.locators.viewEventLink);
+        await viewEventLink.waitFor({ state: 'visible', timeout: 5000 });
+      
+        console.log(`Event Card with title "${eventTitle}" is present`);
+
+        const hrefValue = await viewEventLink.getAttribute('href');
+        console.log(`Href value of the link: ${hrefValue}`);
+
+        viewEventLink.click();
+        viewEventLink.click();
+        console.log(`Clicked on the view more link for "${eventTitle}"`);
+
     } catch (error) {
-      console.error(`Failed to view event with title "${eventTitle}":`, error.message);
-      throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
+        console.error(`Failed to view event with title "${eventTitle}":`, error.message);
+        throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
     }
-  }
+}
+
+
 
 }
 

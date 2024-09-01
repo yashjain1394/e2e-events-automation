@@ -1,4 +1,3 @@
-// helpers.js
 const getDynamicEventNames = () => {
     const eventNamesFromEnv = process.env.EVENTS;
   
@@ -6,7 +5,7 @@ const getDynamicEventNames = () => {
       return eventNamesFromEnv.split(',').map(name => name.trim());
     }
 
-    return ["Adam's Creative Jelly Jam", 'E2E Event', 'World UAT Expo'];
+    return ['PixelArt Expo', 'Create Now Pittsburgh'];
   };
   
   module.exports = { getDynamicEventNames };
