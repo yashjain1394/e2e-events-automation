@@ -1,5 +1,7 @@
 const { EventsBasePage } = require('./eventsBase.page.js');
 const { expect } = require('@playwright/test');
+const Logger = require('../common-utils/logger.js');
+const logger = new Logger();
 
 class EventsHubPage extends EventsBasePage {
   constructor() {
@@ -25,28 +27,37 @@ class EventsHubPage extends EventsBasePage {
 
   }
 
-  async isElementVisible(elementLocator) {
+  async isElementVisible(elementLocator, timeout = 2000) {
     try {
-      const element = await this.native.waitForSelector(elementLocator);
+      const element = await this.native.waitForSelector(elementLocator, { timeout });
       const isVisible = await element.isVisible();
       expect(isVisible).toBe(true);
+      return true;
     } catch (error) {
-      throw new Error(`Element located by ${elementLocator} was not visible: ${error.message}`);
+      console.error(`Element located by ${elementLocator} was not visible within ${timeout} ms: ${error.message}`);
+      return false;
     }
   }
 
-  // async verifyMarquee() {
-  //   const marqueElement = await this.native.waitForSelector(this.locators.marquee);
-  //   expect(await marqueElement.isVisible()).toBeTruthy();
-  // }
-
   async verifyEventsDisplayed() {
-    await this.native.waitForSelector(this.locators.cardsWrapper);
-    const cards = await this.native.locator(this.locators.eventCards);
-    const count = await cards.count();
-    expect(count).toBeGreaterThan(0);
-    console.log(`${count} events dispalyed on the page` )
-  }
+    try {
+        await this.native.waitForSelector(this.locators.cardsWrapper);
+        const cards = await this.native.locator(this.locators.eventCards);
+        const count = await cards.count();
+        if (count > 0) {
+            logger.logInfo(`${count} Events displayed on the Events Hub first page`);
+            return true; 
+        } else {
+            logger.logError('No events displayed on the Events Hub first page');
+            return false; 
+        }
+    } catch (error) {
+        logger.logError(`Error verifying events displayed: ${error.message}`);
+        return false; 
+    }
+}
+
+
 
   async viewEventByTitle(eventTitle) {
     try {
@@ -172,14 +183,14 @@ class EventsHubPage extends EventsBasePage {
   //   }
   // }
 
-  async verifyButtonIsClickable(buttonSelector) {
+  async verifyButtonIsClickable(buttonType, buttonSelector) {
     try {
       const button = await this.native.locator(buttonSelector);
       await button.waitFor({ state: 'visible' });
       expect(await button.isEnabled()).toBeTruthy();
-      console.log(`The button with selector "${buttonSelector}" is clickable.`);
+      logger.logInfo(`The "${buttonType}" button is clickable.`);
     } catch (error) {
-      console.error(`Button with selector "${buttonSelector}" is not clickable:`, error.message);
+      logger.logError(`The "${buttonType}" button is not clickable:`, error.message);
       throw new Error(`The button with selector "${buttonSelector}" is not clickable.`);
     }
   }
@@ -190,6 +201,7 @@ class EventsHubPage extends EventsBasePage {
       const count = await paginationItems.count();
 
       if (count === 0) {
+        logger.logError("No pagination buttons found inside")
         throw new Error(`No pagination buttons found inside ${paginationSelector}.`);
       }
 
@@ -198,11 +210,11 @@ class EventsHubPage extends EventsBasePage {
         const pageButton = paginationItems.nth(i);
         await pageButton.waitFor({ state: 'visible' });
         expect(await pageButton.isEnabled()).toBeTruthy();
-        console.log(`Pagination button ${i + 1} is clickable.`);
+        logger.logInfo(`Pagination button ${i + 1} is clickable.`);
       }
 
     } catch (error) {
-      console.error(`Pagination button verification failed:`, error.message);
+      logger.logError(`Error occured while pagination button verification:`, error.message);
       throw new Error(`Failed to verify pagination buttons.`);
     }
   }
@@ -245,9 +257,9 @@ class EventsHubPage extends EventsBasePage {
       await eventCard.waitFor({ state: 'visible', timeout: 5000 });
 
       const viewEventLinkSelector = this.locators.viewEventLink;
-      await this.native.waitForSelector(viewEventLinkSelector);  
+      await this.native.waitForSelector(viewEventLinkSelector);
       const viewEventLink = eventCard.locator(viewEventLinkSelector);
-      await viewEventLink.waitFor({ state: 'visible', timeout: 5000 }); 
+      await viewEventLink.waitFor({ state: 'visible', timeout: 5000 });
 
       console.log(`Event Card with title "${eventTitle}" is present`);
 
@@ -270,8 +282,6 @@ class EventsHubPage extends EventsBasePage {
       throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
     }
   }
-
-
 
 }
 

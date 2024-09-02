@@ -4,32 +4,93 @@ const { EventDetailPage } = require("../pages/eventDetails.page.js");
 const testData = require("../config/test-data/eventRegistration.json");
 const { expect } = require('@playwright/test');
 const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/page-objects/adobeidsingin.page.js');
+const Logger = require('../common-utils/logger.js');
+const logger = new Logger();
 
 Given('I am on the events hub page', async function () {
   try {
     this.page = new EventsHubPage();
     await this.page.open();
+    logger.logInfo("Navigated to Events Hub page")
   } catch (error) {
-    console.error("Failed to open the Events Hub page:", error.message);
+    logger.logError("Failed to open the Events Hub page:", error.message);
     throw new Error("Could not navigate to the Events Hub page. Please check the URL or connectivity.");
   }
 });
 
 Then('I should see the Marquee displayed on the page', async function () {
   try {
-    await this.page.isElementVisible(this.page.locators.marquee);
+    const isMarqueeVisible = await this.page.isElementVisible(this.page.locators.marquee);
+    if (!isMarqueeVisible) {
+      logger.logError("Marquee not displayed on Events Hub page.");
+    }
+    else {
+      logger.logInfo("Marquee displayed on Events Hub page")
+    }
   } catch (error) {
-    console.error("Marquee verification failed:", error.message);
+    logger.logError("Error occured while marquee verification:", error.message);
     //throw new Error("Marquee is not displayed as expected on the Events Hub page.");
   }
 });
 
 Then('I should see events displayed on the page', async function () {
   try {
-    await this.page.verifyEventsDisplayed();
+    const eventsDisplayed = await this.page.verifyEventsDisplayed();
+    if (!eventsDisplayed) {
+      throw new Error("Events are not displayed as expected on the Events Hub page.");
+    }
   } catch (error) {
-    console.error("Events verification failed:", error.message);
-    throw new Error("Events are not displayed as expected on the Events Hub page.");
+    throw new Error("Error during events verification on the Events Hub page.", error.message);
+  }
+});
+
+Then('I should see pagination controls', async function () {
+  try {
+    const isPaginationVisible = await this.page.isElementVisible(this.page.locators.paginationControlsSelector);
+    if (!isPaginationVisible) {
+      logger.logWarning("Pagination controls not present on Events Hub page")
+    }
+    else {
+      logger.logInfo("Pagination controls are present on Events Hub page.");
+    }
+  } catch (error) {
+    logger.logError("Error occured while pagination controls verification:", error.message);
+    //throw new Error("Failed to verify pagination controls.");
+  }
+});
+
+Then('the {string} button should be clickable', async function (buttonType) {
+  try {
+    const buttonSelectors = {
+      'Next': this.page.locators.nextButtonSelector,
+      'Previous': this.page.locators.previousButtonSelector
+    };
+    const buttonSelector = buttonSelectors[buttonType];
+    if (!buttonSelector) {
+      throw new Error(`No selector defined for button type "${buttonType}".`);
+    }
+    await this.page.verifyButtonIsClickable(buttonType, buttonSelector);
+  } catch (error) {
+    logger.logError(`Error occured while verifying "${buttonType}" button is clickable:`, error.message);
+    //throw new Error(`The "${buttonType}" button could not be verified as clickable.`);
+  }
+});
+
+Then('I should be able to click on specific page numbers', async function () {
+  try {
+    await this.page.verifyPageNumbersClickable();
+  } catch (error) {
+    console.error('Failed to verify page numbers:', error.message);
+    //throw new Error('The page numbers could not be verified.');
+  }
+});
+
+Then('I should see the total number of pages and results displayed', async function () {
+  try {
+    await this.page.verifyTotalPagesAndResults();
+  } catch (error) {
+    console.error('Failed to verify total pages and results:', error.message);
+    //throw new Error('The total number of pages and results could not be verified.');
   }
 });
 
@@ -71,50 +132,6 @@ Then('I should see the date and time displayed correctly on the event card', asy
   } catch (error) {
     console.error("Date and time verification failed:", error.message);
     //throw new Error("Date and time on the event card are not displayed correctly.");
-  }
-});
-
-Then('I should see pagination controls', async function () {
-  try {
-    await this.page.isElementVisible(this.page.locators.paginationControlsSelector);
-  } catch (error) {
-    console.error("Pagination controls verification failed:", error.message);
-    //throw new Error("Failed to verify pagination controls.");
-  }
-});
-
-Then('the {string} button should be clickable', async function (buttonType) {
-  try {
-    const buttonSelectors = {
-      'Next': this.page.locators.nextButtonSelector,
-      'Previous': this.page.locators.previousButtonSelector
-    };
-    const buttonSelector = buttonSelectors[buttonType];
-    if (!buttonSelector) {
-      throw new Error(`No selector defined for button type "${buttonType}".`);
-    }
-    await this.page.verifyButtonIsClickable(buttonSelector);
-  } catch (error) {
-    console.error(`Failed to verify if the "${buttonType}" button is clickable:`, error.message);
-    //throw new Error(`The "${buttonType}" button could not be verified as clickable.`);
-  }
-});
-
-Then('I should be able to click on specific page numbers', async function () {
-  try {
-    await this.page.verifyPageNumbersClickable();
-  } catch (error) {
-    console.error('Failed to verify page numbers:', error.message);
-    //throw new Error('The page numbers could not be verified.');
-  }
-});
-
-Then('I should see the total number of pages and results displayed', async function () {
-  try {
-    await this.page.verifyTotalPagesAndResults();
-  } catch (error) {
-    console.error('Failed to verify total pages and results:', error.message);
-    //throw new Error('The total number of pages and results could not be verified.');
   }
 });
 
