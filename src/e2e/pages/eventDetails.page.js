@@ -14,6 +14,7 @@ class EventDetailPage extends EventsBasePage {
             sectionSelector: (profile) => `div[class*="profile-cards"]:has(#${profile})`,
             relatedProductsSection : `.event-product-blades`,
             relatedProductFragment: `[class="fragment"]`,
+            partnersSection : `.event-partners-container`,
             eventContainer: '.foreground.container',
             eventRsvp: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
             eventForm: '#rsvp-form-1',
@@ -176,7 +177,7 @@ class EventDetailPage extends EventsBasePage {
 
     async verifyRelatedProductsBladeDetails(relatedProductBladeSelector) {
         try {
-            const relatedProductBlade = this.native.locator(relatedProductBladeSelector);
+            const relatedProductBlade = await this.native.locator(relatedProductBladeSelector);
             const productCards = await relatedProductBlade.locator(this.locators.relatedProductFragment).elementHandles();
             const cardCount = productCards.length;
 
@@ -206,6 +207,43 @@ class EventDetailPage extends EventsBasePage {
             }
         } catch (error) {
             console.error('Error verifying details in the related products blade:', error);
+            throw error; 
+        }
+    }
+
+    async verifyPartnersDetails(partnersSectionSelector) {
+        try {
+            const partnersSection = this.native.locator(partnersSectionSelector);
+            await partnersSection.waitFor({ state: 'visible', timeout: 5000 });
+    
+            const links = await partnersSection.locator('a').elementHandles();
+            const linkCount = links.length;
+    
+            if (linkCount > 0) {
+                console.log(`Found ${linkCount} partner links.`);
+    
+                for (let i = 0; i < linkCount; i++) {
+                    const link = links[i];
+    
+                    try {
+                        const isVisible = await link.isVisible();
+                        const isEnabled = await link.isEnabled();
+                        const linkTitle = await link.getAttribute('title');
+    
+                        if (isVisible && isEnabled) {
+                            console.log(`Link ${i + 1} is clickable. Text: ${linkTitle}`);
+                        } else {
+                            console.warn(`Link ${i + 1} is not clickable. Text: ${linkTitle}`);
+                        }
+                    } catch (error) {
+                        console.error(`Error verifying link ${i + 1}:`, error);
+                    }
+                }
+            } else {
+                console.log('No partner links found.');
+            }
+        } catch (error) {
+            console.error('Error verifying details in the partners section:', error);
             throw error; 
         }
     }

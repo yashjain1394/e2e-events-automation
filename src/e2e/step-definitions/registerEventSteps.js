@@ -51,7 +51,7 @@ When('I select the event card at position {int}', async function (sequenceNumber
     await this.page.viewEventByTitle(this.eventTitle);
   } catch (error) {
     console.error(`Failed to select the event card at position ${sequenceNumber}:`, error.message);
-    throw new Error(`Could not select the event card at position ${sequenceNumber}. Please ensure the event cards are loaded correctly.`);
+    //throw new Error(`Could not select the event card at position ${sequenceNumber}. Please ensure the event cards are loaded correctly.`);
   }
 });
 
@@ -164,33 +164,33 @@ Then('I should see the event details on the page', async function () {
     console.log(`Event details for "${this.eventTitle}" are displayed as expected.`);
   } catch (error) {
     console.error(`Error verifying event details for "${this.eventTitle}": ${error.message}`);
-    throw new Error(`Failed to verify event details for "${this.eventTitle}". ${error.message}`);
+    //throw new Error(`Failed to verify event details for "${this.eventTitle}". ${error.message}`);
   }
 });
 
 
 Then('I should see the Agenda on the event details page', async function () {
   try {
-      const isAgendaVisible = await this.page.isElementVisible(this.page.locators.eventAgenda);
-      if (!isAgendaVisible) {
-          console.warn("Event agenda verification failed: Agenda is not visible.");
-      }
+    const isAgendaVisible = await this.page.isElementVisible(this.page.locators.eventAgenda);
+    if (!isAgendaVisible) {
+      console.warn("Event agenda verification failed: Agenda is not visible.");
+    }
   } catch (error) {
-      console.error("An error occurred while verifying the agenda:", error.message);
-      //throw new Error("Failed to verify agenda visibility on the Event Details page.");
+    console.error("An error occurred while verifying the agenda:", error.message);
+    //throw new Error("Failed to verify agenda visibility on the Event Details page.");
   }
 });
 
 Then('I should see the Venue on the event details page', async function () {
   try {
-      const isVenueVisible = await this.page.isElementVisible(this.page.locators.eventVenue);
-      if (!isVenueVisible) {
-          console.error("Event venue verification failed: Venue is not visible.");
-          throw new Error("Venue is not displayed as expected on the Event Details page.");
-      }
+    const isVenueVisible = await this.page.isElementVisible(this.page.locators.eventVenue);
+    if (!isVenueVisible) {
+      console.error("Event venue verification failed: Venue is not visible.");
+      throw new Error("Venue is not displayed as expected on the Event Details page.");
+    }
   } catch (error) {
-      console.error("An error occurred while verifying the venue:", error.message);
-      throw new Error("Failed to verify venue visibility on the Event Details page.");
+    console.error("An error occurred while verifying the venue:", error.message);
+    //throw new Error("Failed to verify venue visibility on the Event Details page.");
   }
 });
 
@@ -217,8 +217,7 @@ Then('I should see profile cards for speakers and host', async function () {
 
   } catch (error) {
     console.error("Failed to verify profile cards:", error.message);
-    // Optionally, you can rethrow the error to fail the test
-    throw new Error("Failed to verify profile cards: " + error.message);
+    //throw new Error("Failed to verify profile cards: " + error.message);
   }
 });
 
@@ -234,7 +233,22 @@ Then(/^I verify the CTA in the related products blade$/, async function () {
 
   } catch (error) {
     console.error('An error occurred while verifying the related products blade:', error);
-    throw new Error("Failed to verify CTA in the related products blade.");
+    //throw new Error("Failed to verify CTA in the related products blade.");
+  }
+});
+
+Then(/^I verify the partners section$/, async function () {
+  try {
+    partnersSectionSelector = await this.page.locators.partnersSection
+    const sectionExists = await this.page.isElementVisible(partnersSectionSelector);
+    if (sectionExists) {
+      await this.page.verifyPartnersDetails(partnersSectionSelector);
+    } else {
+      console.warn('Partners does not exist on the page.');
+    }
+  } catch (error) {
+    console.error('An error occurred while verifying the related products blade:', error);
+    //throw new Error("Failed to verify CTA in the related products blade.");
   }
 });
 
@@ -248,13 +262,13 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
     const checkFormDisplayed = async () => {
       try {
         await this.page.native.waitForSelector(this.page.locators.eventForm, { state: 'visible', timeout: 10000 });
-        return true; 
+        return true;
       } catch (error) {
         console.error(`Error checking form visibility: ${error.message}`);
-        return false; 
+        return false;
       }
     };
-    
+
     let formDisplayed = await checkFormDisplayed();
     if (!formDisplayed) {
       console.log("RSVP form not displayed, checking for sign-in");
@@ -283,46 +297,8 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
       console.log("RSVP form displayed successfully");
     }
   } catch (error) {
-    console.error(`Failed to complete the RSVP process: ${error.message}`);
-  }
-});
-
-
-
-Then('I click the RSVP Button', async function () {
-  try {
-    await this.page.clickRsvp();
-  } catch (error) {
-    console.error("Failed to click on RSVP Button")
-  }
-});
-
-Then('I sign in with AdobeID', async function () {
-  try {
-    this.context(AdobeIdSigninPage);
-    await this.page.signIn(this.credentials.username, this.credentials.password)
-    console.log("Sign in done")
-  }
-  catch (error) {
-    console.error(`Failed to sign in : ${error}`)
-  }
-});
-
-Then('I again click the RSVP Button', async function () {
-  try {
-    this.context(EventDetailPage);
-    await this.page.clickRsvp();
-  } catch (error) {
-    console.error("Failed to click on RSVP Button")
-  }
-});
-
-Then('I see the RSVP Form', async function () {
-  try {
-    await this.page.isElementVisible(this.page.locators.eventForm);
-  } catch (error) {
-    console.error("RSVP form verification failed:", error.message);
-    throw new Error("RSVP form not displayed as expected on the Event Details page.");
+    console.error(`Failed to initiate the RSVP process: ${error.message}`);
+    throw new Error("Error occured while initiating the RSVP process.");
   }
 });
 

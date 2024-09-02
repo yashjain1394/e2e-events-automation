@@ -24,7 +24,7 @@ Feature: Event Registration
     And I should see the Agenda on the event details page
     And I should see profile cards for speakers and host
     And I verify the CTA in the related products blade
-    #And I verify the partners section
+    And I verify the partners section
 
     Then I initiate the RSVP process and handle sign-in if required
     Then I should see the event title I clicked on

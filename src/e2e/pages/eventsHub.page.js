@@ -45,6 +45,7 @@ class EventsHubPage extends EventsBasePage {
     const cards = await this.native.locator(this.locators.eventCards);
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
+    console.log(`${count} events dispalyed on the page` )
   }
 
   async viewEventByTitle(eventTitle) {
