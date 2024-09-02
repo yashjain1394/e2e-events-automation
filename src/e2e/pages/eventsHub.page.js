@@ -64,7 +64,7 @@ class EventsHubPage extends EventsBasePage {
       expect(await button.isEnabled()).toBeTruthy();
       logger.logInfo(`The "${buttonType}" button is clickable.`);
     } catch (error) {
-      logger.logError(`The "${buttonType}" button is not clickable:`, error.message);
+      logger.logError(`The "${buttonType}" button is not clickable: ${error.message}`);
       throw new Error(`The button with selector "${buttonSelector}" is not clickable.`);
     }
   }
@@ -88,7 +88,7 @@ class EventsHubPage extends EventsBasePage {
       }
 
     } catch (error) {
-      logger.logError(`Error occured while pagination button verification:`, error.message);
+      logger.logError(`Error occured while pagination button verification: ${error.message}`);
       throw new Error(`Failed to verify pagination buttons.`);
     }
   }
@@ -104,19 +104,19 @@ class EventsHubPage extends EventsBasePage {
 
       if (!match) {
         logger.error(`Pagination summary does not match expected format. Found: "${summaryText}".`)
-        throw new Error(`Pagination summary does not match expected format. Found: "${summaryText}".`);
+        throw new Error(`Pagination summary does not match expected format.`);
       }
 
       const [_, start, end, total] = match.map(Number);
 
       if (start > end || end > total) {
         logger.logError(`Pagination summary numbers are out of range. Summary: "${summaryText}".`)
-        throw new Error(`Pagination summary numbers are out of range. Summary: "${summaryText}".`);
+        throw new Error(`Pagination summary numbers are out of range.`);
       }
 
       logger.logInfo(`Pagination summary is correct: ${summaryText}`);
     } catch (error) {
-      logger.logError(`Error occured while total pages and results verification:`, error.message);
+      logger.logError(`Error occured while total pages and results verification: ${error.message}`);
       throw new Error(`Failed to verify total pages and results: ${error.message}`);
     }
   }
@@ -132,7 +132,7 @@ class EventsHubPage extends EventsBasePage {
       logger.logInfo(`Event Card with title ${eventTitle} is present`)
 
     } catch (error) {
-      logger.logError(`Failed to view event with title "${eventTitle}":`, error.message);
+      logger.logError(`Failed to view event with title "${eventTitle}": ${error.message}`);
       throw new Error(`Could not view event card with title "${eventTitle}".`);
     }
   }
@@ -185,7 +185,7 @@ class EventsHubPage extends EventsBasePage {
       logger.logInfo(`Banner background image URL on the event card titled "${eventTitle}" is: ${backgroundImageUrl}`);
 
     } catch (error) {
-      logger.logError("Error occured while banner verification:", error.message);
+      logger.logError(`Error occured while banner verification: ${error.message}`);
       throw new Error(`Failed to verify the banner on the event card titled "${eventTitle}".`);
     }
   }
@@ -206,15 +206,15 @@ class EventsHubPage extends EventsBasePage {
         throw new Error("Date and time text is missing or not visible.");
       }
 
-      const dateTimeRegex = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2} \| \d{2}:\d{2} (AM|PM) - \d{2}:\d{2} (AM|PM) GMT[+-]\d{1,2}:\d{2}$/;
+      const dateTimeRegex = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2} \| \d{2}:\d{2} (AM|PM) - \d{2}:\d{2} (AM|PM)/;
       if (!dateTimeRegex.test(dateAndTimeText.trim())) {
         logger.logError(`Date and time format is incorrect: ${dateAndTimeText}`)
-        throw new Error(`Date and time format is incorrect: ${dateAndTimeText}`);
+        throw new Error(`Date and time format is incorrect`);
       }
 
       logger.logInfo(`Date and time on the event card are displayed correctly: ${dateAndTimeText}`);
     } catch (error) {
-      logger.logError("Error occured while date and time verification :", error.message);
+      logger.logError(`Error occured while date and time verification : ${error.message}`);
       throw error;
     }
   }
@@ -244,7 +244,7 @@ class EventsHubPage extends EventsBasePage {
           logger.logInfo(`Navigated to ${hrefValue}`);
         } else {
           console.warn(`Href value not found for the link in card "${eventTitle}".`);
-          throw new Error(`Href value not found for the link in card "${eventTitle}"`);
+          throw new Error(`Href value not found for the link`);
         }
       } else {
         logger.logError(`View event link in card "${eventTitle}" is not clickable.`);
@@ -252,7 +252,7 @@ class EventsHubPage extends EventsBasePage {
       }
 
     } catch (error) {
-      logger.logError(`Error occured while clicking on view event with title "${eventTitle}":`, error.message);
+      logger.logError(`Error occured while clicking on view event with title "${eventTitle}": ${error.message}`);
       throw new Error(`Could not click "View event" on event card with title "${eventTitle}".`);
     }
   }

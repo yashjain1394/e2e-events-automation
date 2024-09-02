@@ -98,7 +98,11 @@ Then('I should see the total number of pages and results displayed', async funct
 When('I select the event card with title {string}', async function (eventTitle) {
   try {
     console.log(`Event provided by user: ${this.overrideEventName}`)
-    this.eventTitle = eventTitle
+    if (this.overrideEventName){
+      this.eventTitle = overrideEventName
+    }else{
+      this.eventTitle = eventTitle
+    }
     await this.page.viewEventByTitle(eventTitle);
   } catch (error) {
     console.error(`Failed to select the event card with title "${eventTitle}":`, error.message);
