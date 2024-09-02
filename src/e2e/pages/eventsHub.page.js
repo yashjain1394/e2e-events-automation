@@ -41,147 +41,21 @@ class EventsHubPage extends EventsBasePage {
 
   async verifyEventsDisplayed() {
     try {
-        await this.native.waitForSelector(this.locators.cardsWrapper);
-        const cards = await this.native.locator(this.locators.eventCards);
-        const count = await cards.count();
-        if (count > 0) {
-            logger.logInfo(`${count} Events displayed on the Events Hub first page`);
-            return true; 
-        } else {
-            logger.logError('No events displayed on the Events Hub first page');
-            return false; 
-        }
-    } catch (error) {
-        logger.logError(`Error verifying events displayed: ${error.message}`);
-        return false; 
-    }
-}
-
-
-
-  async viewEventByTitle(eventTitle) {
-    try {
-      const eventCardSelector = this.locators.eventCard(eventTitle);
-      const eventCard = this.native.locator(eventCardSelector);
-
-      await eventCard.waitFor({ state: 'visible' });
-      const viewEventLink = eventCard.locator(this.locators.viewEventLink);
-      expect(await viewEventLink.isVisible()).toBeTruthy();
-      console.log(`Event Card with title ${eventTitle} is present`)
-
-    } catch (error) {
-      console.error(`Failed to view event with title "${eventTitle}":`, error.message);
-      throw new Error(`Could not view event card with title "${eventTitle}".`);
-    }
-  }
-
-  async getEventTitleBySequence(sequenceNumber) {
-    try {
-      const eventCards = this.native.locator(this.locators.eventCards);
-      const eventCard = eventCards.nth(sequenceNumber - 1);
-
-      await eventCard.waitFor({ state: 'visible' });
-
-      const titleElement = eventCard.locator(this.locators.eventTitle);
-      await titleElement.waitFor({ state: 'visible' });
-
-      const titleText = await titleElement.innerText();
-      console.log(`Event Card at position ${sequenceNumber} has title: "${titleText}"`);
-
-      return titleText;
-
-    } catch (error) {
-      console.error(`Failed to view event card at position "${sequenceNumber}":`, error.message);
-      throw new Error(`Could not select or click on the event card at position "${sequenceNumber}".`);
-    }
-  }
-
-
-  async verifyBannersOnCard(eventTitle) {
-    try {
-      const eventCardSelector = this.locators.eventCard(eventTitle);
-      const eventCard = this.native.locator(eventCardSelector);
-
-      await eventCard.waitFor({ state: 'visible' });
-
-      const bannerHeader = await eventCard.locator('[data-testid="consonant-Card-header"]');
-
-      expect(await bannerHeader.isVisible()).toBeTruthy();
-
-      const styleAttribute = await bannerHeader.getAttribute('style');
-
-      expect(styleAttribute).toContain('background-image', `No background-image found in the style attribute for the event card titled "${eventTitle}".`);
-
-      const backgroundImageStart = styleAttribute.indexOf('url(') + 4; // 4 to skip 'url('
-      const backgroundImageEnd = styleAttribute.indexOf(')', backgroundImageStart);
-      let backgroundImageUrl = styleAttribute.substring(backgroundImageStart, backgroundImageEnd).replace(/['"]/g, '');
-
-
-      if (!backgroundImageUrl || backgroundImageUrl === '') {
-        throw new Error(`Banner for the event card titled "${eventTitle}" does not have a valid background-image URL.`);
+      await this.native.waitForSelector(this.locators.cardsWrapper);
+      const cards = await this.native.locator(this.locators.eventCards);
+      const count = await cards.count();
+      if (count > 0) {
+        logger.logInfo(`${count} Events displayed on the Events Hub first page`);
+        return true;
+      } else {
+        logger.logError('No events displayed on the Events Hub first page');
+        return false;
       }
-      console.log(`Banner background image URL on the event card titled "${eventTitle}" is: ${backgroundImageUrl}`);
-
     } catch (error) {
-      console.error("Banner verification failed:", error.message);
-      throw new Error(`Failed to verify the banner on the event card titled "${eventTitle}".`);
+      logger.logError(`Error verifying events displayed: ${error.message}`);
+      return false;
     }
   }
-
-  async verifyDateAndTimeOnCard(eventTitle) {
-    try {
-      const eventCardSelector = this.locators.eventCard(eventTitle);
-      const eventCard = this.native.locator(eventCardSelector);
-
-      await eventCard.waitFor({ state: 'visible' });
-
-      const dateAndTimeElement = eventCard.locator(this.locators.eventDateAndTime);
-      await dateAndTimeElement.waitFor({ state: 'visible' });
-
-      const dateAndTimeText = await dateAndTimeElement.textContent();
-      if (!dateAndTimeText) {
-        throw new Error("Date and time text is missing or not visible.");
-      }
-
-      const dateTimeRegex = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2} \| \d{2}:\d{2} (AM|PM) - \d{2}:\d{2} (AM|PM) GMT[+-]\d{1,2}:\d{2}$/;
-      if (!dateTimeRegex.test(dateAndTimeText.trim())) {
-        throw new Error(`Date and time format is incorrect: ${dateAndTimeText}`);
-      }
-
-      console.log(`Date and time on the event card are displayed correctly: ${dateAndTimeText}`);
-    } catch (error) {
-      console.error("Date and time verification failed:", error.message);
-      throw error;
-    }
-  }
-
-  async verifyViewEventButton(eventTitle) {
-    try {
-      const eventCardSelector = this.locators.eventCard(eventTitle);
-      const eventCard = this.native.locator(eventCardSelector);
-
-      await eventCard.waitFor({ state: 'visible' });
-
-      const viewEventLink = eventCard.locator(this.locators.viewEventLink);
-      await viewEventLink.waitFor({ state: 'visible' });
-      await expect(viewEventLink).toBeEnabled();
-
-      console.log(`"View event" button on the event card is clickable.`);
-    } catch (error) {
-      console.error('Verification of "View event" button failed:', error.message);
-      throw error;
-    }
-  }
-
-  // async verifyPaginationControls() {
-  //   try {
-  //     const paginationControls = await this.native.waitForSelector(this.locators.paginationControlsSelector);
-  //     expect(await paginationControls.isVisible()).toBeTruthy();
-  //   } catch (error) {
-  //     console.error("Pagination controls verification failed:", error.message);
-  //     throw new Error("Failed to verify pagination controls.");
-  //   }
-  // }
 
   async verifyButtonIsClickable(buttonType, buttonSelector) {
     try {
@@ -221,8 +95,6 @@ class EventsHubPage extends EventsBasePage {
 
   async verifyTotalPagesAndResults() {
     try {
-
-      //const parentSelector = '.consonant-Pagination-summary';
       await this.native.waitForSelector(this.locators.paginationSummarySelector);
 
       const childElement = await this.native.locator(`${this.locators.paginationSummarySelector} > *`);
@@ -231,19 +103,119 @@ class EventsHubPage extends EventsBasePage {
       const match = summaryText.match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)\s*results/);
 
       if (!match) {
+        logger.error(`Pagination summary does not match expected format. Found: "${summaryText}".`)
         throw new Error(`Pagination summary does not match expected format. Found: "${summaryText}".`);
       }
 
       const [_, start, end, total] = match.map(Number);
 
       if (start > end || end > total) {
+        logger.logError(`Pagination summary numbers are out of range. Summary: "${summaryText}".`)
         throw new Error(`Pagination summary numbers are out of range. Summary: "${summaryText}".`);
       }
 
-      console.log(`Pagination summary is correct: ${summaryText}`);
+      logger.logInfo(`Pagination summary is correct: ${summaryText}`);
     } catch (error) {
-      console.error(`Total pages and results verification failed:`, error.message);
+      logger.logError(`Error occured while total pages and results verification:`, error.message);
       throw new Error(`Failed to verify total pages and results: ${error.message}`);
+    }
+  }
+
+  async viewEventByTitle(eventTitle) {
+    try {
+      const eventCardSelector = this.locators.eventCard(eventTitle);
+      const eventCard = this.native.locator(eventCardSelector);
+
+      await eventCard.waitFor({ state: 'visible' });
+      const viewEventLink = eventCard.locator(this.locators.viewEventLink);
+      expect(await viewEventLink.isVisible()).toBeTruthy();
+      logger.logInfo(`Event Card with title ${eventTitle} is present`)
+
+    } catch (error) {
+      logger.logError(`Failed to view event with title "${eventTitle}":`, error.message);
+      throw new Error(`Could not view event card with title "${eventTitle}".`);
+    }
+  }
+
+  // async getEventTitleBySequence(sequenceNumber) {
+  //   try {
+  //     const eventCards = this.native.locator(this.locators.eventCards);
+  //     const eventCard = eventCards.nth(sequenceNumber - 1);
+
+  //     await eventCard.waitFor({ state: 'visible' });
+
+  //     const titleElement = eventCard.locator(this.locators.eventTitle);
+  //     await titleElement.waitFor({ state: 'visible' });
+
+  //     const titleText = await titleElement.innerText();
+  //     console.log(`Event Card at position ${sequenceNumber} has title: "${titleText}"`);
+
+  //     return titleText;
+
+  //   } catch (error) {
+  //     console.error(`Failed to view event card at position "${sequenceNumber}":`, error.message);
+  //     throw new Error(`Could not select or click on the event card at position "${sequenceNumber}".`);
+  //   }
+  // }
+
+  async verifyBannersOnCard(eventTitle) {
+    try {
+      const eventCardSelector = this.locators.eventCard(eventTitle);
+      const eventCard = this.native.locator(eventCardSelector);
+
+      await eventCard.waitFor({ state: 'visible' });
+
+      const bannerHeader = await eventCard.locator('[data-testid="consonant-Card-header"]');
+
+      expect(await bannerHeader.isVisible()).toBeTruthy();
+
+      const styleAttribute = await bannerHeader.getAttribute('style');
+
+      expect(styleAttribute).toContain('background-image', `No background-image found in the style attribute for the event card titled "${eventTitle}".`);
+
+      const backgroundImageStart = styleAttribute.indexOf('url(') + 4; // 4 to skip 'url('
+      const backgroundImageEnd = styleAttribute.indexOf(')', backgroundImageStart);
+      let backgroundImageUrl = styleAttribute.substring(backgroundImageStart, backgroundImageEnd).replace(/['"]/g, '');
+
+
+      if (!backgroundImageUrl || backgroundImageUrl === '') {
+        logger.logError(`Banner not present for event card titled "${eventTitle}"`)
+        throw new Error(`Banner for the event card titled "${eventTitle}" does not have a valid background-image URL.`);
+      }
+      logger.logInfo(`Banner background image URL on the event card titled "${eventTitle}" is: ${backgroundImageUrl}`);
+
+    } catch (error) {
+      logger.logError("Error occured while banner verification:", error.message);
+      throw new Error(`Failed to verify the banner on the event card titled "${eventTitle}".`);
+    }
+  }
+
+  async verifyDateAndTimeOnCard(eventTitle) {
+    try {
+      const eventCardSelector = this.locators.eventCard(eventTitle);
+      const eventCard = this.native.locator(eventCardSelector);
+
+      await eventCard.waitFor({ state: 'visible' });
+
+      const dateAndTimeElement = eventCard.locator(this.locators.eventDateAndTime);
+      await dateAndTimeElement.waitFor({ state: 'visible' });
+
+      const dateAndTimeText = await dateAndTimeElement.textContent();
+      if (!dateAndTimeText) {
+        logger.logError("Date and time text is missing or not visible.")
+        throw new Error("Date and time text is missing or not visible.");
+      }
+
+      const dateTimeRegex = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2} \| \d{2}:\d{2} (AM|PM) - \d{2}:\d{2} (AM|PM) GMT[+-]\d{1,2}:\d{2}$/;
+      if (!dateTimeRegex.test(dateAndTimeText.trim())) {
+        logger.logError(`Date and time format is incorrect: ${dateAndTimeText}`)
+        throw new Error(`Date and time format is incorrect: ${dateAndTimeText}`);
+      }
+
+      logger.logInfo(`Date and time on the event card are displayed correctly: ${dateAndTimeText}`);
+    } catch (error) {
+      logger.logError("Error occured while date and time verification :", error.message);
+      throw error;
     }
   }
 
@@ -269,17 +241,19 @@ class EventsHubPage extends EventsBasePage {
       if (await viewEventLink.isEnabled()) {
         if (hrefValue) {
           await this.native.goto(hrefValue);
-          console.log(`Navigated to ${hrefValue}`);
+          logger.logInfo(`Navigated to ${hrefValue}`);
         } else {
           console.warn(`Href value not found for the link in card "${eventTitle}".`);
+          throw new Error(`Href value not found for the link in card "${eventTitle}"`);
         }
       } else {
-        console.warn(`Link in card "${eventTitle}" is not clickable.`);
+        logger.logError(`View event link in card "${eventTitle}" is not clickable.`);
+        throw new Error(`View event link in card "${eventTitle}" is not clickable.`);
       }
 
     } catch (error) {
-      console.error(`Failed to view event with title "${eventTitle}":`, error.message);
-      throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
+      logger.logError(`Error occured while clicking on view event with title "${eventTitle}":`, error.message);
+      throw new Error(`Could not click "View event" on event card with title "${eventTitle}".`);
     }
   }
 

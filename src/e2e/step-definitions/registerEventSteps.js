@@ -48,14 +48,15 @@ Then('I should see pagination controls', async function () {
   try {
     const isPaginationVisible = await this.page.isElementVisible(this.page.locators.paginationControlsSelector);
     if (!isPaginationVisible) {
-      logger.logWarning("Pagination controls not present on Events Hub page")
+      logger.logWarning("Pagination controls not present on Events Hub page, skipping next pagination test cases")
+      throw new Error("Pagination controls not present on Events Hub page");
     }
     else {
       logger.logInfo("Pagination controls are present on Events Hub page.");
     }
   } catch (error) {
     logger.logError("Error occured while pagination controls verification:", error.message);
-    //throw new Error("Failed to verify pagination controls.");
+    throw new Error("Failed to verify pagination controls.");
   }
 });
 
@@ -105,17 +106,16 @@ When('I select the event card with title {string}', async function (eventTitle) 
   }
 });
 
-When('I select the event card at position {int}', async function (sequenceNumber) {
-  try {
-    console.log("Events :", this.eventNames)
-    this.eventTitle = await this.page.getEventTitleBySequence(sequenceNumber);
-    await this.page.viewEventByTitle(this.eventTitle);
-  } catch (error) {
-    console.error(`Failed to select the event card at position ${sequenceNumber}:`, error.message);
-    //throw new Error(`Could not select the event card at position ${sequenceNumber}. Please ensure the event cards are loaded correctly.`);
-  }
-});
-
+// When('I select the event card at position {int}', async function (sequenceNumber) {
+//   try {
+//     console.log("Events :", this.eventNames)
+//     this.eventTitle = await this.page.getEventTitleBySequence(sequenceNumber);
+//     await this.page.viewEventByTitle(this.eventTitle);
+//   } catch (error) {
+//     console.error(`Failed to select the event card at position ${sequenceNumber}:`, error.message);
+//     //throw new Error(`Could not select the event card at position ${sequenceNumber}. Please ensure the event cards are loaded correctly.`);
+//   }
+// });
 
 Then('the banners on the event card should be displayed correctly', async function () {
   try {
@@ -135,15 +135,6 @@ Then('I should see the date and time displayed correctly on the event card', asy
   }
 });
 
-When('the View event button on the event card should be clickable', async function () {
-  try {
-    await this.page.clickViewEventButton(this.eventTitle);
-  } catch (error) {
-    console.error(`Failed to click the "View event" button for the event with title "${testData.eventTitle}":`, error.message);
-    throw new Error('Could not click the "View event" button as expected.');
-  }
-});
-
 When('I click the View event button on the event card', async function () {
   try {
     await this.page.clickViewEventButton(this.eventTitle);
@@ -153,15 +144,15 @@ When('I click the View event button on the event card', async function () {
   }
 });
 
-When('I click the "View event" button on the event card at position {int}', async function (sequenceNumber) {
-  try {
-    this.eventTitle = await this.page.getEventTitleBySequence(sequenceNumber);
-    await this.page.clickViewEventButton(this.eventTitle);
-  } catch (error) {
-    console.error(`Failed to click the "View event" button for the event with title "${this.eventTitle}":`, error.message);
-    throw new Error('Could not click the "View event" button as expected.');
-  }
-});
+// When('I click the "View event" button on the event card at position {int}', async function (sequenceNumber) {
+//   try {
+//     this.eventTitle = await this.page.getEventTitleBySequence(sequenceNumber);
+//     await this.page.clickViewEventButton(this.eventTitle);
+//   } catch (error) {
+//     console.error(`Failed to click the "View event" button for the event with title "${this.eventTitle}":`, error.message);
+//     throw new Error('Could not click the "View event" button as expected.');
+//   }
+// });
 
 Then('I should navigate to the event detail page', async function () {
   try {

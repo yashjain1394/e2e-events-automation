@@ -6,11 +6,12 @@ Feature: Event Registration
     Given I am on the events hub page
     Then I should see the Marquee displayed on the page
     Then I should see events displayed on the page
+    Then I should see the total number of pages and results displayed
     Then I should see pagination controls
     And the "Next" button should be clickable
     And the "Previous" button should be clickable
     And I should be able to click on specific page numbers
-    And I should see the total number of pages and results displayed
+    
 
   Scenario Outline: Validate and register events
     Given I am on the events hub page
