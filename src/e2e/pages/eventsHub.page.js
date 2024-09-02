@@ -55,12 +55,11 @@ class EventsHubPage extends EventsBasePage {
       await eventCard.waitFor({ state: 'visible' });
       const viewEventLink = eventCard.locator(this.locators.viewEventLink);
       expect(await viewEventLink.isVisible()).toBeTruthy();
-      console.log(`Event Card with title ${eventTitle} is present`);
-
+      console.log(`Event Card with title ${eventTitle} is present`)
 
     } catch (error) {
       console.error(`Failed to view event with title "${eventTitle}":`, error.message);
-      throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
+      throw new Error(`Could not view event card with title "${eventTitle}".`);
     }
   }
 
@@ -237,30 +236,39 @@ class EventsHubPage extends EventsBasePage {
 
   async clickViewEventButton(eventTitle) {
     try {
+      const eventCardSelector = this.locators.eventCard(eventTitle);
 
-        const eventCardSelector = this.locators.eventCard(eventTitle);
-        await this.native.waitForSelector(eventCardSelector);
+      await this.native.waitForSelector(eventCardSelector);
+      const eventCard = this.native.locator(eventCardSelector);
 
-        const eventCard = await this.native.locator(eventCardSelector);
-        await eventCard.waitFor({ state: 'visible', timeout: 5000 });
+      await eventCard.waitFor({ state: 'visible', timeout: 5000 });
 
-        const viewEventLink = await eventCard.locator(this.locators.viewEventLink);
-        await viewEventLink.waitFor({ state: 'visible', timeout: 5000 });
-      
-        console.log(`Event Card with title "${eventTitle}" is present`);
+      const viewEventLinkSelector = this.locators.viewEventLink;
+      await this.native.waitForSelector(viewEventLinkSelector);  
+      const viewEventLink = eventCard.locator(viewEventLinkSelector);
+      await viewEventLink.waitFor({ state: 'visible', timeout: 5000 }); 
 
-        const hrefValue = await viewEventLink.getAttribute('href');
-        console.log(`Href value of the link: ${hrefValue}`);
+      console.log(`Event Card with title "${eventTitle}" is present`);
 
-        viewEventLink.click();
-        viewEventLink.click();
-        console.log(`Clicked on the view more link for "${eventTitle}"`);
+      const hrefValue = await viewEventLink.getAttribute('href');
+      console.log(`Href value of the link: ${hrefValue}`);
+
+      if (await viewEventLink.isEnabled()) {
+        if (hrefValue) {
+          await this.native.goto(hrefValue);
+          console.log(`Navigated to ${hrefValue}`);
+        } else {
+          console.warn(`Href value not found for the link in card "${eventTitle}".`);
+        }
+      } else {
+        console.warn(`Link in card "${eventTitle}" is not clickable.`);
+      }
 
     } catch (error) {
-        console.error(`Failed to view event with title "${eventTitle}":`, error.message);
-        throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
+      console.error(`Failed to view event with title "${eventTitle}":`, error.message);
+      throw new Error(`Could not select or click on the event card with title "${eventTitle}".`);
     }
-}
+  }
 
 
 

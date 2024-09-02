@@ -12,6 +12,8 @@ class EventDetailPage extends EventsBasePage {
             eventVenue: '#venue',
             eventAgenda: `#agenda`,
             sectionSelector: (profile) => `div[class*="profile-cards"]:has(#${profile})`,
+            relatedProductsSection : `.event-product-blades`,
+            relatedProductFragment: `[class="fragment"]`,
             eventContainer: '.foreground.container',
             eventRsvp: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
             eventForm: '#rsvp-form-1',
@@ -39,7 +41,6 @@ class EventDetailPage extends EventsBasePage {
         }
     }
     
-
     async verifyNavigationToEventDetailPage(expectedTitle) {
         try {
             const normalizedTitle = expectedTitle
@@ -173,6 +174,41 @@ class EventDetailPage extends EventsBasePage {
         }
     }
 
+    async verifyRelatedProductsBladeDetails(relatedProductBladeSelector) {
+        try {
+            const relatedProductBlade = this.native.locator(relatedProductBladeSelector);
+            const productCards = await relatedProductBlade.locator(this.locators.relatedProductFragment).elementHandles();
+            const cardCount = productCards.length;
+
+            if (cardCount > 0) {
+                console.log(`Found ${cardCount} product cards in the related products blade.`);
+
+                for (let i = 0; i < cardCount; i++) {
+                    const card = productCards[i];
+
+                    const link = await card.waitForSelector('a.con-button');
+                    const linkExists = await link.isVisible();
+                    if (linkExists) {
+                        const isClickable = await link.isEnabled();
+                        const linkText = await link.textContent(); // Get the text of the link
+
+                        if (isClickable) {
+                            console.log(`Link in card ${i + 1} is clickable. Context: text=${linkText}`);
+                        } else {
+                            console.warn(`Link in card ${i + 1} is not clickable. Context: text=${linkText}`);
+                        }
+                    } else {
+                        console.warn(`Link with class 'con-button' not found in card ${i + 1}.`);
+                    }
+                }
+            } else {
+                console.log('No product cards found in the related products blade.');
+            }
+        } catch (error) {
+            console.error('Error verifying details in the related products blade:', error);
+            throw error; 
+        }
+    }
 
     async clickRsvp() {
         try {

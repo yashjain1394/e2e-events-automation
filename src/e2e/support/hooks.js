@@ -1,6 +1,6 @@
 const { Before } = require('@cucumber/cucumber');
 const testData = require("../config/test-data/eventRegistration.json");
-const { getDynamicEventNames } = require('../common-utils/helper.js');
+const { getDynamicEventName } = require('../common-utils/helper.js');
 
 Before(async function (testCase) {
   this.credentials = {
@@ -10,8 +10,7 @@ Before(async function (testCase) {
 
   const scenarioName = testCase.pickle.name; 
 
-  if (scenarioName === 'Validate event cards') {
-    const dynamicEventNames = getDynamicEventNames();
-    this.eventNames = dynamicEventNames;
+  if (scenarioName === 'Validate and register events') {
+    this.overrideEventName = process.env.EVENT || null;
   }
 });

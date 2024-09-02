@@ -1,4 +1,4 @@
-const { Given, Then, When } = require("@cucumber/cucumber");
+const { Before, Given, Then, When } = require("@cucumber/cucumber");
 const { EventsHubPage } = require("../pages/eventsHub.page.js");
 const { EventDetailPage } = require("../pages/eventDetails.page.js");
 const testData = require("../config/test-data/eventRegistration.json");
@@ -7,7 +7,6 @@ const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/pa
 
 Given('I am on the events hub page', async function () {
   try {
-    console.log("Events :", this.eventNames)
     this.page = new EventsHubPage();
     await this.page.open();
   } catch (error) {
@@ -36,6 +35,7 @@ Then('I should see events displayed on the page', async function () {
 
 When('I select the event card with title {string}', async function (eventTitle) {
   try {
+    console.log(`Event provided by user: ${this.overrideEventName}`)
     this.eventTitle = eventTitle
     await this.page.viewEventByTitle(eventTitle);
   } catch (error) {
@@ -46,6 +46,7 @@ When('I select the event card with title {string}', async function (eventTitle) 
 
 When('I select the event card at position {int}', async function (sequenceNumber) {
   try {
+    console.log("Events :", this.eventNames)
     this.eventTitle = await this.page.getEventTitleBySequence(sequenceNumber);
     await this.page.viewEventByTitle(this.eventTitle);
   } catch (error) {
@@ -126,7 +127,7 @@ When('the View event button on the event card should be clickable', async functi
   }
 });
 
-When('I click the "View event" button on the event card', async function () {
+When('I click the View event button on the event card', async function () {
   try {
     await this.page.clickViewEventButton(this.eventTitle);
   } catch (error) {
@@ -196,28 +197,44 @@ Then('I should see the Venue on the event details page', async function () {
 
 Then('I should see profile cards for speakers and host', async function () {
   try {
-      const speakersSection = this.page.locators.sectionSelector('speakers')
-      const hostSection = this.page.locators.sectionSelector('host')
-      const isSpeakerSectionVisible = await this.page.isElementVisible(speakersSection);
-      
-      if (isSpeakerSectionVisible) {
-          await this.page.verifyProfileCards('speakers');
-      } else {
-          console.warn("Speaker section is not visible.");
-      }
+    const speakersSection = this.page.locators.sectionSelector('speakers')
+    const hostSection = this.page.locators.sectionSelector('host')
+    const isSpeakerSectionVisible = await this.page.isElementVisible(speakersSection);
 
-      const isHostSectionVisible = await this.page.isElementVisible(hostSection);
-      
-      if (isHostSectionVisible) {
-          await this.page.verifyProfileCards('host');
-      } else {
-          console.warn("Host section is not visible.");
-      }
+    if (isSpeakerSectionVisible) {
+      await this.page.verifyProfileCards('speakers');
+    } else {
+      console.warn("Speaker section is not visible.");
+    }
+
+    const isHostSectionVisible = await this.page.isElementVisible(hostSection);
+
+    if (isHostSectionVisible) {
+      await this.page.verifyProfileCards('host');
+    } else {
+      console.warn("Host section is not visible.");
+    }
 
   } catch (error) {
-      console.error("Failed to verify profile cards:", error.message);
-      // Optionally, you can rethrow the error to fail the test
-      throw new Error("Failed to verify profile cards: " + error.message);
+    console.error("Failed to verify profile cards:", error.message);
+    // Optionally, you can rethrow the error to fail the test
+    throw new Error("Failed to verify profile cards: " + error.message);
+  }
+});
+
+Then(/^I verify the CTA in the related products blade$/, async function () {
+  try {
+    relatedProductsSelector = await this.page.locators.relatedProductsSection
+    const bladeExists = await this.page.isElementVisible(relatedProductsSelector);
+    if (bladeExists) {
+      await this.page.verifyRelatedProductsBladeDetails(relatedProductsSelector);
+    } else {
+      console.warn('Related products blade does not exist on the page.');
+    }
+
+  } catch (error) {
+    console.error('An error occurred while verifying the related products blade:', error);
+    throw new Error("Failed to verify CTA in the related products blade.");
   }
 });
 
