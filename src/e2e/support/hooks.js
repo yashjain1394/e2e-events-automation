@@ -1,6 +1,7 @@
 const { Before } = require('@cucumber/cucumber');
 const testData = require("../config/test-data/eventRegistration.json");
-const { getDynamicEventName } = require('../common-utils/helper.js');
+const Logger = require('../common-utils/logger.js'); // Adjust the path to your logger file
+const logger = new Logger();
 
 Before(async function (testCase) {
   this.credentials = {
@@ -9,6 +10,7 @@ Before(async function (testCase) {
   };
 
   const scenarioName = testCase.pickle.name; 
+  logger.logHeading(`Starting Scenario: ${scenarioName}`);
 
   if (scenarioName === 'Validate and register events') {
     this.overrideEventName = process.env.EVENT || null;
