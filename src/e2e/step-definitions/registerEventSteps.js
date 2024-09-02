@@ -97,9 +97,9 @@ Then('I should see the total number of pages and results displayed', async funct
 
 When('I select the event card with title {string}', async function (eventTitle) {
   try {
-    console.log(`Event provided by user: ${this.overrideEventName}`)
     if (this.overrideEventName){
-      this.eventTitle = overrideEventName
+      logger.logHeading(`Event provided by user: ${this.overrideEventName}`)
+      this.eventTitle = this.overrideEventName
     }else{
       this.eventTitle = eventTitle
     }
