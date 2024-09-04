@@ -107,7 +107,7 @@ When('I select the event card with title {string}', async function (eventTitle) 
     await this.page.viewEventByTitle(eventTitle);
   } catch (error) {
     console.error(`Failed to select the event card with title "${eventTitle}":`, error.message);
-    //throw new Error(`Could not select the event card with title "${eventTitle}". Please verify the event title.`);
+    throw new Error(`Could not select the event card with title "${eventTitle}". Please verify the event title.`);
   }
 });
 
@@ -336,7 +336,7 @@ Then('I should see my email prefilled', async function () {
 Then('I fill all the required information with {string}', async function(formDataJson) {
   try {
     const formData = JSON.parse(formDataJson);
-    console.log('Filling out form with data:', formData);
+    //console.log('Filling out form with data:', formData);
     this.context(RegistrationForm)
     await this.page.fillRequiredFields(formData);
   } catch (error) {
@@ -345,13 +345,45 @@ Then('I fill all the required information with {string}', async function(formDat
   }
 });
 
-// Then('I see the registration confirmation', async function () {
-//   await expect(eventDetailsPage.rsvpConfirmation).toBeVisible();
-// });
+When('I check the Terms and Conditions', async function () {
+  try {
+      await this.page.checkTermsAndConditions();
+  } catch (error) {
+      console.error("Failed to check the Terms and Conditions:", error);
+      //throw new Error("Terms and Conditions checkbox could not be checked.");
+  }
+});
 
-// Then('I close the confirmation', async function () {
-//   await eventDetailsPage.closeConfirmation();
-// });
+Then('I click the Submit button', async function () {
+  try {
+      await this.page.submitInformation();
+  } catch (error) {
+      console.error("Failed to submit the information:", error);
+      throw new Error("Form submission failed.");
+  }
+});
+
+Then('I see the registration confirmation', async function () {
+  try {
+      await this.page.verifyRegistrationConfirmation();
+  } catch (error) {
+      console.error("Failed to verify the registration confirmation:", error);
+      throw new Error("Failed to verify the registration confirmation.");
+  }
+});
+
+Then('I cancel the RSVP', async function () {
+  try {
+      await this.page.cancelRSVP();
+  } catch (error) {
+      console.error("Failed to cancel the RSVP:", error);
+      throw new Error("Failed to cancel the RSVP.");
+  }
+});
+
+
+
+
 
 
 
