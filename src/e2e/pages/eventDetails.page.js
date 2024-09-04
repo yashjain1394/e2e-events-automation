@@ -1,6 +1,7 @@
 const { expect } = require('@playwright/test');
 const { EventsBasePage } = require('./eventsBase.page.js');
-//const testData = require("../config/test-data/eventRegistration.json");
+const Logger = require('../common-utils/logger.js');
+const logger = new Logger();
 
 class EventDetailPage extends EventsBasePage {
     constructor() {
@@ -261,30 +262,6 @@ class EventDetailPage extends EventsBasePage {
             throw new Error(`Failed to click the RSVP button: ${error.message}`);
         }
     }
-
-    async isEventTitleCorrect(eventTitle) {
-        try {
-
-            await expect(this.native.locator(this.locators.eventFormTitle)).toHaveText(eventTitle);
-            console.log(`Event title is correct: ${eventTitle}`);
-
-        } catch (error) {
-            console.error(`Event title verification failed. Expected: "${eventTitle}". Error: ${error.message}`);
-            throw new Error(`Event title verification failed. Expected: "${eventTitle}". Error: ${error.message}`);
-        }
-    }
-
-    async isEmailCorrect(expectedEmailAddress) {
-        try {
-            await expect(this.native.locator(this.locators.eventRsvpFormEmail)).toHaveText(expectedEmailAddress);
-            console.log(`Email address is correct: ${expectedEmailAddress}`);
-
-        } catch (error) {
-            console.error(`Email address verification failed. Expected: "${expectedEmailAddress}". Error: ${error.message}`);
-            throw new Error(`Email address verification failed. Expected: "${expectedEmailAddress}". Error: ${error.message}`);
-        }
-    }
-
 
     // async fillRsvpForm() {
     //     await this.native.locator(this.locators.eventFormCompany).fill(testData.companyName);

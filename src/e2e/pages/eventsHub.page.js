@@ -79,12 +79,12 @@ class EventsHubPage extends EventsBasePage {
         throw new Error(`No pagination buttons found inside ${paginationSelector}.`);
       }
 
-      console.log(`Found ${count} pagination buttons.`);
+      logger.logInfo(`Found ${count} pagination buttons.`);
       for (let i = 0; i < count; i++) {
         const pageButton = paginationItems.nth(i);
         await pageButton.waitFor({ state: 'visible' });
         expect(await pageButton.isEnabled()).toBeTruthy();
-        logger.logInfo(`Pagination button ${i + 1} is clickable.`);
+        console.log(`Pagination button ${i + 1} is clickable.`);
       }
 
     } catch (error) {

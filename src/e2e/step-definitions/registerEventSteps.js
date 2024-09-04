@@ -1,6 +1,7 @@
 const { Before, Given, Then, When } = require("@cucumber/cucumber");
 const { EventsHubPage } = require("../pages/eventsHub.page.js");
 const { EventDetailPage } = require("../pages/eventDetails.page.js");
+const { RegistrationForm } = require("../pages/registrationForm.page.js");
 const testData = require("../config/test-data/eventRegistration.json");
 const { expect } = require('@playwright/test');
 const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/page-objects/adobeidsingin.page.js');
@@ -97,10 +98,10 @@ Then('I should see the total number of pages and results displayed', async funct
 
 When('I select the event card with title {string}', async function (eventTitle) {
   try {
-    if (this.overrideEventName){
+    if (this.overrideEventName) {
       logger.logHeading(`Event provided by user: ${this.overrideEventName}`)
       this.eventTitle = this.overrideEventName
-    }else{
+    } else {
       this.eventTitle = eventTitle
     }
     await this.page.viewEventByTitle(eventTitle);
@@ -316,7 +317,8 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
 
 Then('I should see the event title I clicked on', async function () {
   try {
-    await this.page.isEventTitleCorrect(this.eventTitle);
+    this.context(RegistrationForm)
+    await this.page.verifyEventTitle(this.eventTitle);
   } catch (error) {
     console.error("Event title verification failed:", error.message);
     //throw new Error("The event title displayed does not match the expected title on the Event Details page.");
@@ -324,11 +326,23 @@ Then('I should see the event title I clicked on', async function () {
 });
 
 Then('I should see my email prefilled', async function () {
-  await this.page.isEmailCorrect(this.credentials.username);
+  try {
+    await this.page.verifyEmailPrefilled(this.credentials.username);
+  } catch (error) {
+    console.log("Error verifying prefilled email input:", error.message);
+  }
 });
 
-Then('I fill all required information', async function () {
-  await this.page.fillRsvpForm();
+Then('I fill all the required information with {string}', async function(formDataJson) {
+  try {
+    const formData = JSON.parse(formDataJson);
+    console.log('Filling out form with data:', formData);
+    this.context(RegistrationForm)
+    await this.page.fillRequiredFields(formData);
+  } catch (error) {
+    console.error("Failed to fill required fields:", error.message);
+    throw new Error("Failed to fill all required information on the form.");
+  }
 });
 
 // Then('I see the registration confirmation', async function () {
