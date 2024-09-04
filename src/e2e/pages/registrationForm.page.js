@@ -63,7 +63,7 @@ class RegistrationForm extends EventsBasePage {
                 throw new Error(`Expected email to be "${expectedEmail}", but got "${emailValue}".`);
             }
 
-            logger.logInfo(`Prefilled Email: ${emailValue}`);
+            logger.logInfo(`Verified prefilled email : ${emailValue}`);
         } catch (error) {
             logger.logError(`Error verifying prefilled email input: ${error.message}`);
             throw error;
@@ -129,7 +129,7 @@ class RegistrationForm extends EventsBasePage {
                 }
 
                 if (value) {
-                    logger.logInfo(`"${fieldId}" : "${value}"`);
+                    console.log(`"${fieldId}" : "${value}"`);
                 } else {
                     logger.logWarning(`"${fieldId}" : "No value provided"`);
                     throw new Error(`"${fieldId}" : "No value provided"`);

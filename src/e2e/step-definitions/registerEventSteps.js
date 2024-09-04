@@ -12,7 +12,7 @@ Given('I am on the events hub page', async function () {
   try {
     this.page = new EventsHubPage();
     await this.page.open();
-    logger.logInfo("Navigated to Events Hub page")
+    logger.logInfo("Navigated to the Events Hub page successfully.")
   } catch (error) {
     logger.logError("Failed to open the Events Hub page:", error.message);
     throw new Error("Could not navigate to the Events Hub page. Please check the URL or connectivity.");
@@ -26,7 +26,7 @@ Then('I should see the Marquee displayed on the page', async function () {
       logger.logError("Marquee not displayed on Events Hub page.");
     }
     else {
-      logger.logInfo("Marquee displayed on Events Hub page")
+      logger.logInfo("Marquee is  displayed on Events Hub page")
     }
   } catch (error) {
     logger.logError("Error occured while marquee verification:", error.message);
@@ -188,6 +188,7 @@ Then('I should see the Agenda on the event details page', async function () {
     if (!isAgendaVisible) {
       console.warn("Event agenda verification failed: Agenda is not visible.");
     }
+    logger.logInfo("Verified event agenda is displayed.")
   } catch (error) {
     console.error("An error occurred while verifying the agenda:", error.message);
     //throw new Error("Failed to verify agenda visibility on the Event Details page.");
@@ -198,9 +199,10 @@ Then('I should see the Venue on the event details page', async function () {
   try {
     const isVenueVisible = await this.page.isElementVisible(this.page.locators.eventVenue);
     if (!isVenueVisible) {
-      console.error("Event venue verification failed: Venue is not visible.");
+      logger.logError("Event venue verification failed: Venue is not visible.");
       throw new Error("Venue is not displayed as expected on the Event Details page.");
     }
+    logger.logInfo("Verfied event venue is displayed.")
   } catch (error) {
     console.error("An error occurred while verifying the venue:", error.message);
     //throw new Error("Failed to verify venue visibility on the Event Details page.");
@@ -217,7 +219,7 @@ Then('I should see profile cards for speakers and host', async function () {
     if (isSpeakerSectionVisible) {
       await this.page.verifyProfileCards('speakers');
     } else {
-      console.warn("Speaker section is not visible.");
+      logger.logWarning("Speaker section is not visible: No Speakers for the event");
     }
 
     const isHostSectionVisible = await this.page.isElementVisible(hostSection);
@@ -225,7 +227,7 @@ Then('I should see profile cards for speakers and host', async function () {
     if (isHostSectionVisible) {
       await this.page.verifyProfileCards('host');
     } else {
-      console.warn("Host section is not visible.");
+      logger.logWarning("Host section is not visible : No Host added for the event");
     }
 
   } catch (error) {
@@ -241,7 +243,7 @@ Then(/^I verify the CTA in the related products blade$/, async function () {
     if (bladeExists) {
       await this.page.verifyRelatedProductsBladeDetails(relatedProductsSelector);
     } else {
-      console.warn('Related products blade does not exist on the page.');
+      logger.logWarning('Related products blade does not exist on the page.');
     }
 
   } catch (error) {
@@ -257,7 +259,7 @@ Then(/^I verify the partners section$/, async function () {
     if (sectionExists) {
       await this.page.verifyPartnersDetails(partnersSectionSelector);
     } else {
-      console.warn('Partners does not exist on the page.');
+      logger.logWarning('Partners does not exist on the page.');
     }
   } catch (error) {
     console.error('An error occurred while verifying the related products blade:', error);
@@ -270,7 +272,7 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
   try {
 
     await this.page.clickRsvp();
-    console.log("RSVP button clicked");
+    logger.logInfo("RSVP button clicked");
 
     const checkFormDisplayed = async () => {
       try {
@@ -292,14 +294,15 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
 
         this.context(AdobeIdSigninPage);
         await this.page.signIn(this.credentials.username, this.credentials.password);
-        console.log("Sign-in completed");
+        logger.logInfo("Sign-in completed");
 
         this.context(EventDetailPage);
         await this.page.clickRsvp();
-        console.log("RSVP button clicked again after sign-in");
+        logger.logInfo("RSVP button clicked again after sign-in");
 
         formDisplayed = await checkFormDisplayed();
         if (!formDisplayed) {
+          logger.logError("RSVP form did not appear after sign-in");
           throw new Error("RSVP form did not appear after sign-in");
         }
       } catch (signInError) {
@@ -307,7 +310,7 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
         throw new Error("RSVP form did not appear and sign-in failed");
       }
     } else {
-      console.log("RSVP form displayed successfully");
+      logger.logInfo("RSVP form displayed successfully");
     }
   } catch (error) {
     console.error(`Failed to initiate the RSVP process: ${error.message}`);

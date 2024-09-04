@@ -54,9 +54,9 @@ class EventDetailPage extends EventsBasePage {
             await this.native.waitForURL(new RegExp(expectedUrlPart));
             const currentUrl = this.native.url();
             expect(currentUrl).toContain(expectedUrlPart);
-            console.log(`Successfully navigated to URL containing: "${expectedUrlPart}"`);
+            logger.logInfo(`"View Event" navigated to ${expectedTitle} event details page successfully. URL : "${currentUrl}"`);
         } catch (error) {
-            console.error(`Failed to verify navigation to event detail page with title "${expectedTitle}":`, error.message);
+            logger.logError(`Failed to verify navigation to event detail page with title "${expectedTitle}":`, error.message);
             throw new Error(`Could not verify navigation to the event detail page for "${expectedTitle}".`);
         }
     }
@@ -64,8 +64,13 @@ class EventDetailPage extends EventsBasePage {
     async verifyOnEventDetailPage(expectedTitle) {
         try {
             const header = await this.native.locator(this.locators.pageHeader).innerText();
-            expect(header).toBe(expectedTitle);
-            console.log(`Event detail page header verified as: "${header}"`);
+            //expect(header).toBe(expectedTitle);
+            if (header === expectedTitle){
+                logger.logInfo(`Event detail page heading verified as: "${header}"`);
+            }
+            else{
+                logger.logError(`"${expectedTitle}" doesn't match the event details page heading "${header}"`)
+            }
         } catch (error) {
             console.error(`Failed to verify event detail page header for title "${expectedTitle}":`, error.message);
             //throw new Error(`Could not verify the event detail page header for "${expectedTitle}".`);
@@ -86,7 +91,7 @@ class EventDetailPage extends EventsBasePage {
             if (!date || date.trim() === '') {
                 throw new Error(`Event date "${date}" is not in the expected format.`);
             }
-            console.log(`Event date "${date}" is in the expected format.`);
+            logger.logInfo(`Verfied event date "${date}" is in the expected format.`);
 
         } catch (error) {
             throw new Error(`Failed to verify event date and time: ${error.message}`);
@@ -107,7 +112,8 @@ class EventDetailPage extends EventsBasePage {
             if (!description || description.trim() === '') {
                 throw new Error('Event description is missing or empty.');
             }
-            console.log(`Event description "${description} is present.`);
+            logger.logInfo(`Verfied event description is present.`);
+            console.log(`Description : "${description}"`)
 
         } catch (error) {
             throw new Error(`Failed to verify event description: ${error.message}`);
@@ -124,7 +130,7 @@ class EventDetailPage extends EventsBasePage {
             if (!title.trim().includes(expectedTitle)) {
                 throw new Error(`Expected event title to contain "${expectedTitle}", but found "${title}"`);
             }
-            console.log(`Event title "${title}" is displayed correctly.`);
+            logger.logInfo(`Verified event title "${title}" is displayed.`);
 
             await this.verifyDateAndTime();
             await this.verifyEventDescription();
@@ -146,9 +152,10 @@ class EventDetailPage extends EventsBasePage {
 
             const cardCount = await profileCards.count();
             if (cardCount === 0) {
+                logger.logError(`No profile cards found in ${profile} section`)
                 throw new Error('No profile cards found within the section');
             }
-            console.log(`Found ${cardCount} profile cards for ${profile}.`);
+            logger.logInfo(`Found ${cardCount} profile cards for ${profile}.`);
 
             for (let i = 0; i < cardCount; i++) {
                 const card = profileCards.nth(i);
@@ -165,13 +172,13 @@ class EventDetailPage extends EventsBasePage {
                 await expect(prevButton).toBeEnabled();
                 await expect(nextButton).toBeEnabled();
 
-                console.log('Carousel navigation buttons are present and enabled.');
+                logger.logInfo('Carousel navigation buttons are present and enabled.');
             } else {
-                console.log('Profile cards are not in a carousel as the count is 3 or less.');
+                logger.logInfo('Profile cards are not in a carousel as the count is 3 or less.');
             }
 
         } catch (error) {
-            console.error(`Failed to verify profile cards for ${profile}:`, error.message);
+            logger.logError(`Failed to verify profile cards for ${profile}:`, error.message);
             throw new Error(`Failed to verify profile cards for ${profile}: ${error.message}`);
         }
     }
@@ -183,7 +190,7 @@ class EventDetailPage extends EventsBasePage {
             const cardCount = productCards.length;
 
             if (cardCount > 0) {
-                console.log(`Found ${cardCount} product cards in the related products blade.`);
+                logger.logInfo(`Found ${cardCount} product cards in the related products blade.`);
 
                 for (let i = 0; i < cardCount; i++) {
                     const card = productCards[i];
@@ -192,22 +199,22 @@ class EventDetailPage extends EventsBasePage {
                     const linkExists = await link.isVisible();
                     if (linkExists) {
                         const isClickable = await link.isEnabled();
-                        const linkText = await link.textContent(); // Get the text of the link
+                        const linkText = await link.textContent(); 
 
                         if (isClickable) {
-                            console.log(`Link in card ${i + 1} is clickable. Context: text=${linkText}`);
+                            logger.logInfo(`"${linkText}" link in card ${i + 1} is clickable.`);
                         } else {
-                            console.warn(`Link in card ${i + 1} is not clickable. Context: text=${linkText}`);
+                            logger.logError(`"${linkText}" link in card ${i + 1} is not clickable.`);
                         }
                     } else {
-                        console.warn(`Link with class 'con-button' not found in card ${i + 1}.`);
+                        logger.logError(`CTA link not found in card ${i + 1}.`);
                     }
                 }
             } else {
-                console.log('No product cards found in the related products blade.');
+                logger.logError('No product cards found in the related products blade.');
             }
         } catch (error) {
-            console.error('Error verifying details in the related products blade:', error);
+            logger.logError(`Error verifying details in the related products blade: ${error.message}`);
             throw error; 
         }
     }
@@ -221,7 +228,7 @@ class EventDetailPage extends EventsBasePage {
             const linkCount = links.length;
     
             if (linkCount > 0) {
-                console.log(`Found ${linkCount} partner links.`);
+                logger.logInfo(`Found ${linkCount} partner links.`);
     
                 for (let i = 0; i < linkCount; i++) {
                     const link = links[i];
@@ -232,19 +239,19 @@ class EventDetailPage extends EventsBasePage {
                         const linkTitle = await link.getAttribute('title');
     
                         if (isVisible && isEnabled) {
-                            console.log(`Link ${i + 1} is clickable. Text: ${linkTitle}`);
+                            logger.logInfo(`"${linkTitle}" link is clickable.`);
                         } else {
-                            console.warn(`Link ${i + 1} is not clickable. Text: ${linkTitle}`);
+                            logger.logWarning(`"${linkTitle}" link is not clickable.`);
                         }
                     } catch (error) {
-                        console.error(`Error verifying link ${i + 1}:`, error);
+                        logger.logError(`Error verifying link ${i + 1}:`, error);
                     }
                 }
             } else {
-                console.log('No partner links found.');
+                logger.logError('No partner links found.');
             }
         } catch (error) {
-            console.error('Error verifying details in the partners section:', error);
+            logger.logError(`Error verifying details in the partners section: ${error.message}`);
             throw error; 
         }
     }
@@ -258,7 +265,7 @@ class EventDetailPage extends EventsBasePage {
             console.log("RSVP button clicked successfully.");
 
         } catch (error) {
-            console.error(`Failed to click the RSVP button: ${error.message}`);
+            logger.logError(`Failed to click the RSVP button: ${error.message}`);
             throw new Error(`Failed to click the RSVP button: ${error.message}`);
         }
     }

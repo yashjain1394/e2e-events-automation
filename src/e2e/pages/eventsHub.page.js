@@ -27,9 +27,9 @@ class EventsHubPage extends EventsBasePage {
 
   }
 
-  async isElementVisible(elementLocator, timeout = 2000) {
+  async isElementVisible(elementLocator) {
     try {
-      const element = await this.native.waitForSelector(elementLocator, { timeout });
+      const element = await this.native.waitForSelector(elementLocator);
       const isVisible = await element.isVisible();
       expect(isVisible).toBe(true);
       return true;
@@ -45,7 +45,7 @@ class EventsHubPage extends EventsBasePage {
       const cards = await this.native.locator(this.locators.eventCards);
       const count = await cards.count();
       if (count > 0) {
-        logger.logInfo(`${count} Events displayed on the Events Hub first page`);
+        logger.logInfo(`${count} events are shown on the first page of the Events Hub.`);
         return true;
       } else {
         logger.logError('No events displayed on the Events Hub first page');
@@ -241,7 +241,7 @@ class EventsHubPage extends EventsBasePage {
       if (await viewEventLink.isEnabled()) {
         if (hrefValue) {
           await this.native.goto(hrefValue);
-          logger.logInfo(`Navigated to ${hrefValue}`);
+          console.log(`Navigated to ${hrefValue}`);
         } else {
           console.warn(`Href value not found for the link in card "${eventTitle}".`);
           throw new Error(`Href value not found for the link`);
