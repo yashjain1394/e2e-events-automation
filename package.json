@@ -28,6 +28,7 @@
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.25.4",
     "jsdom": "^18.0.1",
+    "multiple-cucumber-html-reporter": "^3.7.0",
     "npm-failsafe": "^0.4.3",
     "playwright-extra": "^4.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
