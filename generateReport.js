@@ -4,7 +4,7 @@ const report = require('multiple-cucumber-html-reporter');
 
 const reportDir = './reports'; 
 const outputDir = './reports/combinedJSONs'; 
-const finalReportDir = '/finalReport';
+const finalReportDir = './finalReport';
 
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });
