@@ -43,7 +43,8 @@ After(function (scenario) {
 
 AfterAll(async function () {
   try {
-
+    this.env = process.env.ENV || argv.p;
+    this.browser = process.env.BROWSER || argv.b
     const metadata = {
       browser: { name: "Browser", value: this.browser || 'chrome' },
       environment: { name: "Environment", value: this.env || 'stage' }

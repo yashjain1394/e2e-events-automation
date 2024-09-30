@@ -3,7 +3,8 @@ const path = require('path');
 const report = require('multiple-cucumber-html-reporter');
 
 const reportDir = './reports'; 
-const outputDir = './reports/combinedReports'; 
+const outputDir = './reports/combinedJSONs'; 
+const finalReportDir = '/finalReport';
 
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });
@@ -51,15 +52,11 @@ async function generateHtmlReport() {
 
     report.generate({
       jsonDir: outputDir, 
-      reportPath: outputDir, 
+      reportPath: finalReportDir, 
       customData: {
         title: "Details",
         data: [
-          { label: "Project", value: "Auto Events" },
-          { label: "Release", value: "1.2.3" },
-          { label: "Cycle", value: "B11221.34321" },
-          { label: "Execution Start Time", value: "Nov 19th 2017, 02:31 PM EST" },
-          { label: "Execution End Time", value: "Nov 19th 2017, 02:56 PM EST" },
+          { label: "Project", value: "Auto Events" }
         ],
       },
       customMetadata: true,
