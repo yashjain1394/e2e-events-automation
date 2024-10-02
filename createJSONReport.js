@@ -34,7 +34,8 @@ function mergeMetadataWithLogs() {
                     outputContent = logContent;
                 }
 
-                const outputFilePath = path.join(outputDir, dataFile);
+                const currentDate = new Date().toISOString().slice(0, 10);
+                const outputFilePath = path.join(outputDir, `${currentDate}_${dataFile}`);
                 fs.writeFileSync(outputFilePath, JSON.stringify(outputContent, null, 2), 'utf-8');
                 console.log(`Merged file saved at: ${outputFilePath}`);
 
