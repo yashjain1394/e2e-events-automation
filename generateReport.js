@@ -1,8 +1,19 @@
+const { execSync } = require('child_process');
 const fs = require('fs');
-const report = require('multiple-cucumber-html-reporter');
+let report;
+
+// Check if 'multiple-cucumber-html-reporter' is installed
+try {
+  require.resolve('multiple-cucumber-html-reporter');
+  report = require('multiple-cucumber-html-reporter');
+  console.log('multiple-cucumber-html-reporter is already installed.');
+} catch (e) {
+  console.log('Installing multiple-cucumber-html-reporter...');
+  execSync('npm install multiple-cucumber-html-reporter', { stdio: 'inherit' });
+  report = require('multiple-cucumber-html-reporter'); // Require it after installation
+}
 
 // Set the output directory for the JSON files and report
-
 const jsonDir = 'C:\\Users\\labuser\\Desktop\\AutoEventsReports\\label=AutoEvents\\reports\\combinedJSONs';
 const outputDir = 'htmlReport';
 
