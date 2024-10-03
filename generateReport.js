@@ -1,49 +1,20 @@
 const fs = require('fs');
-const path = require('path');
 const report = require('multiple-cucumber-html-reporter');
 
-const reportDir = './reports'; 
-const outputDir = './reports/combinedJSONs'; 
-const finalReportDir = './finalReport';
+// Set the output directory for the JSON files and report
 
+const jsonDir = 'C:\\Users\\labuser\\Desktop\\AutoEventsReports\\label=AutoEvents\\reports\\combinedJSONs';
+const outputDir = 'htmlReport';
+
+// Create the output directory if it doesn't exist
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });
   console.log(`Created output directory at: ${outputDir}`);
 }
 
-function mergeMetadataWithLogs() {
-  const dataFiles = fs.readdirSync(reportDir).filter(file => file.endsWith('.json') && file.startsWith('cucumber'));
-  const metadataFiles = fs.readdirSync(reportDir).filter(file => file.endsWith('.json') && file.startsWith('metadata_'));
-
-  dataFiles.forEach(dataFile => {
-    const timestamp = dataFile.split('_')[1].split('.')[0];
-    const matchingMetadataFile = `metadata_${timestamp}.json`;
-
-    if (metadataFiles.includes(matchingMetadataFile)) {
-      try {
-        const logContent = JSON.parse(fs.readFileSync(path.join(reportDir, dataFile), 'utf-8'));
-        const metadataContent = JSON.parse(fs.readFileSync(path.join(reportDir, matchingMetadataFile), 'utf-8'));
-
-        logContent.forEach((feature) => {
-          feature.metadata = metadataContent;
-        });
-
-        const outputFilePath = path.join(outputDir, dataFile);
-        fs.writeFileSync(outputFilePath, JSON.stringify(logContent, null, 2), 'utf-8');
-        console.log(`Merged file saved at: ${outputFilePath}`);
-
-      } catch (error) {
-        console.error(`Error merging files: ${dataFile} and ${matchingMetadataFile}. Error: ${error.message}`);
-      }
-    } else {
-      console.warn(`No matching metadata file found for: ${dataFile}`);
-    }
-  });
-}
-
 async function generateHtmlReport() {
   try {
-    const combinedJsonFiles = fs.readdirSync(outputDir).filter(file => file.endsWith('.json'));
+    const combinedJsonFiles = fs.readdirSync(jsonDir).filter(file => file.endsWith('.json'));
 
     if (combinedJsonFiles.length === 0) {
       console.log('No JSON files found in the output directory.');
@@ -51,14 +22,11 @@ async function generateHtmlReport() {
     }
 
     report.generate({
-      jsonDir: outputDir, 
-      reportPath: finalReportDir, 
-      customData: {
-        title: "Details",
-        data: [
-          { label: "Project", value: "Auto Events" }
-        ],
-      },
+      jsonDir: jsonDir, 
+      reportPath: outputDir, 
+      reportName: "Auto Events Report",
+      pageTitle : "Auto Events Report",
+      pageFooter: '<div style="text-align:center;"><p>Contact us for any support: <b>Grp-ccwt-e2e-support</b></p></div>',
       customMetadata: true,
       openReportInBrowser: true,
       saveReport: true, 
@@ -70,5 +38,5 @@ async function generateHtmlReport() {
   }
 }
 
-mergeMetadataWithLogs();
+// Execute the report generation function
 generateHtmlReport();
