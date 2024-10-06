@@ -26,11 +26,11 @@ if (!fs.existsSync(outputDir)) {
 
 // Get the date argument from command line
 const dateArg = process.argv[2];
+console.log(`Provided Data : ${dateArg}`)
 
 // Validate the date format (YYYY-MM-DD)
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 if (!dateArg || !dateRegex.test(dateArg)) {
-  console.log(`Provided Data : ${dateArg}`)
   console.error('Please provide a date in the format YYYY-MM-DD.');
   process.exit(1);
 }
