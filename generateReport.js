@@ -46,17 +46,20 @@ async function generateHtmlReport() {
       return;
     }
 
+    // Map to full file paths
+    const jsonFilesToInclude = combinedJsonFiles.map(file => `${jsonDir}\\${file}`);
+
+    // Generate the report using the filtered JSON files
     report.generate({
-      jsonDir: jsonDir, 
-      reportPath: outputDir, 
+      reportPath: outputDir,  // Output path for the report
       reportName: "Auto Events Report",
       pageTitle: "Auto Events Report",
       pageFooter: '<div style="text-align:center;"><p>Contact us for any support: <b>Grp-ccwt-e2e-support</b></p></div>',
       customMetadata: true,
       openReportInBrowser: false,
       saveReport: true, 
-      // Specify the JSON files to include
-      jsonFiles: combinedJsonFiles.map(file => `${jsonDir}\\${file}`), // Full paths
+      // Specify the filtered JSON files to include
+      jsonFiles: jsonFilesToInclude, // Only the filtered full paths
     });
 
     console.log(`HTML report generated successfully at: ${outputDir}`);
@@ -64,6 +67,7 @@ async function generateHtmlReport() {
     console.error(`Error generating HTML report: ${err.message}`);
   }
 }
+
 
 // Execute the report generation function
 generateHtmlReport();
