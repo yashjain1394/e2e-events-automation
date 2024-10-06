@@ -44,8 +44,8 @@ async function generateHtmlReport() {
     console.log('Filtered JSON files:', combinedJsonFiles);
 
     if (combinedJsonFiles.length === 0) {
-      console.log(`No JSON files found in the output directory for date: ${dateArg}.`);
-      return;
+      console.error(`No JSON files found in the output directory for date: ${dateArg}.`);
+      process.exit(1); // Fail the build
     }
 
     // Copy filtered JSON files to the temporary directory
@@ -71,6 +71,7 @@ async function generateHtmlReport() {
     console.log(`HTML report generated successfully at: ${outputDir}`);
   } catch (err) {
     console.error(`Error generating HTML report: ${err.message}`);
+    process.exit(1); // Fail the build on error
   } finally {
     // Optionally, clean up the temporary directory after report generation
     fs.readdirSync(tempDir).forEach(file => {
