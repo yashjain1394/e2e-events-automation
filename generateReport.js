@@ -1,5 +1,6 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
+
 let report;
 
 // Check if 'multiple-cucumber-html-reporter' is installed
@@ -23,12 +24,24 @@ if (!fs.existsSync(outputDir)) {
   console.log(`Created output directory at: ${outputDir}`);
 }
 
+// Get the date argument from command line
+const dateArg = process.argv[2];
+
+// Validate the date format (YYYY-MM-DD)
+const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+if (!dateArg || !dateRegex.test(dateArg)) {
+  console.error('Please provide a date in the format YYYY-MM-DD.');
+  process.exit(1);
+}
+
 async function generateHtmlReport() {
   try {
-    const combinedJsonFiles = fs.readdirSync(jsonDir).filter(file => file.endsWith('.json'));
+    // Filter JSON files that contain the date in their name
+    const combinedJsonFiles = fs.readdirSync(jsonDir)
+      .filter(file => file.endsWith('.json') && file.includes(dateArg));
 
     if (combinedJsonFiles.length === 0) {
-      console.log('No JSON files found in the output directory.');
+      console.log(`No JSON files found in the output directory for date: ${dateArg}.`);
       return;
     }
 
@@ -36,11 +49,13 @@ async function generateHtmlReport() {
       jsonDir: jsonDir, 
       reportPath: outputDir, 
       reportName: "Auto Events Report",
-      pageTitle : "Auto Events Report",
+      pageTitle: "Auto Events Report",
       pageFooter: '<div style="text-align:center;"><p>Contact us for any support: <b>Grp-ccwt-e2e-support</b></p></div>',
       customMetadata: true,
-      openReportInBrowser: true,
+      openReportInBrowser: false,
       saveReport: true, 
+      // Specify the JSON files to include
+      jsonFiles: combinedJsonFiles.map(file => `${jsonDir}\\${file}`), // Full paths
     });
 
     console.log(`HTML report generated successfully at: ${outputDir}`);
