@@ -47,9 +47,10 @@ if (!fs.existsSync(tempDir)) {
 const dateArg = process.argv[2]; // This should be passed when running the script
 
 async function generateHtmlReport() {
+  let combinedJsonFiles = [];
   try {
     // Filter JSON files that contain the date in their name
-    const combinedJsonFiles = fs.readdirSync(jsonDir)
+    combinedJsonFiles = fs.readdirSync(jsonDir)
       .filter(file => file.endsWith('.json') && file.includes(dateArg));
 
     // Debug output to check the filtered files
@@ -88,7 +89,7 @@ async function generateHtmlReport() {
     console.error(`Error generating HTML report: ${err.message}`);
     process.exit(1); // Fail the build on error
   } finally {
-    // Optionally, clean up the temporary directory after report generation
+
     fs.readdirSync(tempDir).forEach(file => {
       fs.unlinkSync(path.join(tempDir, file)); // Delete each file in the temporary directory
     });
