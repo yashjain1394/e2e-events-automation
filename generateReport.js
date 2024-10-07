@@ -85,6 +85,13 @@ async function generateHtmlReport() {
 
     // Take a screenshot of the generated report
     await takeScreenshot(outputDir);
+    // Delete the original JSON files from the jsonDir
+    combinedJsonFiles.forEach(file => {
+      const originalPath = path.join(jsonDir, file);
+      fs.unlinkSync(originalPath); // Delete the original JSON file
+      console.log(`Deleted original file: ${originalPath}`);
+    });
+    
   } catch (err) {
     console.error(`Error generating HTML report: ${err.message}`);
     process.exit(1); // Fail the build on error
@@ -96,12 +103,6 @@ async function generateHtmlReport() {
     fs.rmdirSync(tempDir); // Remove the temporary directory
     console.log(`Cleaned up temporary directory: ${tempDir}`);
 
-    // Delete the original JSON files from the jsonDir
-    combinedJsonFiles.forEach(file => {
-      const originalPath = path.join(jsonDir, file);
-      fs.unlinkSync(originalPath); // Delete the original JSON file
-      console.log(`Deleted original file: ${originalPath}`);
-    });
   }
 }
 
