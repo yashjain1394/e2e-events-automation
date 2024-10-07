@@ -90,10 +90,17 @@ async function generateHtmlReport() {
   } finally {
     // Optionally, clean up the temporary directory after report generation
     fs.readdirSync(tempDir).forEach(file => {
-      fs.unlinkSync(path.join(tempDir, file)); // Delete each file
+      fs.unlinkSync(path.join(tempDir, file)); // Delete each file in the temporary directory
     });
     fs.rmdirSync(tempDir); // Remove the temporary directory
     console.log(`Cleaned up temporary directory: ${tempDir}`);
+
+    // Delete the original JSON files from the jsonDir
+    combinedJsonFiles.forEach(file => {
+      const originalPath = path.join(jsonDir, file);
+      fs.unlinkSync(originalPath); // Delete the original JSON file
+      console.log(`Deleted original file: ${originalPath}`);
+    });
   }
 }
 
@@ -107,7 +114,7 @@ async function takeScreenshot(reportDir) {
   await page.goto(reportPath);
 
   await new Promise(resolve => setTimeout(resolve, 3000));
-  
+
   // Take a screenshot and save it in the same directory as the HTML report
   const screenshotPath = path.join(reportDir, 'Auto_Events_Report.png');
   await page.screenshot({ path: screenshotPath, fullPage: true });
