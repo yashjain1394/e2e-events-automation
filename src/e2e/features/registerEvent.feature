@@ -37,5 +37,5 @@ Feature: Event Registration
 
   Examples: DefaultEvents
     | EventName                | FormData                                              |
-    | Auto Events Demo         | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10-49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
+    | Rayyan test Stage 09/30/2024        | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
     

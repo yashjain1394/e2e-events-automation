@@ -8,8 +8,8 @@ let isScenarioExecuted = false;
 Before(async function (scenario) {
   const env = process.env.ENV || null
   this.credentials = {
-    username: process.env.USERNAME || testData.userInfo.username,
-    password: process.env.PASSWORD || testData.userInfo.password,
+    username: testData.userInfo.username || process.env.USERNAME,
+    password: testData.userInfo.password || process.env.PASSWORD,
   };
 
   const scenarioName = scenario.pickle.name;

@@ -50,7 +50,10 @@ class EventDetailPage extends EventsBasePage {
                 .replace(/['"`]/g, '')
                 .replace(/\s+/g, '-')
                 .replace(/-+/g, '-');
-            const expectedUrlPart = `/${normalizedTitle}`;
+            const regex = /^([^/]+)/; // Matches everything before the first '/' (if present)
+            const match = normalizedTitle.match(regex);
+            const firstSegment = match ? match[0] : normalizedTitle;
+            const expectedUrlPart = `/${firstSegment}`;
             await this.native.waitForURL(new RegExp(expectedUrlPart));
             const currentUrl = this.native.url();
             expect(currentUrl).toContain(expectedUrlPart);
