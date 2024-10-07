@@ -106,6 +106,8 @@ async function takeScreenshot(reportDir) {
   const reportPath = `file://${path.join(__dirname, reportDir, 'index.html')}`;
   await page.goto(reportPath);
 
+  await new Promise(resolve => setTimeout(resolve, 3000));
+  
   // Take a screenshot and save it in the same directory as the HTML report
   const screenshotPath = path.join(reportDir, 'Auto_Events_Report.png');
   await page.screenshot({ path: screenshotPath, fullPage: true });
