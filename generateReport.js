@@ -2,6 +2,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 let report;
+let puppeteer;
 
 // Check if 'multiple-cucumber-html-reporter' is installed
 try {
@@ -12,6 +13,17 @@ try {
   console.log('Installing multiple-cucumber-html-reporter...');
   execSync('npm install multiple-cucumber-html-reporter', { stdio: 'inherit' });
   report = require('multiple-cucumber-html-reporter'); // Require it after installation
+}
+
+// Check if 'puppeteer' is installed
+try {
+  require.resolve('puppeteer');
+  puppeteer = require('puppeteer');
+  console.log('Puppeteer is already installed.');
+} catch (e) {
+  console.log('Installing Puppeteer...');
+  execSync('npm install puppeteer', { stdio: 'inherit' });
+  puppeteer = require('puppeteer'); // Require it after installation
 }
 
 // Set the output directory for the JSON files and report
@@ -69,6 +81,9 @@ async function generateHtmlReport() {
     });
 
     console.log(`HTML report generated successfully at: ${outputDir}`);
+
+    // Take a screenshot of the generated report
+    await takeScreenshot(outputDir);
   } catch (err) {
     console.error(`Error generating HTML report: ${err.message}`);
     process.exit(1); // Fail the build on error
@@ -80,6 +95,24 @@ async function generateHtmlReport() {
     fs.rmdirSync(tempDir); // Remove the temporary directory
     console.log(`Cleaned up temporary directory: ${tempDir}`);
   }
+}
+
+// Function to take a screenshot of the HTML report
+async function takeScreenshot(reportDir) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  // Load the generated report (index.html)
+  const reportPath = `file://${path.join(__dirname, reportDir, 'index.html')}`;
+  await page.goto(reportPath);
+
+  // Take a screenshot and save it in the same directory as the HTML report
+  const screenshotPath = path.join(reportDir, 'Auto_Events_Report.png');
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+
+  console.log(`Screenshot saved at: ${screenshotPath}`);
+
+  await browser.close();
 }
 
 // Execute the report generation function
