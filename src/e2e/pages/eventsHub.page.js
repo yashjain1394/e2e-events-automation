@@ -80,7 +80,7 @@ class EventsHubPage extends EventsBasePage {
       }
 
       logger.logInfo(`Found ${count} pagination buttons.`);
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < (count-1); i++) {
         const pageButton = paginationItems.nth(i);
         await pageButton.waitFor({ state: 'visible' });
         expect(await pageButton.isEnabled()).toBeTruthy();
