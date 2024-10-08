@@ -12,8 +12,8 @@ Before(async function (scenario) {
   this.env = process.env.ENV || argv.p;
   this.browser = process.env.BROWSER || arguments.b
   this.credentials = {
-    username: testData.userInfo.username || process.env.USERNAME,
-    password: testData.userInfo.password || process.env.PASSWORD,
+    username: process.env.USERNAME || testData.userInfo.username,
+    password: process.env.PASSWORD || testData.userInfo.password,
   };
   this.overrideEventName = process.env.EVENT || null;
 
