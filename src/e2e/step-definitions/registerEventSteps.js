@@ -104,10 +104,10 @@ When('I select the event card with title {string}', async function (eventTitle) 
     } else {
       this.eventTitle = eventTitle
     }
-    await this.page.viewEventByTitle(eventTitle);
+    await this.page.viewEventByTitle(this.eventTitle);
   } catch (error) {
-    console.error(`Failed to select the event card with title "${eventTitle}":`, error.message);
-    throw new Error(`Could not select the event card with title "${eventTitle}". Please verify the event title.`);
+    console.error(`Failed to select the event card with title "${this.eventTitle}":`, error.message);
+    throw new Error(`Could not select the event card with title "${this.eventTitle}". Please verify the event title.`);
   }
 });
 
