@@ -1,8 +1,9 @@
-const { Before, Given, Then, When } = require("@cucumber/cucumber");
+const { Before, Given, Then, When, And } = require("@cucumber/cucumber");
 const { EventsHubPage } = require("../pages/eventsHub.page.js");
 const { EventDetailPage } = require("../pages/eventDetails.page.js");
 const { RegistrationForm } = require("../pages/registrationForm.page.js");
 const { EventsDashboard } = require("../pages/eventsDashboard.page.js");
+const { BasicInfo } = require("../pages/basicInfo.page.js");
 const testData = require("../config/test-data/eventRegistration.json");
 const constants = require("../config/test-data/constants.js");
 const { expect } = require('@playwright/test');
@@ -123,10 +124,33 @@ Then('I should see the Create new event button on the page', async function () {
       logger.logInfo("Create new event button is  displayed on Events Dashboard page")
     }
 
+  } catch (error) {
+    logger.logError("Error occured while validating Create new event button:", error.message);
+  }
+});
+
+Then('I should be able to click on Create new event button', async function () {
+  try {
     this.context(EventsDashboard);
     await this.page.clickCreateNewEventButton();
-
   } catch (error) {
-    logger.logError("Error occured while clicking Create new event button:", error.message);
+    logger.logError('Failed to click Create new event button:', error.message);
+  }
+});
+
+Then('I am in the create event flow and Basic info page', async function () {
+  try {
+    const basicInfo = new BasicInfo()
+    this.context(EventDetailPage);
+    const isAllEventsVisible = await this.page.isElementVisible(basicInfo.locators.basicInfoLabel, timeout=30000);
+    if (!isAllEventsVisible) {
+      logger.logError("Basic info not displayed on page.");
+    }
+    else {
+      logger.logInfo("Basic info is  displayed on page")
+    }
+  } catch (error) {
+    logger.logError("Error occured while Basic info label verification:", error.message);
+    console.error("Error occured while Basic info label verification:", error.message);
   }
 });

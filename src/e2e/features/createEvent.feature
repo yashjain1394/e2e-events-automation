@@ -2,7 +2,7 @@
 Feature: Event Creation
 
 
-  Scenario: Verify ECC Dashboard Page content
+  Scenario Outline: Validate and create events
     Given I am on the ECC dashboard page
     Then I should see the All Events label on the page
     Then I should see the Search box on the page
@@ -10,10 +10,9 @@ Feature: Event Creation
     Then I should see pagination container
     Then I should see the footer section on the page
     Then I should see the Create new event button on the page
-    # And I should be able to click on Create new event button
+    Then I should be able to click on Create new event button
 
-    # Scenario Outline: Validate and create events
-    # Given I am in the create event flow
+    Then I am in the create event flow and Basic info page
     # Then I fill out cloud type, series type and select event topics
     # Then I fill event title, event description, date, start time, end time, timezone and venue information from <EventDetails>
     # Then I click Next step multiple times
