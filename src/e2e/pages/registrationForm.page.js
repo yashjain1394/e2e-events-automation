@@ -75,6 +75,7 @@ class RegistrationForm extends EventsBasePage {
             await this.native.waitForSelector(this.locators.requiredFields);
             const requiredFields = this.native.locator(this.locators.requiredFields);
             let totalRequiredFields = await requiredFields.count();
+            logger.logInfo("totalRequiredFields=",totalRequiredFields)
 
             for (let i = 0; i < totalRequiredFields; i++) {
                 const field = requiredFields.nth(i);
@@ -135,7 +136,13 @@ class RegistrationForm extends EventsBasePage {
                     throw new Error(`"${fieldId}" : "No value provided"`);
                 }
             }
-            const isContactMethodVisible = await this.isElementVisible(this.locators.contactMethodSelector);
+
+            let isContactMethodVisible = false;
+            try{
+            isContactMethodVisible = await this.isElementVisible(this.locators.contactMethodSelector); 
+            }catch(ReferenceError){
+                logger.logInfo("Contact method is not visible.");
+            }
             if (isContactMethodVisible) {
                 const contactMethodLabelClass = await this.native.getAttribute(this.locators.contactMethodSelector, 'class');
                 if (contactMethodLabelClass && contactMethodLabelClass.includes('required')) {

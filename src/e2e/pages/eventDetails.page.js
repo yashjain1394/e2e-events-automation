@@ -49,7 +49,9 @@ class EventDetailPage extends EventsBasePage {
                 .toLowerCase()
                 .replace(/['"`]/g, '')
                 .replace(/\s+/g, '-')
-                .replace(/-+/g, '-');
+                .replace(/-+/g, '-')
+                .replace(/\//g, '');
+
             const expectedUrlPart = `/${normalizedTitle}`;
             await this.native.waitForURL(new RegExp(expectedUrlPart));
             const currentUrl = this.native.url();
