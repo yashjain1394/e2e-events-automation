@@ -9,6 +9,7 @@ const constants = require("../config/test-data/constants.js");
 const { expect } = require('@playwright/test');
 const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/page-objects/adobeidsingin.page.js');
 const Logger = require('../common-utils/logger.js');
+const { SpeakersAndHosts } = require("../pages/speakersAndHosts.page.js");
 const logger = new Logger();
 
 Given('I am on the ECC dashboard page', async function () {
@@ -151,6 +152,40 @@ Then('I am in the create event flow and Basic info page', async function () {
     }
   } catch (error) {
     logger.logError("Error occured while Basic info label verification:", error.message);
-    console.error("Error occured while Basic info label verification:", error.message);
   }
+});
+
+Then('I fill out cloud type and series type with {string}', async function(eventDataJson) {
+  try {
+    const eventData = JSON.parse(eventDataJson);
+    console.log('Filling out cloud type and series type with data:', eventData);
+    this.context(BasicInfo);
+    await this.page.selectCloudType(eventData.cloudType);
+    await this.page.selectSeriesType(eventData.series);
+  } catch (error) {
+    logger.logError("Failed to fill out cloud type and series type:", error.message);
+  }
+});
+
+Then('I fill minimum required fields such as event title, event description, date, start time, end time, timezone and venue information with {string}', async function(eventDataJson) {
+  try {
+    const eventData = JSON.parse(eventDataJson);
+    console.log('Filling out minimum required fields with data:', eventData);
+    this.context(BasicInfo);
+    await this.page.fillMinimumRequiredFields(eventData);
+
+  } catch (error) {
+    logger.logError("Failed to fill minimum required fields:", error.message);
+  }
+});
+
+Then('I click Next step multiple times', async function () {
+  try {
+    await this.page.clickCreateNextStepButton();
+
+  } catch (error) {
+    logger.logError('Failed to click Next step button:', error.message);
+  }
+
+  
 });
