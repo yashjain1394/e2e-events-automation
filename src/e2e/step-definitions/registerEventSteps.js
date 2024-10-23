@@ -293,7 +293,7 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
         console.log("Sign-in required, proceeding with sign-in");
 
         this.context(AdobeIdSigninPage);
-        await this.page.signIn(this.credentials.username, this.credentials.password);
+        await this.page.signIn(this.credentialsRegisterEvent.username, this.credentialsRegisterEvent.password);
         logger.logInfo("Sign-in completed");
 
         this.context(EventDetailPage);
@@ -330,7 +330,7 @@ Then('I should see the event title I clicked on', async function () {
 
 Then('I should see my email prefilled', async function () {
   try {
-    await this.page.verifyEmailPrefilled(this.credentials.username);
+    await this.page.verifyEmailPrefilled(this.credentialsRegisterEvent.username);
   } catch (error) {
     console.log("Error verifying prefilled email input:", error.message);
   }

@@ -8,15 +8,7 @@ class SpeakersAndHosts extends EventsBasePage {
         super('/ecc/create/t3');
         this.locators = {
             speakersAndHostsLabel: '//*[@id="speakers-and-hosts"]',
-
-
-
-
-
         };
     }
-    
-    
-
 }
 module.exports = { SpeakersAndHosts };

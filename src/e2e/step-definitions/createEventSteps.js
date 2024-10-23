@@ -3,13 +3,15 @@ const { EventsHubPage } = require("../pages/eventsHub.page.js");
 const { EventDetailPage } = require("../pages/eventDetails.page.js");
 const { RegistrationForm } = require("../pages/registrationForm.page.js");
 const { EventsDashboard } = require("../pages/eventsDashboard.page.js");
-const { BasicInfo } = require("../pages/basicInfo.page.js");
+const { BasicInfo } = require("../pages/createEvent_basicInfo.page.js");
 const testData = require("../config/test-data/eventRegistration.json");
 const constants = require("../config/test-data/constants.js");
 const { expect } = require('@playwright/test');
 const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/page-objects/adobeidsingin.page.js');
 const Logger = require('../common-utils/logger.js');
-const { SpeakersAndHosts } = require("../pages/speakersAndHosts.page.js");
+const { SpeakersAndHosts } = require("../pages/createEvent_speakersAndHosts.page.js");
+const { AdditionalContent } = require("../pages/createEvent_additionalContent.page.js");
+const { Rsvp } = require("../pages/createEvent_rsvp.page.js");
 const logger = new Logger();
 
 Given('I am on the ECC dashboard page', async function () {
@@ -23,15 +25,15 @@ Given('I am on the ECC dashboard page', async function () {
   }
 
   try {
-    await this.page.clickSignIn();
-    logger.logInfo("Sign-in clicked successfully.");
+    // await this.page.clickSignIn();
+    // logger.logInfo("Sign-in clicked successfully.");
 
-    this.context(EventDetailPage);
-    await this.page.isElementVisible(this.page.locators.signInEmailForm, timeout = 60000);
-    logger.logInfo("Sign-in required, proceeding with sign-in");
+    // this.context(EventDetailPage);
+    // await this.page.isElementVisible(this.page.locators.signInEmailForm, timeout = 60000);
+    // logger.logInfo("Sign-in required, proceeding with sign-in");
 
     this.context(AdobeIdSigninPage);
-    await this.page.signIn(this.credentials.username, this.credentials.password);
+    await this.page.signIn(this.credentialsCreateEvent.username, this.credentialsCreateEvent.password);
     logger.logInfo("Sign-in completed");
 
   } catch (signInError) {
@@ -172,7 +174,7 @@ Then('I fill minimum required fields such as event title, event description, dat
     const eventData = JSON.parse(eventDataJson);
     console.log('Filling out minimum required fields with data:', eventData);
     this.context(BasicInfo);
-    await this.page.fillMinimumRequiredFields(eventData);
+    await this.page.fillRequiredFields(eventData);
 
   } catch (error) {
     logger.logError("Failed to fill minimum required fields:", error.message);
@@ -181,11 +183,81 @@ Then('I fill minimum required fields such as event title, event description, dat
 
 Then('I click Next step multiple times', async function () {
   try {
+    
+    await this.page.clickCreateNextStepButton();
+
+    const speakersAndHosts = new SpeakersAndHosts()
+    this.context(EventDetailPage);
+    const isSpeakersAndHostsLabelVisible = await this.page.isElementVisible(speakersAndHosts.locators.speakersAndHostsLabel, timeout=30000);
+    if (!isSpeakersAndHostsLabelVisible) {
+      logger.logError("Speakers And Hosts label not displayed on page.");
+    }
+    else {
+      logger.logInfo("Speakers And Hosts label is displayed on page.")
+    }
+    this.context(BasicInfo);
+    await this.page.clickCreateNextStepButton();
+
+    const additionalContent = new AdditionalContent()
+    this.context(EventDetailPage);
+    const isAdditionalContentLabelVisible = await this.page.isElementVisible(additionalContent.locators.additionalContentLabel, timeout=30000);
+    if (!isAdditionalContentLabelVisible) {
+      logger.logError("Additional Content label not displayed on page.");
+    }
+    else {
+      logger.logInfo("Additional Content label is displayed on page.")
+    }
+    this.context(BasicInfo);
+    await this.page.clickCreateNextStepButton();
+
+    const rsvp = new Rsvp()
+    this.context(EventDetailPage);
+    const isRsvpLabelVisible = await this.page.isElementVisible(rsvp.locators.rsvpLabel, timeout=30000);
+    if (!isRsvpLabelVisible) {
+      logger.logError("Rsvp label not displayed on page.");
+    }
+    else {
+      logger.logInfo("Rsvp label is displayed on page.")
+    }
+    this.context(BasicInfo);
     await this.page.clickCreateNextStepButton();
 
   } catch (error) {
-    logger.logError('Failed to click Next step button:', error.message);
+    logger.logError('Failed to click Next step button multiple times:', error.message);
   }
 
-  
 });
+
+  Then('I should check that event is created with minimum required elements', async function () {
+  try {
+    const rsvp = new Rsvp()
+    this.context(EventDetailPage);
+    const isAllEventsVisible = await this.page.isElementVisible(rsvp.locators.successToast, timeout=30000);
+    if (!isAllEventsVisible) {
+      logger.logError("Event creation Success toast is not not displayed on page.");
+    }
+    else {
+      logger.logInfo("Event creation Success toast is displayed on page");
+      this.context(Rsvp);
+      await this.page.verifyEventCreationSuccessToast();
+    }
+
+  } catch (error) {
+    logger.logError("Error occured while validating created event:", error.message);
+  }
+
+  try{
+    await this.page.verifyNavigationToECCDashboard();
+  }catch (error) {
+    logger.logError("Error occured while navigating to ECC dashboard:", error.message);
+  }
+  });
+
+  Then('I should be able to delete the event', async function () {
+    try{
+      this.context(EventsDashboard);
+      await this.page.deleteEvent(Rsvp.eventId);
+    }catch (error) {
+      logger.logError("Error occured while deleting the event:", error.message);
+    }
+    });

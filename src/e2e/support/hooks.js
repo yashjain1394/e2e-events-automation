@@ -1,5 +1,6 @@
 const { Before, After, AfterAll } = require('@cucumber/cucumber');
-const testData = require("../config/test-data/eventRegistration.json");
+const registerEventTestData = require("../config/test-data/eventRegistration.json");
+const createEventTestData = require("../config/test-data/eventCreation.json");
 const Logger = require('../common-utils/logger.js'); // Adjust the path to your logger file
 const logger = new Logger();
 const path = require('path');
@@ -11,10 +12,17 @@ let isScenarioExecuted = false;
 Before(async function (scenario) {
   this.env = process.env.ENV || argv.p;
   this.browser = process.env.BROWSER || arguments.b
-  this.credentials = {
-    username: process.env.USERNAME || testData.userInfo.username,
-    password: process.env.PASSWORD || testData.userInfo.password,
+
+  this.credentialsRegisterEvent = {
+    username: process.env.USERNAME || registerEventTestData.userInfo.username,
+    password: process.env.PASSWORD || registerEventTestData.userInfo.password,
   };
+
+  this.credentialsCreateEvent = {
+    username: process.env.USERNAME || createEventTestData.eventCreationUserInfo.username,
+    password: process.env.PASSWORD || createEventTestData.eventCreationUserInfo.password,
+  };
+
   this.overrideEventName = process.env.EVENT || null;
 
   const scenarioName = scenario.pickle.name;

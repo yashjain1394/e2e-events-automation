@@ -8,14 +8,7 @@ class AdditionalContent extends EventsBasePage {
         super('/ecc/create/t3');
         this.locators = {
             additionalContentLabel: '//*[@id="additional-content"]',
-
-
-
-
-
         };
     }
-    
-
 }
 module.exports = { AdditionalContent };

@@ -16,6 +16,7 @@ class BasicInfo extends EventsBasePage {
             eventTitle: '//*[@placeholder="Event title"]',
             eventDescription: '//*[@placeholder="Event description"]',
             eventDate: '//*[@name="event-date"]',
+            enabledDatesClass: '.calendar-day:not(.disabled):not(.empty)',
             iconCalendar: '//*[@class="icon icon-calendar-add"]',
             startTime: '//*[@id="time-picker-start-time"]',
             endTime: '//*[@id="time-picker-end-time"]',
@@ -26,11 +27,6 @@ class BasicInfo extends EventsBasePage {
             venueName: '//*[@placeholder="Venue name"]',
             firstVenueNameOption: '.pac-item:first-child',
             nextStepButtonEnabled: '//a[contains(@class, "next-button") and not(contains(@class, "disabled"))]'
-
-
-
-
-
         };
     }
 
@@ -116,7 +112,7 @@ class BasicInfo extends EventsBasePage {
             await this.openDatePicker();
     
             // Locator for enabled dates
-            const enabledDatesLocator = this.native.locator('.calendar-day:not(.disabled)');
+            const enabledDatesLocator = this.native.locator(this.locators.enabledDatesClass);
     
             // Get all enabled date elements
             const enabledDatesElements = await enabledDatesLocator.elementHandles();
@@ -124,34 +120,30 @@ class BasicInfo extends EventsBasePage {
             // Get all enabled dates as an array of strings
             const enabledDates = await Promise.all(enabledDatesElements.map(async (el) => {
                 const date = await el.getAttribute('data-date');
-                return date ? date.split('-')[2] : '';
+                return date ? date : '';
             }));
-            
+    
             console.log(`Enabled dates: ${enabledDates.join(', ')}`);
     
-            // Check if the provided startDate is enabled
-            let selectedStartDate = enabledDates.includes(startDate) ? startDate : enabledDates[0];
-            if (selectedStartDate !== startDate) {
-                console.warn(`Start date ${startDate} is not enabled, selecting the first available date: ${selectedStartDate}.`);
-            }
-    
-            // Check if the provided endDate is enabled
-            let selectedEndDate = enabledDates.includes(endDate) ? endDate : null;
-            if (!selectedEndDate) {
-                // Find the next enabled date after the start date
-                const startIndex = enabledDates.indexOf(selectedStartDate);
-                selectedEndDate = (startIndex !== -1 && startIndex < enabledDates.length - 1) ? enabledDates[startIndex + 1] : enabledDates[0];
-                console.warn(`End date ${endDate} is not enabled, selecting the next available date: ${selectedEndDate}.`);
+            // Check if the provided startDate or endDate is enabled
+            if(enabledDates.includes(startDate)==false || enabledDates.includes(endDate)==false){
+                startDate=enabledDates[0]
+                endDate=enabledDates[0]
+                logger.logWarning(`Start date or end date is not enabled, selecting the first available date: ${startDate}.`);
             }
     
             // Log selected dates
-            console.log(`Selected start date: ${selectedStartDate}, Selected end date: ${selectedEndDate}`);
+            logger.logInfo(`Selected start date: ${startDate}, Selected end date: ${endDate}`);
     
             // Click on the selected start date
-            await this.native.locator(`.calendar-day:not(.disabled)[data-date*="${selectedStartDate}"]`).click();
+            const enabledStartDate = await this.native.locator(`.calendar-day:not(.disabled):not(.empty)[data-date="${startDate}"]`);
+            console.log('Enabled Start date value: ', enabledStartDate.getAttribute('data-date'));
+            await enabledStartDate.click();
     
             // Click on the selected end date
-            await this.native.locator(`.calendar-day:not(.disabled)[data-date*="${selectedEndDate}"]`).click();
+            const enabledEndDate = await this.native.locator(`.calendar-day:not(.disabled):not(.empty)[data-date="${endDate}"]`);
+            console.log('Enabled End date value: ', enabledEndDate.getAttribute('data-date'));
+            await enabledEndDate.click();
     
         } catch (error) {
             console.error(`Error selecting date: ${error.message}`);
@@ -170,14 +162,8 @@ class BasicInfo extends EventsBasePage {
             throw new Error(`Error opening date picker: ${error.message}`);
         }
     }
-    
-    
-    
-    
-    
-
-
-    async fillMinimumRequiredFields(eventData) {
+   
+    async fillRequiredFields(eventData) {
         try{
 
             const titleInput = await this.getInputHandleInsideInputShadowRoot(this.locators.eventTitle);
@@ -225,7 +211,5 @@ class BasicInfo extends EventsBasePage {
             throw new Error(`Failed to click the Next Step button: ${error.message}`);
         }
     }
-    
-
 }
 module.exports = { BasicInfo };
