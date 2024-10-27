@@ -26,7 +26,8 @@ class BasicInfo extends EventsBasePage {
             timezoneOption: (value) => `//sp-picker[@id='time-zone-select-input']//sp-menu-item[text()='${value}']`,
             venueName: '//*[@placeholder="Venue name"]',
             firstVenueNameOption: '.pac-item:first-child',
-            nextStepButtonEnabled: '//a[contains(@class, "next-button") and not(contains(@class, "disabled"))]'
+            nextStepButtonEnabled: '//a[contains(@class, "next-button") and not(contains(@class, "disabled"))]',
+            checkbox: (name) => `sp-checkbox[name="${name}"]`
         };
     }
 
@@ -52,6 +53,28 @@ class BasicInfo extends EventsBasePage {
         console.error(`Error in selecting Series Type: ${error.message}`);
         throw new Error(`Error in selecting Series Type: ${error.message}`);
     }
+    }
+
+    async selectEventTopics(eventTopics) {
+        try {
+            if (!Array.isArray(eventTopics)) {
+                throw new Error("eventTopics should be an array");
+            }
+
+            for (const topic of eventTopics) {
+                const trimmedTopic = topic.trim();
+                const checkboxLocator = this.native.locator(this.locators.checkbox(trimmedTopic));
+                logger.logInfo(`Selecting checkbox for topic: ${trimmedTopic}`);
+
+                // Click the checkbox
+                await checkboxLocator.click();
+
+                logger.logInfo(`Selected checkbox for topic: ${trimmedTopic}`);
+            }
+        } catch (error) {
+            logger.logError(`Error in selecting event topics: ${error.message}`);
+            throw new Error(`Error in selecting event topics: ${error.message}`);
+        }
     }
 
     // Function to get input handle inside shadow DOM

@@ -5,7 +5,6 @@ const { RegistrationForm } = require("../pages/registrationForm.page.js");
 const { EventsDashboard } = require("../pages/eventsDashboard.page.js");
 const { BasicInfo } = require("../pages/createEvent_basicInfo.page.js");
 const testData = require("../config/test-data/eventRegistration.json");
-const constants = require("../config/test-data/constants.js");
 const { expect } = require('@playwright/test');
 const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/page-objects/adobeidsingin.page.js');
 const Logger = require('../common-utils/logger.js');
@@ -13,8 +12,9 @@ const { SpeakersAndHosts } = require("../pages/createEvent_speakersAndHosts.page
 const { AdditionalContent } = require("../pages/createEvent_additionalContent.page.js");
 const { Rsvp } = require("../pages/createEvent_rsvp.page.js");
 const logger = new Logger();
+const expectedTableHeaders = ["EVENT NAME","PUBLISH STATUS","DATE RUN","LAST MODIFIED","VENUE NAME","GEO","RSVP DATA","MANAGE"];
 
-Given('I am on the ECC dashboard page', async function () {
+Given('I am on the ECC dashboard page in signed-out state', async function () {
   try {
     this.page = new EventsDashboard();
     await this.page.open();
@@ -32,12 +32,27 @@ Given('I am on the ECC dashboard page', async function () {
     // await this.page.isElementVisible(this.page.locators.signInEmailForm, timeout = 60000);
     // logger.logInfo("Sign-in required, proceeding with sign-in");
 
+    this.context(EventDetailPage);
+    await this.page.isElementVisible(this.page.locators.signInEmailForm, timeout = 45000);
+
+    logger.logInfo("Sign-in required, proceeding with sign-in");
     this.context(AdobeIdSigninPage);
     await this.page.signIn(this.credentialsCreateEvent.username, this.credentialsCreateEvent.password);
     logger.logInfo("Sign-in completed");
-
+    
   } catch (signInError) {
     console.error(`Sign-in handling failed: ${signInError.message}`);
+  }
+});
+
+Given('I am on the ECC dashboard page in signed-in state', async function () {
+  try {
+    this.page = new EventsDashboard();
+    await this.page.open();
+    logger.logInfo("Navigated to the Events Dashboard page successfully.")
+  } catch (error) {
+    logger.logError("Failed to open the Events Dashboard page:", error.message);
+    throw new Error("Could not navigate to the Events Dashboard page. Please check the URL or connectivity.");
   }
 });
 
@@ -77,7 +92,7 @@ Then('I should see the Search box on the page', async function () {
 Then('I should see the table headers on the page', async function () {
   try {
     this.context(EventsDashboard);
-    await this.page.verifyTableHeaders(constants.expectedTableHeaders)
+    await this.page.verifyTableHeaders(expectedTableHeaders)
   } catch (error) {
     logger.logError("Error occured while table headers verification:", error.message);
   }
@@ -119,7 +134,7 @@ Then('I should see the Create new event button on the page', async function () {
   try {
     const eventDashboard = new EventsDashboard()
     this.context(EventDetailPage);
-    const isAllEventsVisible = await this.page.isElementVisible(eventDashboard.locators.createNewEventButton);
+    const isAllEventsVisible = await this.page.isElementVisible(eventDashboard.locators.createNewEventButton, timeout = 30000);
     if (!isAllEventsVisible) {
       logger.logError("Create new event button not displayed on Events Dashboard page.");
     }
@@ -260,4 +275,30 @@ Then('I click Next step multiple times', async function () {
     }catch (error) {
       logger.logError("Error occured while deleting the event:", error.message);
     }
+    });
+
+  Then('I fill out create event Basic info page with {string} and click Next step', async function(eventDataJson) {
+      try {
+        const eventData = JSON.parse(eventDataJson);
+        logger.logInfo('Filling out cloud type, series type and event topics with data:', eventData);
+        this.context(BasicInfo);
+        await this.page.selectCloudType(eventData.cloudType);
+        await this.page.selectSeriesType(eventData.series);
+
+      // Check if eventTopics is defined and split it using a comma
+      if (eventData.eventTopics) {
+        const eventTopics = eventData.eventTopics.split(',').map(topic => topic.trim());
+        logger.logInfo('Event Topics:', eventTopics);
+        await this.page.selectEventTopics(eventTopics);
+      } 
+      else {
+        logger.logError('eventTopics is not defined in eventData');
+    }
+
+      await this.page.fillRequiredFields(eventData);
+      await this.page.clickCreateNextStepButton();
+
+      } catch (error) {
+        logger.logError("Failed to fill out cloud type, series type and event topics:", error.message);
+      }
     });
