@@ -13,7 +13,14 @@ class EventsDashboard extends EventsBasePage {
             createNewEventButton: '//a[text()="Create new event"]',
             footerSection: '.feds-footer-privacySection',
             paginationContainer: '.pagination-container',
-            tableHeaders: '//th/span'
+            tableHeaders: '//th/span',
+            eventRow: (eventId) => `tr.event-row[data-event-id="${eventId}"]`,
+            moreOptionsButton: 'img.icon.icon-more-small-list',
+            eventToolBox: '.dashboard-event-tool-box',
+            deleteOption: 'a.dash-event-tool:has-text("Delete")',
+            confirmDeleteDialog: 'sp-dialog[role="dialog"]',
+            confirmDeleteButton: 'sp-button:has-text("Yes, I want to delete this event")',
+            deleteConfirmationToast: 'sp-toast:has-text("Your event has been deleted.")',
 
         };
     }
@@ -103,6 +110,51 @@ class EventsDashboard extends EventsBasePage {
             logger.logError(`Failed to verify navigation to create events page: ${error.message}`);
             throw new Error(`Could not verify navigation to create events page. ${error.message}`);
         }
+    }
+
+    async deleteEvent(eventId) {
+        try {
+            const eventRowSelector = this.locators.eventRow(eventId);
+            const eventRow = this.native.locator(eventRowSelector);
+            logger.logInfo({ eventRowSelector });
+
+            // Click the "more options" button within the event row
+            const moreOptionsButton = eventRow.locator(this.locators.moreOptionsButton);
+            await moreOptionsButton.click();
+
+            logger.logInfo('Clicked the "more options" button successfully.');
+
+            const eventToolBox = this.native.locator(this.locators.eventToolBox);
+
+            // Click the delete option
+            const deleteOption = eventToolBox.locator(this.locators.deleteOption);
+            await deleteOption.click();
+
+            logger.logInfo('Clicked the delete option successfully.');
+
+             // Wait for the confirmation dialog to appear
+             const confirmDeleteDialog = this.native.locator(this.locators.confirmDeleteDialog);
+
+             // Click the confirm delete button
+             const confirmDeleteButton = confirmDeleteDialog.locator(this.locators.confirmDeleteButton);
+             await confirmDeleteButton.click();
+ 
+            logger.logInfo('Deletion confirmation button clicked successfully.');
+
+            // Delete confirmation toast will appear
+            const deleteConfirmationToast = this.native.locator(this.locators.deleteConfirmationToast);
+
+            // Verify the text content of the delete confirmation toast
+            const toastText = await deleteConfirmationToast.textContent();
+            expect(toastText).toContain('Your event has been deleted.');
+
+            logger.logInfo('Event deletion confirmation toast verified successfully.');
+
+        } catch (error) {
+            logger.logError(`Error deleting the event: ${error.message}`);
+            throw new Error(`Error deleting the event: ${error.message}`);
+        } 
+        
     }
     
     
