@@ -19,6 +19,17 @@ Given('I am on the events hub page', async function () {
   }
 });
 
+Given('I am on the events page', async function () {
+  try {
+    this.page = new EventsHubPage();
+    await this.page.open();
+    logger.logInfo("Navigated to the Events Hub page successfully.")
+  } catch (error) {
+    logger.logError("Failed to open the Events Hub page:", error.message);
+    throw new Error("Could not navigate to the Events Hub page. Please check the URL or connectivity.");
+  }
+});
+
 Then('I should see the Marquee displayed on the page', async function () {
   try {
     const isMarqueeVisible = await this.page.isElementVisible(this.page.locators.marquee);
