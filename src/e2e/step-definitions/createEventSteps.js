@@ -295,6 +295,27 @@ Then('I click Next step multiple times', async function () {
         logger.logError('eventTopics is not defined in eventData');
     }
 
+      // Check if communityLink is defined and check the checkbox
+        if (eventData.communityLink) {
+            await this.page.checkCommunityLinkCheckbox(eventData.communityLink);
+        } else {
+            logger.logWarning('communityLink is not defined in eventData');
+        }
+
+      // Check if communityUrl is defined and fill it
+        if (eventData.communityUrl) {
+            await this.page.fillCommunityUrl(eventData.communityUrl);
+        } else {
+            logger.logWarning('communityUrl is not defined in eventData');
+        }
+
+      // Check if agenda is defined and fill it
+      if (eventData.agenda) {
+        await this.page.fillAgendaDetails(eventData.agenda);
+    } else {
+        logger.logWarning('agenda is not defined in eventData');
+    }
+
       await this.page.fillRequiredFields(eventData);
       await this.page.clickCreateNextStepButton();
 

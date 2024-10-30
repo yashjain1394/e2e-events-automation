@@ -21,13 +21,23 @@ class BasicInfo extends EventsBasePage {
             startTime: '//*[@id="time-picker-start-time"]',
             endTime: '//*[@id="time-picker-end-time"]',
             timezone: '//*[@id="time-zone-select-input"]',
-            startTimeOption: (value) => `//sp-picker[@id='time-picker-start-time']//sp-menu-item[text()='${value}']`,
-            endTimeOption: (value) => `//sp-picker[@id='time-picker-end-time']//sp-menu-item[text()='${value}']`,
-            timezoneOption: (value) => `//sp-picker[@id='time-zone-select-input']//sp-menu-item[text()='${value}']`,
+            startTimeOption: (time) => `//sp-picker[@id='time-picker-start-time']//sp-menu-item[text()='${time}']`,
+            endTimeOption: (time) => `//sp-picker[@id='time-picker-end-time']//sp-menu-item[text()='${time}']`,
+            timezoneOption: (timezone) => `//sp-picker[@id='time-zone-select-input']//sp-menu-item[text()='${timezone}']`,
             venueName: '//*[@placeholder="Venue name"]',
             firstVenueNameOption: '.pac-item:first-child',
             nextStepButtonEnabled: '//a[contains(@class, "next-button") and not(contains(@class, "disabled"))]',
-            checkbox: (name) => `sp-checkbox[name="${name}"]`
+            checkbox: (name) => `sp-checkbox[name="${name}"]`,
+            communityLinkCheckbox: 'sp-checkbox#checkbox-community',
+            communityUrlField: 'sp-textfield#community-url-details',
+            addAgendaTimeAndDetailsPanel: 'repeater-element[text="Add agenda time and details"]',
+            agendaFieldsetGroup: 'agenda-fieldset-group',
+            agendaFieldset: 'agenda-fieldset',
+            agendaTime: 'sp-picker[label="Pick agenda time"]',
+            agendaTimeOption: (time) => `sp-menu-item[value="${this.convertTimeToValue(time)}"]`,
+            agendaDetails: 'sp-textfield[placeholder="Add Agenda details"]',
+            agendaPostEventCheckbox: 'sp-checkbox#checkbox-agenda-info',
+            
         };
     }
 
@@ -77,54 +87,46 @@ class BasicInfo extends EventsBasePage {
         }
     }
 
-    // Function to get input handle inside shadow DOM
-    async getInputHandleInsideInputShadowRoot(selector) {
+    async getHandleInsideShadowRoot(shadowHostSelectorOrHandle, innerSelector) {
         try {
-            // Get the handle of the shadow host element
-            const textFieldHandle = await this.native.locator(selector).elementHandle();
-            if (!textFieldHandle) {
-                throw new Error(`Element handle not found for selector: ${selector}`);
+            let shadowHostHandle;
+    
+            // Check if shadowHostSelectorOrHandle is a string or a JSHandle
+            if (typeof shadowHostSelectorOrHandle === 'string') {
+                // Get the handle of the shadow host element
+                shadowHostHandle = await this.native.locator(shadowHostSelectorOrHandle).elementHandle();
+                if (!shadowHostHandle) {
+                    throw new Error(`Element handle not found for selector: ${shadowHostSelectorOrHandle}`);
+                }
+            } else {
+                // Use the provided JSHandle directly
+                shadowHostHandle = shadowHostSelectorOrHandle;
+            }
+    
+            // Ensure the shadow host element has a shadow root
+            const hasShadowRoot = await shadowHostHandle.evaluate(element => !!element.shadowRoot);
+            if (!hasShadowRoot) {
+                throw new Error(`Element does not have a shadow root: ${shadowHostSelectorOrHandle}`);
             }
 
+            // Print the DOM inside the shadow root
+            // const shadowRootHTML = await shadowHostHandle.evaluate(element => element.shadowRoot.innerHTML);
+            // console.log(`Shadow root DOM for selector ${shadowHostSelectorOrHandle}:`, shadowRootHTML);
+    
             // Evaluate and access the shadow DOM root of the host element
-            const inputHandle = await textFieldHandle.evaluateHandle((element) => {
-                return element.shadowRoot.querySelector('input');
-            });
-
-            if (!inputHandle) {
-                throw new Error(`Input handle not found in shadow DOM for selector: ${selector}`);
+            const innerHandle = await shadowHostHandle.evaluateHandle((element, selector) => {
+                return element.shadowRoot.querySelector(selector);
+            }, innerSelector);
+    
+            if (!innerHandle) {
+                throw new Error(`Inner handle not found in shadow DOM for selector: ${innerSelector}`);
             }
-
-            return inputHandle;
-
+    
+            return innerHandle;
+    
         } catch (error) {
-            console.error(`Error in getInputHandleInsideShadowRoot: ${error.message}`);
-            throw new Error(`Failed to get input handle inside shadow DOM for selector: ${selector}`);
-        }
-    }
-
-    async getInputHandleTextAreaShadowRoot(selector) {
-        try {
-            // Get the handle of the shadow host element
-            const textFieldHandle = await this.native.locator(selector).elementHandle();
-            if (!textFieldHandle) {
-                throw new Error(`Element handle not found for selector: ${selector}`);
-            }
-
-            // Evaluate and access the shadow DOM root of the host element
-            const inputHandle = await textFieldHandle.evaluateHandle((element) => {
-                return element.shadowRoot.querySelector('textarea');
-            });
-
-            if (!inputHandle) {
-                throw new Error(`Input handle not found in shadow DOM for selector: ${selector}`);
-            }
-
-            return inputHandle;
-
-        } catch (error) {
-            console.error(`Error in getInputHandleInsideShadowRoot: ${error.message}`);
-            throw new Error(`Failed to get input handle inside shadow DOM for selector: ${selector}`);
+            console.error(`Error in getHandleInsideShadowRoot: ${error.message}`);
+            throw new Error(`Failed to get handle inside shadow DOM for selectors: ${shadowHostSelectorOrHandle}, ${innerSelector}`);
         }
     }
 
@@ -160,12 +162,10 @@ class BasicInfo extends EventsBasePage {
     
             // Click on the selected start date
             const enabledStartDate = await this.native.locator(`.calendar-day:not(.disabled):not(.empty)[data-date="${startDate}"]`);
-            console.log('Enabled Start date value: ', enabledStartDate.getAttribute('data-date'));
             await enabledStartDate.click();
     
             // Click on the selected end date
             const enabledEndDate = await this.native.locator(`.calendar-day:not(.disabled):not(.empty)[data-date="${endDate}"]`);
-            console.log('Enabled End date value: ', enabledEndDate.getAttribute('data-date'));
             await enabledEndDate.click();
     
         } catch (error) {
@@ -189,10 +189,10 @@ class BasicInfo extends EventsBasePage {
     async fillRequiredFields(eventData) {
         try{
 
-            const titleInput = await this.getInputHandleInsideInputShadowRoot(this.locators.eventTitle);
+            const titleInput = await this.getHandleInsideShadowRoot(this.locators.eventTitle,'input');
             await titleInput.type(eventData.title);
 
-            const descriptionInput = await this.getInputHandleTextAreaShadowRoot(this.locators.eventDescription);
+            const descriptionInput = await this.getHandleInsideShadowRoot(this.locators.eventDescription,'textarea');
             await descriptionInput.type(eventData.description);
 
             await this.selectDate(eventData.startDate, eventData.endDate);
@@ -206,7 +206,7 @@ class BasicInfo extends EventsBasePage {
             await this.native.locator(this.locators.timezone).click()
             await this.native.locator(this.locators.timezoneOption(eventData.timezone)).click()
 
-            const venueInput = await this.getInputHandleInsideInputShadowRoot(this.locators.venueName);
+            const venueInput = await this.getHandleInsideShadowRoot(this.locators.venueName,'input');
             await venueInput.type(eventData.venue);
 
             await this.native.locator(this.locators.firstVenueNameOption).waitFor({ state: 'visible' });
@@ -233,6 +233,104 @@ class BasicInfo extends EventsBasePage {
             logger.logError(`Failed to click the Next Step button: ${error.message}`);
             throw new Error(`Failed to click the Next Step button: ${error.message}`);
         }
+    }
+
+    async checkCommunityLinkCheckbox(communityLink) {
+        try {
+
+            if(communityLink.toLowerCase() === "checked"){
+            const checkboxLocator = await this.getHandleInsideShadowRoot(this.locators.communityLinkCheckbox,'input');
+            logger.logInfo('Checking the community link checkbox');
+
+            // Click the checkbox
+            await checkboxLocator.click();
+
+            logger.logInfo('Community link checkbox checked successfully');
+            }else{
+                logger.logInfo('Community link checkbox is not checked');
+            }
+        } catch (error) {
+            logger.logError(`Error in checking the community link checkbox: ${error.message}`);
+            throw new Error(`Error in checking the community link checkbox: ${error.message}`);
+        }
+    }
+
+    async fillCommunityUrl(communityUrl) {
+        try {
+            const urlFieldLocator = await this.getHandleInsideShadowRoot(this.locators.communityUrlField,'input');
+            logger.logInfo('Filling the community URL field');
+
+            // Fill the URL field
+            await urlFieldLocator.fill(communityUrl);
+
+            logger.logInfo('Community URL field filled successfully');
+        } catch (error) {
+            logger.logError(`Error in filling the community URL field: ${error.message}`);
+            throw new Error(`Error in filling the community URL field: ${error.message}`);
+        }
+    }
+
+    async fillAgendaDetails(agenda) {
+        try {
+            const agendaFieldsetGroupLocator = this.native.locator(this.locators.agendaFieldsetGroup);
+    
+            for (let i = 0; i < agenda.length; i++) {
+                const item = agenda[i];
+    
+                // Click the Add Agenda button if there are multiple items
+                if (i > 0) {
+                    const addAgendaTimeAndDetailsPanelLocator = await this.getHandleInsideShadowRoot(agendaFieldsetGroupLocator, this.locators.addAgendaTimeAndDetailsPanel);
+                    const addAgendaButtonLocator = await this.getHandleInsideShadowRoot(addAgendaTimeAndDetailsPanelLocator, 'img');
+                    logger.logInfo('Clicking the Add Agenda button');
+                    await addAgendaButtonLocator.click();
+                }
+    
+                // Locate the nth agenda fieldset within the shadow root
+            const agendaFieldsetLocator = await agendaFieldsetGroupLocator.evaluateHandle((el, index) => {
+                const shadowRoot = el.shadowRoot;
+                return shadowRoot.querySelectorAll('agenda-fieldset')[index];
+            }, i);
+
+                // Fill the agenda time
+                const agendaTimeLocator = await this.getHandleInsideShadowRoot(agendaFieldsetLocator, this.locators.agendaTime);
+                await agendaTimeLocator.click();
+
+                // Use a more specific locator for the time option
+                const agendaTimeOptionLocator = await this.getHandleInsideShadowRoot(agendaFieldsetLocator, this.locators.agendaTimeOption(item.startTime));
+                if (!agendaTimeOptionLocator) {
+                    throw new Error('Agenda time option not found');
+                }
+                await agendaTimeOptionLocator.click();
+
+                // Fill the agenda details
+                const agendaDetailsLocator = await this.getHandleInsideShadowRoot(agendaFieldsetLocator, this.locators.agendaDetails);
+                const agendaDetailsInputLocator = await this.getHandleInsideShadowRoot(agendaDetailsLocator, 'input');
+                if (!agendaDetailsInputLocator) {
+                    throw new Error('Agenda details field not found');
+                }
+                await agendaDetailsInputLocator.fill(item.description);
+    
+                logger.logInfo(`Agenda item with start time ${item.startTime} and description "${item.description}" filled successfully`);
+            }
+        } catch (error) {
+            logger.logError(`Error in filling the agenda details: ${error.message}`);
+            throw new Error(`Error in filling the agenda details: ${error.message}`);
+        }
+    }
+
+    // Helper function to convert time string to value
+    convertTimeToValue(time) {
+        const [hourMinute, period] = time.split(' ');
+        let [hour, minute] = hourMinute.split(':');
+        if (period === 'PM' && hour !== '12') {
+            hour = String(Number(hour) + 12).padStart(2, '0');
+        } else if (period === 'AM' && hour === '12') {
+            hour = '00';
+        } else {
+            hour = hour.padStart(2, '0');
+        }
+        minute = minute.padStart(2, '0');
+        return `${hour}:${minute}:00`;
     }
 }
 module.exports = { BasicInfo };
