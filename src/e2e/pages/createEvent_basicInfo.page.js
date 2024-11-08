@@ -1,9 +1,13 @@
 const { expect } = require('@playwright/test');
 const { EventsBasePage } = require('./eventsBase.page.js');
 const Logger = require('../common-utils/logger.js');
+const { EventDetailPage } = require('./eventDetails.page.js');
 const logger = new Logger();
+const { convertTimeToValue, getTimeWithoutPeriod, getPeriodFromTime } = require('../common-utils/helper.js');
 
 class BasicInfo extends EventsBasePage {
+    static eventName = null; // Static variable to store eventTitle
+
     constructor() {
         super('/ecc/create/t3');
         this.locators = {
@@ -20,21 +24,28 @@ class BasicInfo extends EventsBasePage {
             iconCalendar: '//*[@class="icon icon-calendar-add"]',
             startTime: '//*[@id="time-picker-start-time"]',
             endTime: '//*[@id="time-picker-end-time"]',
+            startTimePeriod: '//*[@id="ampm-picker-start-time"]',
+            endTimePeriod: '//*[@id="ampm-picker-end-time"]',
             timezone: '//*[@id="time-zone-select-input"]',
-            startTimeOption: (time) => `//sp-picker[@id='time-picker-start-time']//sp-menu-item[text()='${time}']`,
-            endTimeOption: (time) => `//sp-picker[@id='time-picker-end-time']//sp-menu-item[text()='${time}']`,
+            startTimeOption: (time) => `//sp-picker[@id='time-picker-start-time']//sp-menu-item[text()='${getTimeWithoutPeriod(time)}']`,
+            startTimePeriodOption: (time) => `//sp-picker[@id='ampm-picker-start-time']//sp-menu-item[text()='${getPeriodFromTime(time)}']`,
+            endTimeOption: (time) => `//sp-picker[@id='time-picker-end-time']//sp-menu-item[text()='${getTimeWithoutPeriod(time)}']`,
+            endTimePeriodOption: (time) => `//sp-picker[@id='ampm-picker-end-time']//sp-menu-item[text()='${getPeriodFromTime(time)}']`,
             timezoneOption: (timezone) => `//sp-picker[@id='time-zone-select-input']//sp-menu-item[text()='${timezone}']`,
             venueName: '//*[@placeholder="Venue name"]',
             firstVenueNameOption: '.pac-item:first-child',
+            venueInfoWillAppearPostEventCheckbox: 'sp-checkbox[id="checkbox-venue-info-visible"]',
             nextStepButtonEnabled: '//a[contains(@class, "next-button") and not(contains(@class, "disabled"))]',
-            checkbox: (name) => `sp-checkbox[name="${name}"]`,
+            eventTopicsCheckbox: (name) => `sp-checkbox[name="${name}"]`,
             communityLinkCheckbox: 'sp-checkbox#checkbox-community',
             communityUrlField: 'sp-textfield#community-url-details',
             addAgendaTimeAndDetailsPanel: 'repeater-element[text="Add agenda time and details"]',
             agendaFieldsetGroup: 'agenda-fieldset-group',
             agendaFieldset: 'agenda-fieldset',
             agendaTime: 'sp-picker[label="Pick agenda time"]',
-            agendaTimeOption: (time) => `sp-menu-item[value="${this.convertTimeToValue(time)}"]`,
+            agendaTimePeriod: 'sp-picker[label="AM/PM"]',
+            agendaTimeOption: (time) => `sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
+            agendaTimePeriodOption: (time) => `sp-menu-item[value="${getPeriodFromTime(time)}"]`,
             agendaDetails: 'sp-textfield[placeholder="Add Agenda details"]',
             agendaPostEventCheckbox: 'sp-checkbox#checkbox-agenda-info',
             
@@ -73,7 +84,7 @@ class BasicInfo extends EventsBasePage {
 
             for (const topic of eventTopics) {
                 const trimmedTopic = topic.trim();
-                const checkboxLocator = this.native.locator(this.locators.checkbox(trimmedTopic));
+                const checkboxLocator = this.native.locator(this.locators.eventTopicsCheckbox(trimmedTopic));
                 logger.logInfo(`Selecting checkbox for topic: ${trimmedTopic}`);
 
                 // Click the checkbox
@@ -192,6 +203,8 @@ class BasicInfo extends EventsBasePage {
             const titleInput = await this.getHandleInsideShadowRoot(this.locators.eventTitle,'input');
             await titleInput.type(eventData.title);
 
+            BasicInfo.eventName = eventData.title;
+
             const descriptionInput = await this.getHandleInsideShadowRoot(this.locators.eventDescription,'textarea');
             await descriptionInput.type(eventData.description);
 
@@ -199,9 +212,13 @@ class BasicInfo extends EventsBasePage {
 
             await this.native.locator(this.locators.startTime).click()
             await this.native.locator(this.locators.startTimeOption(eventData.startTime)).click()
+            await this.native.locator(this.locators.startTimePeriod).click()
+            await this.native.locator(this.locators.startTimePeriodOption(eventData.startTime)).click()
 
             await this.native.locator(this.locators.endTime).click()
             await this.native.locator(this.locators.endTimeOption(eventData.endTime)).click()
+            await this.native.locator(this.locators.endTimePeriod).click()
+            await this.native.locator(this.locators.endTimePeriodOption(eventData.endTime)).click()
 
             await this.native.locator(this.locators.timezone).click()
             await this.native.locator(this.locators.timezoneOption(eventData.timezone)).click()
@@ -213,6 +230,12 @@ class BasicInfo extends EventsBasePage {
 
             await this.native.locator(this.locators.firstVenueNameOption).click();
 
+            if(eventData.venueInfoWillAppearPostEvent && eventData.venueInfoWillAppearPostEvent.toLowerCase() === "checked"){
+                await this.native.locator(this.locators.venueInfoWillAppearPostEventCheckbox).click();
+                logger.logInfo('Checked checkbox and Venue info will appear post event');
+            }else{
+                logger.logInfo('Checkbox not checked and Venue info will not appear post event');
+            }
         
     } catch (error) {
         console.error(`Error in filling Minimum Required Fields: ${error.message}`);
@@ -302,6 +325,17 @@ class BasicInfo extends EventsBasePage {
                 }
                 await agendaTimeOptionLocator.click();
 
+                // Fill the agenda time period
+                const agendaTimePeriodLocator = await this.getHandleInsideShadowRoot(agendaFieldsetLocator, this.locators.agendaTimePeriod);
+                await agendaTimePeriodLocator.click();
+
+                // Use a more specific locator for the time period option
+                const agendaTimePeriodOptionLocator = await this.getHandleInsideShadowRoot(agendaFieldsetLocator, this.locators.agendaTimePeriodOption(item.startTime));
+                if (!agendaTimePeriodOptionLocator) {
+                    throw new Error('Agenda time period option not found');
+                }
+                await agendaTimePeriodOptionLocator.click();
+
                 // Fill the agenda details
                 const agendaDetailsLocator = await this.getHandleInsideShadowRoot(agendaFieldsetLocator, this.locators.agendaDetails);
                 const agendaDetailsInputLocator = await this.getHandleInsideShadowRoot(agendaDetailsLocator, 'input');
@@ -318,19 +352,20 @@ class BasicInfo extends EventsBasePage {
         }
     }
 
-    // Helper function to convert time string to value
-    convertTimeToValue(time) {
-        const [hourMinute, period] = time.split(' ');
-        let [hour, minute] = hourMinute.split(':');
-        if (period === 'PM' && hour !== '12') {
-            hour = String(Number(hour) + 12).padStart(2, '0');
-        } else if (period === 'AM' && hour === '12') {
-            hour = '00';
-        } else {
-            hour = hour.padStart(2, '0');
+    async validateTextContent(locator, expectedText) {
+        try {
+            // Fetch the text content of the element
+            const elementText = await this.native.locator(locator).innerText();
+            logger.logInfo(`Actual text: ${elementText}`);
+    
+            // Validate the text content of the element
+            expect(elementText).toBe(expectedText);
+            logger.logInfo(`Expected text: ${expectedText}`);
+            logger.logInfo("Element text is correct");
+        } catch (error) {
+            logger.logError(`Error occurred while verifying the text content: ${error.message}`);
+            throw new Error(`Error occurred while verifying the text content: ${error.message}`);
         }
-        minute = minute.padStart(2, '0');
-        return `${hour}:${minute}:00`;
     }
 }
 module.exports = { BasicInfo };

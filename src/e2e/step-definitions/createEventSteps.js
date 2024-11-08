@@ -34,14 +34,16 @@ Given('I am on the ECC dashboard page in signed-out state', async function () {
 
     this.context(EventDetailPage);
     await this.page.isElementVisible(this.page.locators.signInEmailForm, timeout = 45000);
-
+    await new Promise(resolve => setTimeout(resolve, 2000));
     logger.logInfo("Sign-in required, proceeding with sign-in");
     this.context(AdobeIdSigninPage);
     await this.page.signIn(this.credentialsCreateEvent.username, this.credentialsCreateEvent.password);
     logger.logInfo("Sign-in completed");
     
   } catch (signInError) {
-    console.error(`Sign-in handling failed: ${signInError.message}`);
+    console.error(`Sign-in failed: ${signInError.message}`);
+    logger.logError(`Sign-in failed: ${signInError.message}`);
+    throw new Error(`Sign-in failed: ${signInError.message}`);
   }
 });
 
@@ -70,6 +72,7 @@ Then('I should see the All Events label on the page', async function () {
   } catch (error) {
     logger.logError("Error occured while All Events label verification:", error.message);
     console.error("Error occured while All Events label verification:", error.message);
+    throw new Error("Error occured while All Events label verification:", error.message);
   }
 });
 
@@ -86,6 +89,7 @@ Then('I should see the Search box on the page', async function () {
     }
   } catch (error) {
     logger.logError("Error occured while Search box verification:", error.message);
+    throw new Error("Error occured while Search box verification:", error.message);
   }
 });
 
@@ -95,6 +99,7 @@ Then('I should see the table headers on the page', async function () {
     await this.page.verifyTableHeaders(expectedTableHeaders)
   } catch (error) {
     logger.logError("Error occured while table headers verification:", error.message);
+    throw new Error("Error occured while table headers verification:", error.message);
   }
 });
 
@@ -111,6 +116,7 @@ Then('I should see pagination container', async function () {
     }
   } catch (error) {
     logger.logError("Error occured while pagination controls verification:", error.message);
+    throw new Error("Error occured while pagination controls verification:", error.message);
   }
 });
 
@@ -127,6 +133,7 @@ Then('I should see the footer section on the page', async function () {
     }
   } catch (error) {
     logger.logError("Error occured while footer section verification:", error.message);
+    throw new Error("Error occured while footer section verification:", error.message);
   }
 });
 
@@ -144,6 +151,7 @@ Then('I should see the Create new event button on the page', async function () {
 
   } catch (error) {
     logger.logError("Error occured while validating Create new event button:", error.message);
+    throw new Error("Error occured while validating Create new event button:", error.message);
   }
 });
 
@@ -153,6 +161,7 @@ Then('I should be able to click on Create new event button', async function () {
     await this.page.clickCreateNewEventButton();
   } catch (error) {
     logger.logError('Failed to click Create new event button:', error.message);
+    throw new Error('Failed to click Create new event button:', error.message);
   }
 });
 
@@ -162,25 +171,29 @@ Then('I am in the create event flow and Basic info page', async function () {
     this.context(EventDetailPage);
     const isAllEventsVisible = await this.page.isElementVisible(basicInfo.locators.basicInfoLabel, timeout=30000);
     if (!isAllEventsVisible) {
-      logger.logError("Basic info not displayed on page.");
+      logger.logError("Basic info label not displayed on page.");
     }
     else {
-      logger.logInfo("Basic info is  displayed on page")
+      logger.logInfo("Basic info label is  displayed on page")
+      this.context(BasicInfo);
+      await this.page.validateTextContent(basicInfo.locators.basicInfoLabel, "Basic info");
     }
   } catch (error) {
     logger.logError("Error occured while Basic info label verification:", error.message);
+    throw new Error("Error occured while Basic info label verification:", error.message);
   }
 });
 
 Then('I fill out cloud type and series type with {string}', async function(eventDataJson) {
   try {
     const eventData = JSON.parse(eventDataJson);
-    console.log('Filling out cloud type and series type with data:', eventData);
+    console.log('Filling out cloud type and series type with data', eventData);
     this.context(BasicInfo);
     await this.page.selectCloudType(eventData.cloudType);
     await this.page.selectSeriesType(eventData.series);
   } catch (error) {
     logger.logError("Failed to fill out cloud type and series type:", error.message);
+    throw new Error("Failed to fill out cloud type and series type:", error.message);
   }
 });
 
@@ -193,6 +206,7 @@ Then('I fill minimum required fields such as event title, event description, dat
 
   } catch (error) {
     logger.logError("Failed to fill minimum required fields:", error.message);
+    throw new Error("Failed to fill minimum required fields:", error.message);
   }
 });
 
@@ -204,46 +218,50 @@ Then('I click Next step multiple times', async function () {
     const speakersAndHosts = new SpeakersAndHosts()
     this.context(EventDetailPage);
     const isSpeakersAndHostsLabelVisible = await this.page.isElementVisible(speakersAndHosts.locators.speakersAndHostsLabel, timeout=30000);
+    this.context(BasicInfo);
     if (!isSpeakersAndHostsLabelVisible) {
       logger.logError("Speakers And Hosts label not displayed on page.");
     }
     else {
       logger.logInfo("Speakers And Hosts label is displayed on page.")
+      await this.page.validateTextContent(speakersAndHosts.locators.speakersAndHostsLabel, "Speakers and hosts");
     }
-    this.context(BasicInfo);
     await this.page.clickCreateNextStepButton();
 
     const additionalContent = new AdditionalContent()
     this.context(EventDetailPage);
     const isAdditionalContentLabelVisible = await this.page.isElementVisible(additionalContent.locators.additionalContentLabel, timeout=30000);
+    this.context(BasicInfo);
     if (!isAdditionalContentLabelVisible) {
       logger.logError("Additional Content label not displayed on page.");
     }
     else {
       logger.logInfo("Additional Content label is displayed on page.")
+      await this.page.validateTextContent(additionalContent.locators.additionalContentLabel, "Additional Content");
     }
-    this.context(BasicInfo);
     await this.page.clickCreateNextStepButton();
 
     const rsvp = new Rsvp()
     this.context(EventDetailPage);
     const isRsvpLabelVisible = await this.page.isElementVisible(rsvp.locators.rsvpLabel, timeout=30000);
+    this.context(BasicInfo);
     if (!isRsvpLabelVisible) {
       logger.logError("Rsvp label not displayed on page.");
     }
     else {
       logger.logInfo("Rsvp label is displayed on page.")
+      await this.page.validateTextContent(rsvp.locators.rsvpLabel, "RSVP");
     }
-    this.context(BasicInfo);
     await this.page.clickCreateNextStepButton();
 
   } catch (error) {
     logger.logError('Failed to click Next step button multiple times:', error.message);
+    throw new Error('Failed to click Next step button multiple times:', error.message);
   }
 
 });
 
-  Then('I should check that event is created with minimum required elements', async function () {
+  Then('I should check that event is created', async function () {
   try {
     const rsvp = new Rsvp()
     this.context(EventDetailPage);
@@ -265,7 +283,19 @@ Then('I click Next step multiple times', async function () {
     await this.page.verifyNavigationToECCDashboard();
   }catch (error) {
     logger.logError("Error occured while navigating to ECC dashboard:", error.message);
+    throw new Error("Error occured while navigating to ECC dashboard:", error.message);
   }
+  });
+
+  Then('I should be able to search & validate the event on ECC dashboard', async function () {
+    try {
+      this.context(EventsDashboard);
+      await this.page.searchEvent(BasicInfo.eventName);
+      await this.page.verifyEvent(BasicInfo.eventName, Rsvp.eventId);
+    } catch (error) {
+      logger.logError("Error occured while searching for the event:", error.message);
+      throw new Error("Error occured while searching for the event:", error.message);
+    }
   });
 
   Then('I should be able to delete the event', async function () {
@@ -274,6 +304,7 @@ Then('I click Next step multiple times', async function () {
       await this.page.deleteEvent(Rsvp.eventId);
     }catch (error) {
       logger.logError("Error occured while deleting the event:", error.message);
+      throw new Error("Error occured while deleting the event:", error.message);
     }
     });
 
@@ -320,6 +351,195 @@ Then('I click Next step multiple times', async function () {
       await this.page.clickCreateNextStepButton();
 
       } catch (error) {
-        logger.logError("Failed to fill out cloud type, series type and event topics:", error.message);
+        logger.logError("Failed to fill out create event Basic info page with all fields and click Next step:", error.message);
+        throw new Error("Failed to fill out create event Basic info page with all fields and click Next step:", error.message);
       }
+    });
+
+    Then('I fill out create event Speakers & Hosts page with {string} and click Next step', async function(eventDataJson) {
+      try {
+        const eventData = JSON.parse(eventDataJson);
+        const speakersAndHosts = new SpeakersAndHosts()
+        this.context(EventDetailPage);
+        const isSpeakersAndHostsLabelVisible = await this.page.isElementVisible(speakersAndHosts.locators.speakersAndHostsLabel, timeout=30000);
+        this.context(BasicInfo);
+        if (!isSpeakersAndHostsLabelVisible) {
+          logger.logError("Speakers And Hosts label not displayed on page.");
+        }
+        else {
+          logger.logInfo("Speakers And Hosts label is displayed on page.")
+          await this.page.validateTextContent(speakersAndHosts.locators.speakersAndHostsLabel, "Speakers and hosts");
+        }
+
+        // Check if profile is defined and fill it
+        this.context(SpeakersAndHosts);
+        if (eventData.profile) {
+          await this.page.fillSpeakersAndHostsProfile(eventData.profile);
+      } else {
+          logger.logWarning('profile is not defined in eventData');
+      }
+
+      this.context(BasicInfo);
+      await this.page.clickCreateNextStepButton();
+        
+
+      } catch (error) {
+        logger.logError("Failed to fill out create event Speakers & Hosts page with all fields and click Next step:", error.message);
+        throw new Error("Failed to fill out create event Speakers & Hosts page with all fields and click Next step:", error.message);
+      }
+    });
+
+    Then('I fill out create event Additional content page with {string} and click Next step', async function(eventDataJson) {
+      try {
+        const eventData = JSON.parse(eventDataJson);
+        const additionalContent = new AdditionalContent()
+        this.context(EventDetailPage);
+        const isAdditionalContentLabelVisible = await this.page.isElementVisible(additionalContent.locators.additionalContentLabel, timeout=30000);
+        this.context(BasicInfo);
+        if (!isAdditionalContentLabelVisible) {
+          logger.logError("Additional content label not displayed on page.");
+        }
+        else {
+          logger.logInfo("Additional content label is displayed on page.")
+          await this.page.validateTextContent(additionalContent.locators.additionalContentLabel, "Additional Content");
+        }
+
+        // Check if profile is defined and fill it
+        this.context(AdditionalContent);
+        if (eventData.relatedProducts) {
+          await this.page.fillRelatedProducts(eventData.relatedProducts);
+        } else {
+            logger.logWarning('relatedProducts is not defined in eventData');
+        }
+
+        // Check if includePartnersCheckbox is defined and check/uncheck the checkbox
+        if (eventData.includePartnersCheckbox) {
+          await this.page.checkIncludePartnersCheckbox(eventData.includePartnersCheckbox);
+        } else {
+          logger.logWarning('includePartnersCheckbox is not defined in eventData');
+        }
+          
+        // Check if partner name is defined and fill it
+        if (eventData.partnerName) {
+          await this.page.fillPartnerName(eventData.partnerName);
+        } else {
+          logger.logWarning('partnerName is not defined in eventData');
+        }
+
+        // Check if partner URL is defined and fill it
+        if (eventData.partnerUrl) {
+          await this.page.fillPartnerUrl(eventData.partnerUrl);
+          } else {  
+          logger.logWarning('partnerUrl is not defined in eventData');  
+        }
+
+        // Check if partner image is defined and upload it
+        if (eventData.partnerImage) {
+          await this.page.uploadPartnerImage(eventData.partnerImage);
+            } else {
+          logger.logWarning('partnerImage is not defined in eventData');
+        }
+
+        // Click Save Partner Button
+        await this.page.clickSavePartnerButton();
+
+        // Check if hero image is defined and upload it
+        if (eventData.heroImage) {
+          await this.page.uploadHeroImage(eventData.heroImage);
+            } else {
+          logger.logWarning('heroImage is not defined in eventData');
+        }
+
+        // Check if thumbnail image is defined and upload it
+        if (eventData.thumbnailImage) {
+        await this.page.uploadThumbnailImage(eventData.thumbnailImage);
+          } else {
+        logger.logWarning('thumbnailImage is not defined in eventData');
+        }
+
+        // Check if venue image is defined and upload it
+        if (eventData.venueImage) {
+        await this.page.uploadVenueImage(eventData.venueImage);
+          } else {
+        logger.logWarning('venueImage is not defined in eventData');
+        }
+
+        // Check if venueImageCheckbox is defined and check/uncheck the checkbox
+        if (eventData.venueImageCheckbox) {
+        await this.page.checkVenueImageCheckbox(eventData.venueImageCheckbox);
+          } else {
+        logger.logWarning('venueImageCheckbox is not defined in eventData');
+        }
+
+        this.context(BasicInfo);
+        await this.page.clickCreateNextStepButton();
+
+        } catch (error) {
+            logger.logError("Failed to fill out create event Additional content page with all fields and click Next step:", error.message);
+            throw new Error("Failed to fill out create event Additional content page with all fields and click Next step:", error.message);
+        }
+    });
+
+    Then('I fill out create event RSVP page with {string} and click Publish event', async function(eventDataJson) {
+      try {
+        const eventData = JSON.parse(eventDataJson);
+        const rsvpPage = new Rsvp()
+        this.context(EventDetailPage);
+        const isRsvpLabelVisible = await this.page.isElementVisible(rsvpPage.locators.rsvpLabel, timeout=30000);
+        this.context(BasicInfo);
+        if (!isRsvpLabelVisible) {
+          logger.logError("Rsvp label not displayed on page.");
+        }
+        else {
+          logger.logInfo("Rsvp label is displayed on page.")
+          await this.page.validateTextContent(rsvpPage.locators.rsvpLabel, "RSVP");
+        }
+
+        // Check if attendeeLimit is defined and fill it
+        this.context(Rsvp);
+        if (eventData.attendeeLimit) {
+          await this.page.fillAttendeeLimit(eventData.attendeeLimit);
+        } else {
+          logger.logWarning('attendeeLimit is not defined in eventData');
+        }
+
+        // Check if hostEmail is defined and fill it
+        if (eventData.hostEmail) {
+          await this.page.fillHostEmail(eventData.hostEmail);
+        } else {
+          logger.logWarning('hostEmail is not defined in eventData');
+        }
+
+        // Check if rsvpFormDescription is defined and fill it
+        if (eventData.rsvpFormDescription) {
+          await this.page.fillRsvpFormDescription(eventData.rsvpFormDescription);
+        } else {
+          logger.logWarning('rsvpFormDescription is not defined in eventData');
+        }
+
+        // Check if includeOnFormFieldCategories is defined and select it
+        if (eventData.includeOnFormFieldCategories) {
+          await this.page.selectIncludeOnFormFieldCategories(eventData.includeOnFormFieldCategories);
+        } else {
+          logger.logWarning('includeOnFormFieldCategories is not defined in eventData');
+        }
+
+        // Check if makeItRequiredFieldcategories is defined and select it
+        if (eventData.makeItRequiredFieldcategories) {
+          await this.page.selectMakeItRequiredFieldcategories(eventData.makeItRequiredFieldcategories);
+        } else {
+          logger.logWarning('makeItRequiredFieldcategories is not defined in eventData');
+        }
+
+        //Check Terms and Conditions checkbox
+        await this.page.checkTermsAndConditionsCheckbox();
+        
+        // Click Publish Event Button
+        this.context(BasicInfo);
+        await this.page.clickCreateNextStepButton();
+        
+        } catch (error) {
+            logger.logError("Failed to fill out create event Rsvp page with all fields and click Publish event:", error.message);
+            // throw new Error("Failed to fill out create event Rsvp page with all fields and click Publish event:", error.message);
+        }
     });
