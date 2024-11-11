@@ -5,7 +5,7 @@ const logger = new Logger();
 
 class EventsHubPage extends EventsBasePage {
   constructor() {
-    super('/events/hub');
+    super('/events/events-t3-poc.html');
     //this.commonPage = new CommonPage(); 
     this.locators = {
       marquee: `[class*="marquee"]`,

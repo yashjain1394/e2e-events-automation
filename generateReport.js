@@ -85,12 +85,13 @@ async function generateHtmlReport() {
 
     // Take a screenshot of the generated report
     await takeScreenshot(outputDir);
+
     // Delete the original JSON files from the jsonDir
-    combinedJsonFiles.forEach(file => {
-      const originalPath = path.join(jsonDir, file);
-      fs.unlinkSync(originalPath); // Delete the original JSON file
-      console.log(`Deleted original file: ${originalPath}`);
-    });
+    // combinedJsonFiles.forEach(file => {
+    //   const originalPath = path.join(jsonDir, file);
+    //   fs.unlinkSync(originalPath);
+    //   console.log(`Deleted original file: ${originalPath}`);
+    // });
     
   } catch (err) {
     console.error(`Error generating HTML report: ${err.message}`);
