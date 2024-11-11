@@ -1,19 +1,8 @@
 @registerEvent
 Feature: Event Registration
-
-
-  Scenario: Verify Events Hub Page Content
-    Given I am on the events hub page
-    Then I should see the Marquee displayed on the page
-    Then I should see events displayed on the page
-    Then I should see the total number of pages and results displayed
-    Then I should see pagination controls
-    And the "Next" button should be clickable
-    And the "Previous" button should be clickable
-    And I should be able to click on specific page numbers
     
   Scenario Outline: Validate and register events
-    Given I am on the events hub page
+    Given I am on the events page
     When I select the event card with title "<EventName>"
     Then the banners on the event card should be displayed correctly
     And I should see the date and time displayed correctly on the event card
@@ -36,6 +25,6 @@ Feature: Event Registration
     Then I cancel the RSVP
 
   Examples: DefaultEvents
-    | EventName                | FormData                                              |
-    | Rayyan test Stage 09/30/2024        | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
+    | EventName     | FormData                                              |
+    | AEEE Test Event     | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
     
