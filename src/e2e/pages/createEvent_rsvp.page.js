@@ -13,8 +13,8 @@ class Rsvp extends EventsBasePage {
         super('/ecc/create/t3');
         this.locators = {
             rsvpLabel: '//*[@id="rsvp"]',
-            successToast: 'sp-toast:not(.save-success-msg)',
-            actionButton: 'sp-button[slot="action"]',
+            successToast: 'sp-toast:not(.save-success-msg)[variant="positive"]',
+            actionButton: 'sp-button[slot="action"][href^="https://www.stage.adobe.com/ecc/dashboard/t3?newEventId="]',
             attendeeLimit: 'input[id="attendee-count-input"]',
             contactHostCheckbox: 'sp-checkbox[id="registration-contact-host"]',
             hostEmail: 'sp-textfield[id="event-host-email-input"]',
@@ -32,11 +32,11 @@ class Rsvp extends EventsBasePage {
 
             // Print the outer HTML of the toast element
             const outerHTML = await toast.evaluate(el => el.outerHTML);
-            logger.logInfo('Outer HTML of toast:', outerHTML);
+            // logger.logInfo(`Outer HTML of toast: ${outerHTML}`);
 
             // Extract text from the toast element
             const confirmationMessage = await toast.textContent();
-            logger.logInfo('Confirmation message:', confirmationMessage);
+            logger.logInfo(`Confirmation message: ${confirmationMessage}`);
             if (!confirmationMessage.includes("Success! This event has been published.")) {
                 throw new Error("Success message not found.");
             }
@@ -44,7 +44,7 @@ class Rsvp extends EventsBasePage {
             // Extract and verify the action button inside the toast
             const actionButton = toast.locator(this.locators.actionButton);
             const buttonText = await actionButton.textContent();
-            logger.logInfo('Button text:', buttonText);
+            logger.logInfo(`Button text: ${buttonText}`);
             expect(buttonText).toBe('Go to dashboard');
 
             const buttonHref = await actionButton.evaluate(el => el.getAttribute('href'));
@@ -56,7 +56,7 @@ class Rsvp extends EventsBasePage {
 
             logger.logInfo('Event creation success toast verified and action button clicked successfully.');
         } catch (error) {
-            logger.logInfo(`Error verifying event creation success toast: ${error.message}`);
+            logger.logError(`Error verifying event creation success toast: ${error.message}`);
             throw new Error(`Error verifying event creation success toast: ${error.message}`);
         }
     }
