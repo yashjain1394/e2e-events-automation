@@ -311,7 +311,7 @@ Then('I click Next step multiple times', async function () {
   Then('I fill out create event Basic info page with {string} and click Next step', async function(eventDataJson) {
       try {
         const eventData = JSON.parse(eventDataJson);
-        logger.logInfo('Filling out cloud type, series type and event topics with data:', eventData);
+        logger.logInfo('Filling out cloud type, series type and event topics with data');
         this.context(BasicInfo);
         await this.page.selectCloudType(eventData.cloudType);
         await this.page.selectSeriesType(eventData.series);

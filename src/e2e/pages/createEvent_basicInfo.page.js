@@ -14,7 +14,6 @@ class BasicInfo extends EventsBasePage {
             basicInfoLabel: '//*[@id="basic-info"]',
             cloudTypeDropdown: '//*[@id="bu-select-input"]',
             seriesTypeDropdown: '//*[@id="series-select-input"]',
-            eventTopicsCheckbox: '//div[@class="event-topics-component form-component"]/div/sp-checkbox',
             cloudTypeOption: (value) => `//sp-picker[@id='bu-select-input']//sp-menu-item[text()='${value}']`,
             seriesTypeOption: (value) => `//sp-picker[@id='series-select-input']//sp-menu-item[text()='${value}']`,
             eventTitle: '//*[@placeholder="Event title"]',
@@ -36,7 +35,7 @@ class BasicInfo extends EventsBasePage {
             firstVenueNameOption: '.pac-item:first-child',
             venueInfoWillAppearPostEventCheckbox: 'sp-checkbox[id="checkbox-venue-info-visible"]',
             nextStepButtonEnabled: '//a[contains(@class, "next-button") and not(contains(@class, "disabled"))]',
-            eventTopicsCheckbox: (name) => `sp-checkbox[name="${name}"]`,
+            eventTopicsCheckbox: (name) => `//*[@id="form-step-basic-info"]//sp-checkbox[@name="${name}"]`,
             communityLinkCheckbox: 'sp-checkbox#checkbox-community',
             communityUrlField: 'sp-textfield#community-url-details',
             addAgendaTimeAndDetailsPanel: 'repeater-element[text="Add agenda time and details"]',
@@ -199,9 +198,14 @@ class BasicInfo extends EventsBasePage {
    
     async fillRequiredFields(eventData) {
         try{
-
+            if (this.overrideEventName) {
+                logger.logHeading(`Event provided by user: ${this.overrideEventName}`)
+                this.eventName = this.overrideEventName
+              } else {
+                this.eventName = eventData.title
+              }
             const titleInput = await this.getHandleInsideShadowRoot(this.locators.eventTitle,'input');
-            await titleInput.type(eventData.title);
+            await titleInput.type(this.eventName);
 
             BasicInfo.eventName = eventData.title;
 
