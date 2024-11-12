@@ -21,6 +21,7 @@ class EventsDashboard extends EventsBasePage {
             confirmDeleteDialog: 'sp-dialog[role="dialog"]',
             confirmDeleteButton: 'sp-button:has-text("Yes, I want to delete this event")',
             deleteConfirmationToast: 'sp-toast:has-text("Your event has been deleted.")',
+            eventTitleLink: '.event-title-link',
 
         };
     }
@@ -112,11 +113,37 @@ class EventsDashboard extends EventsBasePage {
         }
     }
 
+    async searchEvent(eventTitle) {
+        try {
+            const searchBoxLocator = this.native.locator(this.locators.searchBox);
+            await searchBoxLocator.fill(eventTitle);
+            logger.logInfo(`Filled the search box with event name: ${eventTitle}`);
+        } catch (error) {
+            logger.logError(`Failed to fill the search box: ${error.message}`);
+            throw new Error(`Failed to fill the search box: ${error.message}`);
+        }
+    }
+
+    async verifyEvent(eventTitle, eventId) {
+        try {
+            const eventRowLocator = this.native.locator(this.locators.eventRow(eventId));
+            await expect(eventRowLocator).toBeVisible({ timeout: 5000 });
+    
+            const eventTitleLink = eventRowLocator.locator('.event-title-link');
+            const eventText = await eventTitleLink.innerText();
+            expect(eventText).toContain(eventTitle);
+    
+            logger.logInfo(`Event with title "${eventTitle}" and ID "${eventId}" is present in the table.`);
+        } catch (error) {
+            logger.logError(`Error in verifying event in table: ${error.message}`);
+            throw new Error(`Error in verifying event in table: ${error.message}`);
+        }
+    }
+
     async deleteEvent(eventId) {
         try {
             const eventRowSelector = this.locators.eventRow(eventId);
             const eventRow = this.native.locator(eventRowSelector);
-            logger.logInfo({ eventRowSelector });
 
             // Click the "more options" button within the event row
             const moreOptionsButton = eventRow.locator(this.locators.moreOptionsButton);
@@ -132,7 +159,7 @@ class EventsDashboard extends EventsBasePage {
 
             logger.logInfo('Clicked the delete option successfully.');
 
-             // Wait for the confirmation dialog to appear
+             // Confirmation dialog will appear
              const confirmDeleteDialog = this.native.locator(this.locators.confirmDeleteDialog);
 
              // Click the confirm delete button
