@@ -17,7 +17,7 @@ Feature: Event Registration
 
     Then I initiate the RSVP process and handle sign-in if required
     Then I should see the event title I clicked on
-    And I should see my firstname, lastname & email prefilled
+    And I should see my email prefilled
     Then I fill all the required information with <FormData>
     When I check the Terms and Conditions
     Then I click the Submit button

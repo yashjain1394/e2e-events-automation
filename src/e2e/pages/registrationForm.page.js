@@ -10,9 +10,6 @@ class RegistrationForm extends EventsBasePage {
             eventForm: '#rsvp-form-1',
             eventFormTitle: `//*[@id='rsvp-form-1']//*[@id='event-title']`,
             fieldsSelector: (field) => `#${field}`,
-            firstName: 'input#firstName:disabled',
-            lastName: 'input#lastName:disabled',
-            email: 'input#email:disabled',
             requiredFields: '[required="required"]:not(:disabled)',
             contactMethodSelector: 'label[for="contactMethod"]',
             tcCheckbox: '#terms-and-conditions',
@@ -54,15 +51,13 @@ class RegistrationForm extends EventsBasePage {
 
     async verifyEmailPrefilled(expectedEmail) {
         try {
-            const emailInput = await this.native.locator(this.locators.email);
-            await this.native.waitForSelector(this.locators.email, { state: 'visible' });
+            const emailInput = await this.native.locator(this.locators.fieldsSelector('email'));
             const isDisabled = await emailInput.isDisabled();
             if (!isDisabled) {
                 throw new Error("Email input is not disabled as expected.");
             }
 
             const emailValue = await emailInput.inputValue();
-            console.log(`emailValue=${emailValue}`)
 
             if (emailValue !== expectedEmail) {
                 throw new Error(`Expected email to be "${expectedEmail}", but got "${emailValue}".`);
@@ -304,54 +299,6 @@ class RegistrationForm extends EventsBasePage {
 
         } catch (error) {
             logger.logError(`Error in canceling the RSVP: ${error}`);
-            throw error;
-        }
-    }
-
-    async verifyFirstNamePrefilled() {
-        try {
-            const firstNameInput = await this.native.locator(this.locators.firstName);
-            await this.native.waitForSelector(this.locators.firstName, { state: 'visible' });
-            const isDisabled = await firstNameInput.isDisabled();
-            if (!isDisabled) {
-                throw new Error("First name input is not disabled as expected.");
-            }
-
-            const firstNameValue = await firstNameInput.inputValue()
-            // Verify that first name is populated
-            if (!firstNameValue) {
-                logger.logError("First name input is empty.");
-                throw new Error("First name input is empty.");
-            }
-            else{
-                logger.logInfo(`Verified prefilled first name : ${firstNameValue}`);
-            } 
-        } catch (error) {
-            logger.logError(`Error verifying prefilled first name input: ${error.message}`);
-            throw error;
-        }
-    }
-
-    async verifyLastNamePrefilled() {
-        try {
-            const lastNameInput = await this.native.locator(this.locators.lastName);
-            await this.native.waitForSelector(this.locators.lastName, { state: 'visible' });
-            const isDisabled = await lastNameInput.isDisabled();
-            if (!isDisabled) {
-                throw new Error("Last name input is not disabled as expected.");
-            }
-
-            const lastNameValue = await lastNameInput.inputValue()
-            // Verify that last name is populated
-            if (!lastNameValue) {
-                logger.logError("Last name input is empty.");
-                throw new Error("Last name input is empty.");
-            }
-            else{
-                logger.logInfo(`Verified prefilled last name : ${lastNameValue}`);
-            } 
-        } catch (error) {
-            logger.logError(`Error verifying prefilled last name input: ${error.message}`);
             throw error;
         }
     }

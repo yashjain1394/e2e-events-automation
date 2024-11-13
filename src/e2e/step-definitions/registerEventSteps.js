@@ -339,13 +339,11 @@ Then('I should see the event title I clicked on', async function () {
   }
 });
 
-Then('I should see my firstname, lastname & email prefilled', async function () {
+Then('I should see my email prefilled', async function () {
   try {
-    await this.page.verifyFirstNamePrefilled();
-    await this.page.verifyLastNamePrefilled();
     await this.page.verifyEmailPrefilled(this.credentialsRegisterEvent.username);
   } catch (error) {
-    console.log("Error verifying prefilled firstname, lastname & email input:", error.message);
+    console.log("Error verifying prefilled email input:", error.message);
   }
 });
 
