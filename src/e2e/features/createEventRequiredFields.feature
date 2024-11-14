@@ -1,16 +1,16 @@
-@createEventWithRequiredFields
+@createEventRequiredFields
 Feature: Event Creation
 
   Scenario: Verify ECC dashboard page content
-    Given I am on the ECC dashboard page in signed-out state
-    Then I should see the All Events label on the page
+    Given I am on the ECC dashboard page
+    When I sign-in on the ECC dashboard page
     Then I should see the Search box on the page
     Then I should see the table headers on the page
     Then I should see pagination container
     Then I should see the footer section on the page
 
-  Scenario Outline: Validate and create events with required fields
-    Given I am on the ECC dashboard page in signed-in state
+  Scenario Outline: Create and validate events with required fields
+    Given I am on the ECC dashboard page
     And I should see the Create new event button on the page
     Then I should be able to click on Create new event button
     Then I am in the create event flow and Basic info page

@@ -14,7 +14,7 @@ const { Rsvp } = require("../pages/createEvent_rsvp.page.js");
 const logger = new Logger();
 const expectedTableHeaders = ["EVENT NAME","PUBLISH STATUS","DATE RUN","LAST MODIFIED","VENUE NAME","GEO","RSVP DATA","MANAGE"];
 
-Given('I am on the ECC dashboard page in signed-out state', async function () {
+Given('I am on the ECC dashboard page', async function () {
   try {
     this.page = new EventsDashboard();
     await this.page.open();
@@ -23,7 +23,9 @@ Given('I am on the ECC dashboard page in signed-out state', async function () {
     logger.logError("Failed to open the Events Dashboard page:", error.message);
     throw new Error("Could not navigate to the Events Dashboard page. Please check the URL or connectivity.");
   }
+});
 
+When('I sign-in on the ECC dashboard page', async function () {
   try {
     // await this.page.clickSignIn();
     // logger.logInfo("Sign-in clicked successfully.");
@@ -44,17 +46,6 @@ Given('I am on the ECC dashboard page in signed-out state', async function () {
     console.error(`Sign-in failed: ${signInError.message}`);
     logger.logError(`Sign-in failed: ${signInError.message}`);
     throw new Error(`Sign-in failed: ${signInError.message}`);
-  }
-});
-
-Given('I am on the ECC dashboard page in signed-in state', async function () {
-  try {
-    this.page = new EventsDashboard();
-    await this.page.open();
-    logger.logInfo("Navigated to the Events Dashboard page successfully.")
-  } catch (error) {
-    logger.logError("Failed to open the Events Dashboard page:", error.message);
-    throw new Error("Could not navigate to the Events Dashboard page. Please check the URL or connectivity.");
   }
 });
 
