@@ -13,6 +13,9 @@ const { AdditionalContent } = require("../pages/createEvent_additionalContent.pa
 const { Rsvp } = require("../pages/createEvent_rsvp.page.js");
 const logger = new Logger();
 const expectedTableHeaders = ["EVENT NAME","PUBLISH STATUS","DATE RUN","LAST MODIFIED","VENUE NAME","GEO","RSVP DATA","MANAGE"];
+const eventSavedToastTxt = "Edits saved successfully";
+const eventPublishedToastTxt = "Success! This event has been published.";
+const eventPublishedToastGoToDashboardTxt = "Go to dashboard";
 
 Given('I am on the ECC dashboard page', async function () {
   try {
@@ -20,7 +23,7 @@ Given('I am on the ECC dashboard page', async function () {
     await this.page.open();
     logger.logInfo("Navigated to the Events Dashboard page successfully.")
   } catch (error) {
-    logger.logError("Failed to open the Events Dashboard page:", error.message);
+    console.error("Failed to open the Events Dashboard page:", error.message);
     throw new Error("Could not navigate to the Events Dashboard page. Please check the URL or connectivity.");
   }
 });
@@ -44,7 +47,6 @@ When('I sign-in on the ECC dashboard page', async function () {
     
   } catch (signInError) {
     console.error(`Sign-in failed: ${signInError.message}`);
-    logger.logError(`Sign-in failed: ${signInError.message}`);
     throw new Error(`Sign-in failed: ${signInError.message}`);
   }
 });
@@ -61,7 +63,6 @@ Then('I should see the All Events label on the page', async function () {
       logger.logInfo("All Events is  displayed on Events Dashboard page")
     }
   } catch (error) {
-    logger.logError("Error occured while All Events label verification:", error.message);
     console.error("Error occured while All Events label verification:", error.message);
     throw new Error("Error occured while All Events label verification:", error.message);
   }
@@ -79,7 +80,7 @@ Then('I should see the Search box on the page', async function () {
       logger.logInfo("Search box is  displayed on Events Dashboard page")
     }
   } catch (error) {
-    logger.logError("Error occured while Search box verification:", error.message);
+    console.error("Error occured while Search box verification:", error.message);
     throw new Error("Error occured while Search box verification:", error.message);
   }
 });
@@ -89,7 +90,7 @@ Then('I should see the table headers on the page', async function () {
     this.context(EventsDashboard);
     await this.page.verifyTableHeaders(expectedTableHeaders)
   } catch (error) {
-    logger.logError("Error occured while table headers verification:", error.message);
+    console.error("Error occured while table headers verification:", error.message);
     throw new Error("Error occured while table headers verification:", error.message);
   }
 });
@@ -106,7 +107,7 @@ Then('I should see pagination container', async function () {
       logger.logInfo("Pagination controls is  displayed on Events Dashboard page")
     }
   } catch (error) {
-    logger.logError("Error occured while pagination controls verification:", error.message);
+    console.error("Error occured while pagination controls verification:", error.message);
     throw new Error("Error occured while pagination controls verification:", error.message);
   }
 });
@@ -123,7 +124,7 @@ Then('I should see the footer section on the page', async function () {
       logger.logInfo("Footer section is  displayed on Events Dashboard page")
     }
   } catch (error) {
-    logger.logError("Error occured while footer section verification:", error.message);
+    console.error("Error occured while footer section verification:", error.message);
     throw new Error("Error occured while footer section verification:", error.message);
   }
 });
@@ -141,7 +142,7 @@ Then('I should see the Create new event button on the page', async function () {
     }
 
   } catch (error) {
-    logger.logError("Error occured while validating Create new event button:", error.message);
+    console.error("Error occured while validating Create new event button:", error.message);
     throw new Error("Error occured while validating Create new event button:", error.message);
   }
 });
@@ -151,7 +152,7 @@ Then('I should be able to click on Create new event button', async function () {
     this.context(EventsDashboard);
     await this.page.clickCreateNewEventButton();
   } catch (error) {
-    logger.logError('Failed to click Create new event button:', error.message);
+    console.error('Failed to click Create new event button:', error.message);
     throw new Error('Failed to click Create new event button:', error.message);
   }
 });
@@ -170,7 +171,7 @@ Then('I am in the create event flow and Basic info page', async function () {
       await this.page.validateTextContent(basicInfo.locators.basicInfoLabel, "Basic info");
     }
   } catch (error) {
-    logger.logError("Error occured while Basic info label verification:", error.message);
+    console.error("Error occured while Basic info label verification:", error.message);
     throw new Error("Error occured while Basic info label verification:", error.message);
   }
 });
@@ -183,7 +184,7 @@ Then('I fill out cloud type and series type with {string}', async function(event
     await this.page.selectCloudType(eventData.cloudType);
     await this.page.selectSeriesType(eventData.series);
   } catch (error) {
-    logger.logError("Failed to fill out cloud type and series type:", error.message);
+    console.error("Failed to fill out cloud type and series type:", error.message);
     throw new Error("Failed to fill out cloud type and series type:", error.message);
   }
 });
@@ -196,7 +197,7 @@ Then('I fill minimum required fields such as event title, event description, dat
     await this.page.fillRequiredFields(eventData);
 
   } catch (error) {
-    logger.logError("Failed to fill minimum required fields:", error.message);
+    console.error("Failed to fill minimum required fields:", error.message);
     throw new Error("Failed to fill minimum required fields:", error.message);
   }
 });
@@ -204,7 +205,8 @@ Then('I fill minimum required fields such as event title, event description, dat
 Then('I click Next step multiple times', async function () {
   try {
     
-    await this.page.clickCreateNextStepButton();
+    await this.page.clickNextStepButton();
+    await this.page.verifyToastMessage(eventSavedToastTxt);
 
     const speakersAndHosts = new SpeakersAndHosts()
     this.context(EventDetailPage);
@@ -217,7 +219,8 @@ Then('I click Next step multiple times', async function () {
       logger.logInfo("Speakers And Hosts label is displayed on page.")
       await this.page.validateTextContent(speakersAndHosts.locators.speakersAndHostsLabel, "Speakers and hosts");
     }
-    await this.page.clickCreateNextStepButton();
+    await this.page.clickNextStepButton();
+    await this.page.verifyToastMessage(eventSavedToastTxt);
 
     const additionalContent = new AdditionalContent()
     this.context(EventDetailPage);
@@ -230,7 +233,8 @@ Then('I click Next step multiple times', async function () {
       logger.logInfo("Additional Content label is displayed on page.")
       await this.page.validateTextContent(additionalContent.locators.additionalContentLabel, "Additional Content");
     }
-    await this.page.clickCreateNextStepButton();
+    await this.page.clickNextStepButton();
+    await this.page.verifyToastMessage(eventSavedToastTxt);
 
     const rsvp = new Rsvp()
     this.context(EventDetailPage);
@@ -243,10 +247,11 @@ Then('I click Next step multiple times', async function () {
       logger.logInfo("Rsvp label is displayed on page.")
       await this.page.validateTextContent(rsvp.locators.rsvpLabel, "RSVP");
     }
-    await this.page.clickCreateNextStepButton();
+    await this.page.clickNextStepButton();
+    await this.page.verifyToastMessage(eventSavedToastTxt);
 
   } catch (error) {
-    logger.logError('Failed to click Next step button multiple times:', error.message);
+    console.error('Failed to click Next step button multiple times:', error.message);
     throw new Error('Failed to click Next step button multiple times:', error.message);
   }
 
@@ -256,18 +261,18 @@ Then('I click Next step multiple times', async function () {
   try {
     const rsvp = new Rsvp()
     this.context(EventDetailPage);
-    const isAllEventsVisible = await this.page.isElementVisible(rsvp.locators.successToast, timeout=30000);
+    const isAllEventsVisible = await this.page.isElementVisible(rsvp.locators.eventCreationSuccessToast, timeout=30000);
     if (!isAllEventsVisible) {
       logger.logError("Event creation Success toast is not not displayed on page.");
     }
     else {
       logger.logInfo("Event creation Success toast is displayed on page");
       this.context(Rsvp);
-      await this.page.verifyEventCreationSuccessToast();
+      await this.page.verifyEventCreationSuccessToast(eventPublishedToastTxt, eventPublishedToastGoToDashboardTxt);
     }
 
   } catch (error) {
-    logger.logError("Error occured while validating created event:", error.message);
+    console.error("Error occured while validating created event:", error.message);
   }
 
   try{
@@ -284,7 +289,7 @@ Then('I click Next step multiple times', async function () {
       await this.page.searchEvent(BasicInfo.eventName);
       await this.page.verifyEvent(BasicInfo.eventName, Rsvp.eventId);
     } catch (error) {
-      logger.logError("Error occured while searching for the event:", error.message);
+      console.error("Error occured while searching for the event:", error.message);
       throw new Error("Error occured while searching for the event:", error.message);
     }
   });
@@ -294,7 +299,7 @@ Then('I click Next step multiple times', async function () {
       this.context(EventsDashboard);
       await this.page.deleteEvent(Rsvp.eventId);
     }catch (error) {
-      logger.logError("Error occured while deleting the event:", error.message);
+      console.error("Error occured while deleting the event:", error.message);
       throw new Error("Error occured while deleting the event:", error.message);
     }
     });
@@ -338,11 +343,19 @@ Then('I click Next step multiple times', async function () {
         logger.logWarning('agenda is not defined in eventData');
     }
 
+      // Check if agendaPostEventCheckbox is defined and check/uncheck the checkbox
+      if (eventData.agendaPostEventCheckbox) {
+        await this.page.checkAgendaPostEventCheckbox(eventData.agendaPostEventCheckbox);
+      } else {
+        logger.logWarning('agendaPostEventCheckbox is not defined in eventData');
+      }
+
       await this.page.fillRequiredFields(eventData);
-      await this.page.clickCreateNextStepButton();
+      await this.page.clickNextStepButton();
+      await this.page.verifyToastMessage(eventSavedToastTxt);
 
       } catch (error) {
-        logger.logError("Failed to fill out create event Basic info page with all fields and click Next step:", error.message);
+        console.error("Failed to fill out create event Basic info page with all fields and click Next step:", error.message);
         throw new Error("Failed to fill out create event Basic info page with all fields and click Next step:", error.message);
       }
     });
@@ -371,11 +384,12 @@ Then('I click Next step multiple times', async function () {
       }
 
       this.context(BasicInfo);
-      await this.page.clickCreateNextStepButton();
+      await this.page.clickNextStepButton();
+      await this.page.verifyToastMessage(eventSavedToastTxt);
         
 
       } catch (error) {
-        logger.logError("Failed to fill out create event Speakers & Hosts page with all fields and click Next step:", error.message);
+        console.error("Failed to fill out create event Speakers & Hosts page with all fields and click Next step:", error.message);
         throw new Error("Failed to fill out create event Speakers & Hosts page with all fields and click Next step:", error.message);
       }
     });
@@ -463,11 +477,12 @@ Then('I click Next step multiple times', async function () {
         }
 
         this.context(BasicInfo);
-        await this.page.clickCreateNextStepButton();
+        await this.page.clickNextStepButton();
+        await this.page.verifyToastMessage(eventSavedToastTxt);
 
         } catch (error) {
-            logger.logError("Failed to fill out create event Additional content page with all fields and click Next step:", error.message);
-            throw new Error("Failed to fill out create event Additional content page with all fields and click Next step:", error.message);
+          console.error("Failed to fill out create event Additional content page with all fields and click Next step:", error.message);
+          throw new Error("Failed to fill out create event Additional content page with all fields and click Next step:", error.message);
         }
     });
 
@@ -527,10 +542,11 @@ Then('I click Next step multiple times', async function () {
         
         // Click Publish Event Button
         this.context(BasicInfo);
-        await this.page.clickCreateNextStepButton();
+        await this.page.clickNextStepButton();
+        await this.page.verifyToastMessage(eventSavedToastTxt);
         
         } catch (error) {
-            logger.logError("Failed to fill out create event Rsvp page with all fields and click Publish event:", error.message);
-            // throw new Error("Failed to fill out create event Rsvp page with all fields and click Publish event:", error.message);
+          console.error("Failed to fill out create event Rsvp page with all fields and click Publish event:", error.message);
+          throw new Error("Failed to fill out create event Rsvp page with all fields and click Publish event:", error.message);
         }
     });

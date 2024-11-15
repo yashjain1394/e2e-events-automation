@@ -183,12 +183,7 @@ class EventsDashboard extends EventsBasePage {
         } 
         
     }
-    
-    
-      
-
-
-
+   
 }
 
 module.exports = { EventsDashboard };
