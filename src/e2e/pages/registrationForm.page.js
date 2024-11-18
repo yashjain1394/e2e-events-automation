@@ -21,6 +21,8 @@ class RegistrationForm extends EventsBasePage {
             OKbutton: 'text=OK',
             iamgoingRSVPLink: 'a[href*="rsvp-form-1"]:text("I\'m going")',
             RSVPLink: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
+            eventContainer: '.foreground.container',
+            eventRsvp: `//a[(text()="RSVP now" or text()="I'm going") and @href='#rsvp-form-1']`,
         };
     }
 
@@ -279,26 +281,36 @@ class RegistrationForm extends EventsBasePage {
                     const visibleFirstScreen = dialog.locator('.first-screen:not(.hidden)');
                     const cancelLink = await visibleFirstScreen.locator('text=Cancel RSVP');
                     if (!cancelLink) {
+                        logger.logError("Cancel RSVP link not found in the confirmation dialog.");
                         throw new Error("Cancel RSVP link not found in the confirmation dialog.");
                     }
                     await cancelLink.click();
-                    console.log("Cancel RSVP button clicked")
+                    logger.logInfo("Cancel RSVP button clicked")
 
-                    // await dialog.waitFor({ state: 'hidden', timeout: 5000 });
-                    // console.log("Registration confirmation dialog closed successfully.");
+                    const visibleSecondScreen = dialog.locator('.second-screen:not(.hidden)');
+                    const okButton = await visibleSecondScreen.locator(this.locators.OKbutton);
+                    if (!okButton) {
+                        logger.logError("OK button not found in the cancellation dialog.");
+                        throw new Error("OK button not found in the cancellation dialog.");
+                    }
+                    await okButton.click();
+                    logger.logInfo("Clicked OK button in the registration cancellation dialog.");
 
-                    // const RSVPLink = await this.native.locator(this.locators.RSVPLink);
+                    await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+                    logger.logInfo("Registration cancellation dialog closed successfully.");
 
-                    // if (await RSVPLink.isVisible()) {
-                    //     logger.logInfo("Registration cancellation validated successfully.");
-                    // } else {
-                    //     throw new Error("RSVP link not found after cancellation.");
-                    // }
-                    logger.logInfo("RSVP canceled successfully.");
-                }
+                    const rsvpLink = await this.native.locator(this.locators.RSVPLink);
+
+                    if (await rsvpLink.isVisible()) {
+                        logger.logInfo("Registration cancellation validated successfully.");
+                    } else {
+                        logger.logError("'RSVP now' link not found after registration cancellation.");
+                        throw new Error("'RSVP now' link not found after registration cancellation.");
+                    }
+                    }
                 else {
-                    logger.logError("RSVP confirmation dialog not found")
-                    throw new Error("RSVP confirmation dialog not found");
+                    logger.logError("RSVP cancellation dialog not found")
+                    throw new Error("RSVP cancellation dialog not found");
                 }
             }
 
@@ -353,6 +365,29 @@ class RegistrationForm extends EventsBasePage {
         } catch (error) {
             logger.logError(`Error verifying prefilled last name input: ${error.message}`);
             throw error;
+        }
+    }
+
+    async clickRsvp() {
+        try {
+            await this.native.waitForSelector(this.locators.eventContainer);
+            await this.native.waitForSelector(this.locators.eventRsvp);
+
+            if((await this.native.locator(this.locators.eventRsvp).textContent()).includes("RSVP now")){
+            await this.native.locator(this.locators.eventRsvp).click();
+            logger.logInfo("RSVP button clicked successfully.");
+            } else if((await this.native.locator(this.locators.eventRsvp).textContent()).includes("I'm going")){
+                logger.logWarning("Event already registered.");
+                // Cancel RSVP
+                await this.cancelRSVP();
+                // Click RSVP button again
+                await this.native.locator(this.locators.eventRsvp).click();
+                logger.logInfo("RSVP button clicked again after cancelling RSVP.");
+            }
+
+        } catch (error) {
+            logger.logError(`Failed to click the RSVP button: ${error.message}`);
+            throw new Error(`Failed to click the RSVP button: ${error.message}`);
         }
     }
 

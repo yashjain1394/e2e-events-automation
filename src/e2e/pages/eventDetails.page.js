@@ -1,6 +1,7 @@
 const { expect } = require('@playwright/test');
 const { EventsBasePage } = require('./eventsBase.page.js');
 const Logger = require('../common-utils/logger.js');
+const { RegistrationForm } = require('./registrationForm.page.js');
 const logger = new Logger();
 
 class EventDetailPage extends EventsBasePage {
@@ -16,8 +17,6 @@ class EventDetailPage extends EventsBasePage {
             relatedProductsSection : `.event-product-blades`,
             relatedProductFragment: `[class="fragment"]`,
             partnersSection : `.event-partners-container`,
-            eventContainer: '.foreground.container',
-            eventRsvp: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
             eventForm: '#rsvp-form-1',
             eventFormTitle: `//*[@id='rsvp-form-1']//*[@id='event-title']`,
             eventRsvpFormEmail: '#email',
@@ -258,19 +257,6 @@ class EventDetailPage extends EventsBasePage {
         }
     }
 
-    async clickRsvp() {
-        try {
-            await this.native.waitForSelector(this.locators.eventContainer);
-            await this.native.waitForSelector(this.locators.eventRsvp);
-
-            await this.native.locator(this.locators.eventRsvp).click();
-            console.log("RSVP button clicked successfully.");
-
-        } catch (error) {
-            logger.logError(`Failed to click the RSVP button: ${error.message}`);
-            throw new Error(`Failed to click the RSVP button: ${error.message}`);
-        }
-    }
 
     // async fillRsvpForm() {
     //     await this.native.locator(this.locators.eventFormCompany).fill(testData.companyName);

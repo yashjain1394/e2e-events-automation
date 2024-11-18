@@ -282,9 +282,10 @@ Then(/^I verify the partners section$/, async function () {
 Then('I initiate the RSVP process and handle sign-in if required', async function () {
   try {
 
+    this.context(RegistrationForm);
     await this.page.clickRsvp();
     logger.logInfo("RSVP button clicked");
-
+    this.context(EventDetailPage)
     const checkFormDisplayed = async () => {
       try {
         await this.page.native.waitForSelector(this.page.locators.eventForm, { state: 'visible', timeout: 10000 });
@@ -307,7 +308,7 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
         await this.page.signIn(this.credentialsRegisterEvent.username, this.credentialsRegisterEvent.password);
         logger.logInfo("Sign-in completed");
 
-        this.context(EventDetailPage);
+        this.context(RegistrationForm);
         await this.page.clickRsvp();
         logger.logInfo("RSVP button clicked again after sign-in");
 
