@@ -12,6 +12,13 @@ async function getFilePath(filePathOrUrl) {
             logger.logInfo(`Created download directory at: ${downloadDir}`);
         }
         const downloadPath = path.join(downloadDir, path.basename(filePathOrUrl));
+        
+        // Check if the file already exists
+        if (fs.existsSync(downloadPath)) {
+            logger.logInfo(`File already exists at: ${downloadPath}`);
+            return downloadPath;
+        }
+
         await downloadImage(filePathOrUrl, downloadPath);
         logger.logInfo(`Downloaded image from URL: ${filePathOrUrl} to path: ${downloadPath}`);
         return downloadPath;
@@ -41,21 +48,6 @@ async function downloadImage(url, downloadPath) {
     });
 }
 
-// Helper function to convert time string to value
-function convertTimeToValue(time) {
-    const [hourMinute, period] = time.split(' ');
-    let [hour, minute] = hourMinute.split(':');
-    if (period === 'PM' && hour !== '12') {
-        hour = String(Number(hour) + 12).padStart(2, '0');
-    } else if (period === 'AM' && hour === '12') {
-        hour = '00';
-    } else {
-        hour = hour.padStart(2, '0');
-    }
-    minute = minute.padStart(2, '0');
-    return `${hour}:${minute}:00`;
-}
-
 // Helper function to fetch time without AM/PM
 function getTimeWithoutPeriod(time) {
     const match = time.match(/(\d{1,2}:\d{2})(?:\s*[APMapm]{2})?/);
@@ -68,15 +60,4 @@ function getPeriodFromTime(time) {
     return match ? match[1].trim() : '';
 }
 
-// Helper function to convert product name to value
-function convertProductNameToValue(productName) {
-    logger.logInfo(`Converting product name to value: ${productName}`);
-    return productName.toLowerCase().replace(/\s+/g, '-');
-}
-
-// Helper function to remove spaces from category names and capitalize the first character after each space
-function removeSpaceFromCategoryName(categoryName) {
-    return categoryName.toLowerCase().replace(/\s+(\w)/g, (match, p1) => p1.toUpperCase());
-    }
-
-module.exports = { getFilePath, downloadImage, convertTimeToValue, getTimeWithoutPeriod, getPeriodFromTime, convertProductNameToValue, removeSpaceFromCategoryName };
+module.exports = { getFilePath, downloadImage, getTimeWithoutPeriod, getPeriodFromTime };

@@ -3,7 +3,6 @@ const { EventsBasePage } = require('./eventsBase.page.js');
 const { BasicInfo } = require('./createEvent_basicInfo.page.js');
 const Logger = require('../common-utils/logger.js');
 const logger = new Logger();
-const { convertProductNameToValue } = require('../common-utils/helper.js');
 const { getFilePath } = require('../common-utils/helper.js');
 
 class AdditionalContent extends EventsBasePage {
@@ -11,26 +10,19 @@ class AdditionalContent extends EventsBasePage {
         super('/ecc/create/t3');
         this.locators = {
             additionalContentLabel: '//*[@id="additional-content"]',
-            productSelectorGroup: 'product-selector-group',
-            productSelector: 'product-selector',
-            addProductPromotionRepeaterElement: 'repeater-element[text="Add product promotion"]',
-            addProductPromotionImg: 'img[alt="add-circle"]',
-            productPicker: 'sp-picker[label="Select a product"]',
-            productPickerOption: (product) => `sp-menu-item[value="${convertProductNameToValue(product)}"]`,
-            productCheckbox: 'sp-checkbox',
-            partnerSelectorGroup: 'partner-selector-group',
-            partnerSelector: 'partner-selector',
-            partnerNameCustomSearch: 'custom-search',
-            partnerNameCustomTextField: 'custom-textfield',
-            partnerNameSpTextField: 'sp-textfield[placeholder="Enter partner name"]',
-            partnerUrlSpTextField: 'sp-textfield[placeholder="Enter partner full URL"]',
-            partnerImageDropzone: 'image-dropzone',
-            savePartnerButton: 'sp-button[variant="primary"]',
-            includePartnersCheckbox: 'sp-checkbox[id="partners-visible"]',
-            heroImageDropzone: 'image-dropzone[id="hero-image"]',
-            thumbnailImageDropzone: 'image-dropzone[id="thumbnail-image"]',
-            venueImageDropzone: 'image-dropzone[id="venue-image"]',
-            venueImageCheckbox: 'sp-checkbox[id="checkbox-venue-image-visible]',
+            addProductPromotionImg: 'product-selector-group repeater-element[text="Add product promotion"] img',
+            productPicker: (productSelectorIndex) => `product-selector-group product-selector:nth-of-type(${productSelectorIndex+1}) sp-picker[label="Select a product"]`,
+            productPickerOption: (productSelectorIndex,productName) => `product-selector-group product-selector:nth-of-type(${productSelectorIndex+1}) sp-menu-item[value="${this.convertProductNameToValue(productName)}"]`,
+            productCheckbox: (productSelectorIndex) => `product-selector-group product-selector:nth-of-type(${productSelectorIndex+1}) sp-checkbox`,
+            savePartnerButton: 'partner-selector-group partner-selector sp-button[variant="primary"]',
+            includePartnersCheckbox: 'sp-checkbox[id="partners-visible"] input[type="checkbox"]',
+            partnerName: 'partner-selector-group partner-selector custom-search custom-textfield sp-textfield[placeholder="Enter partner name"] input[placeholder="Enter partner name"]',
+            partnerUrl: 'partner-selector-group partner-selector sp-textfield[placeholder="Enter partner full URL"] input[placeholder="Enter partner full URL"]',
+            partnerImage: 'partner-selector-group partner-selector image-dropzone input.img-file-input',
+            heroImageDropzone: 'image-dropzone[id="hero-image"] input.img-file-input',
+            thumbnailImageDropzone: 'image-dropzone[id="thumbnail-image"] input.img-file-input',
+            venueImageDropzone: 'image-dropzone[id="venue-image"] input.img-file-input',
+            venueImageCheckbox: 'sp-checkbox[id="checkbox-venue-image-visible"] input[type="checkbox"]',
 
         };
     }
@@ -41,48 +33,38 @@ class AdditionalContent extends EventsBasePage {
         const basicInfo = new BasicInfo();
         // Fill the related products
         const relatedProductsArray = relatedProducts.split(',').map(product => product.trim());
-        console.log('Related Products:', relatedProductsArray);
+        // console.log('Related Products:', relatedProductsArray);
         for (let j = 0; j < relatedProductsArray.length; j++) {
             const relatedProductsItem = relatedProductsArray[j];
-            console.log(relatedProductsItem);
+            // console.log(relatedProductsItem);
 
-            const productSelectorGroupLocator = this.native.locator(this.locators.productSelectorGroup)
-            
             // Click the Add Product promotion button if there are multiple items
             if (j > 0) {
-                logger.logInfo('Clicking the Add Product promotion button');
-                const addProductPromotionRepeaterElementLocator = await basicInfo.getHandleInsideShadowRoot(productSelectorGroupLocator, this.locators.addProductPromotionRepeaterElement);
-                const addProductPromotionImgLocator = await basicInfo.getHandleInsideShadowRoot(addProductPromotionRepeaterElementLocator, this.locators.addProductPromotionImg);
+                logger.logInfo(`${relatedProductsItem}: Clicking the Add Product promotion button`);
+                const addProductPromotionImgLocator = this.native.locator(this.locators.addProductPromotionImg);
                 await addProductPromotionImgLocator.click();
-                logger.logInfo('Clicked the Add Product promotion button successfully');
+                logger.logInfo(`${relatedProductsItem}: Clicked the Add Product promotion button successfully`);
             }
-
-            // Locate the nth Product selector within the shadow root
-            
-            const productSelectorLocator = await productSelectorGroupLocator.evaluateHandle((el, index) => {
-                const shadowRoot = el.shadowRoot;
-                return shadowRoot.querySelectorAll('product-selector')[index];
-            }, j);
 
             // Click the product dropdown
-            logger.logInfo('Clicking the product picker');
-            const productPickerLocator = await basicInfo.getHandleInsideShadowRoot(productSelectorLocator, this.locators.productPicker);
+            logger.logInfo(`${relatedProductsItem}: Clicking the product picker`);
+            const productPickerLocator = this.native.locator(this.locators.productPicker(j));
             await productPickerLocator.click();
-            logger.logInfo('Clicked the product picker successfully');
+            logger.logInfo(`${relatedProductsItem}: Clicked the product picker successfully`);
 
             // Use a more specific locator for selecting the product option
-            const productPickerOptionLocator = await basicInfo.getHandleInsideShadowRoot(productSelectorLocator, this.locators.productPickerOption(relatedProductsItem));
+            const productPickerOptionLocator = this.native.locator(this.locators.productPickerOption(j,relatedProductsItem));
             if (!productPickerOptionLocator) {
-                logger.logError('product type option not found');
+                logger.logError(`${relatedProductsItem}: product type option not found`);
             }
             await productPickerOptionLocator.click();
-            logger.logInfo(`Selected the product: ${relatedProductsItem}`);
+            logger.logInfo(`${relatedProductsItem}: Selected the product option successfully`);
             
 
             // Check the checkbox for the product
-            const productCheckboxLocator = await basicInfo.getHandleInsideShadowRoot(productSelectorLocator, this.locators.productCheckbox);
+            const productCheckboxLocator = this.native.locator(this.locators.productCheckbox(j));
             await productCheckboxLocator.click();
-            logger.logInfo('Checked the product checkbox successfully');
+            logger.logInfo(`${relatedProductsItem}: Checked the product checkbox successfully`);
         }
     }catch (error) {
         logger.logError(`Error in filling the related products: ${error.message}`);
@@ -92,12 +74,8 @@ class AdditionalContent extends EventsBasePage {
 
     async checkIncludePartnersCheckbox(includePartnersCheckbox) {
         try {
-            const basicInfo = new BasicInfo();
-            const partnerSelectorGroupLocator = this.native.locator(this.locators.partnerSelectorGroup);
-            const partnerSelectorLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorGroupLocator, this.locators.partnerSelector);
-
-            if(includePartnersCheckbox==='checked'){
-            const includePartnersCheckboxLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorLocator, this.locators.includePartnersCheckbox);
+            if(includePartnersCheckbox.toLowerCase()==='checked'){
+            const includePartnersCheckboxLocator = this.native.locator(this.locators.includePartnersCheckbox);
             await includePartnersCheckboxLocator.click();
             logger.logInfo('Include partners checkbox is checked');
             }
@@ -112,14 +90,7 @@ class AdditionalContent extends EventsBasePage {
 
     async fillPartnerName(partnerName) {
         try {
-            const basicInfo = new BasicInfo();
-            const partnerSelectorGroupLocator = this.native.locator(this.locators.partnerSelectorGroup);
-            const partnerSelectorLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorGroupLocator, this.locators.partnerSelector);
-
-            const partnerNameCustomSearchLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorLocator, this.locators.partnerNameCustomSearch);
-            const partnerNameCustomTextFieldLocator = await basicInfo.getHandleInsideShadowRoot(partnerNameCustomSearchLocator, this.locators.partnerNameCustomTextField);
-            const partnerNameSpTextFieldLocator = await basicInfo.getHandleInsideShadowRoot(partnerNameCustomTextFieldLocator, this.locators.partnerNameSpTextField);
-            const partnerNameInputLocator = await basicInfo.getHandleInsideShadowRoot(partnerNameSpTextFieldLocator, 'input');
+            const partnerNameInputLocator = this.native.locator(this.locators.partnerName);
             await partnerNameInputLocator.fill(partnerName);
             logger.logInfo(`Filled the partner name: ${partnerName}`);
         } catch (error) {
@@ -130,12 +101,7 @@ class AdditionalContent extends EventsBasePage {
 
     async fillPartnerUrl(partnerUrl) {
         try {
-            const basicInfo = new BasicInfo();
-            const partnerSelectorGroupLocator = this.native.locator(this.locators.partnerSelectorGroup);
-            const partnerSelectorLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorGroupLocator, this.locators.partnerSelector);
-
-            const partnerUrlSpTextFieldLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorLocator, this.locators.partnerUrlSpTextField);
-            const partnerUrlInputLocator = await basicInfo.getHandleInsideShadowRoot(partnerUrlSpTextFieldLocator, 'input');
+            const partnerUrlInputLocator = this.native.locator(this.locators.partnerUrl);
             await partnerUrlInputLocator.fill(partnerUrl);
             logger.logInfo(`Filled the partner URL: ${partnerUrl}`);
         } catch (error) {
@@ -146,12 +112,7 @@ class AdditionalContent extends EventsBasePage {
 
     async uploadPartnerImage(partnerImage) {
         try {
-            const basicInfo = new BasicInfo();
-            const partnerSelectorGroupLocator = this.native.locator(this.locators.partnerSelectorGroup);
-            const partnerSelectorLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorGroupLocator, this.locators.partnerSelector);
-
-            const partnerImageDropzoneLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorLocator, this.locators.partnerImageDropzone);
-            const partnerImageInputLocator = await basicInfo.getHandleInsideShadowRoot(partnerImageDropzoneLocator, 'input.img-file-input');
+            const partnerImageInputLocator = this.native.locator(this.locators.partnerImage);
             try{
             const partnerImagePath = await getFilePath(partnerImage);
             await partnerImageInputLocator.setInputFiles(partnerImagePath);
@@ -167,11 +128,7 @@ class AdditionalContent extends EventsBasePage {
 
     async clickSavePartnerButton() {
         try {
-            const basicInfo = new BasicInfo();
-            const partnerSelectorGroupLocator = this.native.locator(this.locators.partnerSelectorGroup);
-            const partnerSelectorLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorGroupLocator, this.locators.partnerSelector);
-
-            const savePartnerButtonLocator = await basicInfo.getHandleInsideShadowRoot(partnerSelectorLocator, this.locators.savePartnerButton);
+            const savePartnerButtonLocator = this.native.locator(this.locators.savePartnerButton);
             const isEnabled = await savePartnerButtonLocator.isEnabled();
             
             if (isEnabled) {
@@ -188,9 +145,7 @@ class AdditionalContent extends EventsBasePage {
 
     async uploadHeroImage(heroImage) {
         try {
-            const basicInfo = new BasicInfo();
-            const heroImageDropzoneLocator = this.native.locator(this.locators.heroImageDropzone);
-            const heroImageInputLocator = await basicInfo.getHandleInsideShadowRoot(heroImageDropzoneLocator, 'input.img-file-input');
+            const heroImageInputLocator = this.native.locator(this.locators.heroImageDropzone);
             try{
             const heroImagePath = await getFilePath(heroImage);
             await heroImageInputLocator.setInputFiles(heroImagePath);
@@ -206,9 +161,7 @@ class AdditionalContent extends EventsBasePage {
 
     async uploadThumbnailImage(thumbnailImage) {
         try {
-            const basicInfo = new BasicInfo();
-            const thumbnailImageDropzoneLocator = this.native.locator(this.locators.thumbnailImageDropzone);
-            const thumbnailImageInputLocator = await basicInfo.getHandleInsideShadowRoot(thumbnailImageDropzoneLocator, 'input.img-file-input');
+            const thumbnailImageInputLocator = this.native.locator(this.locators.thumbnailImageDropzone);
             try{
             const thumbnailImagePath = await getFilePath(thumbnailImage);
             await thumbnailImageInputLocator.setInputFiles(thumbnailImagePath);
@@ -224,9 +177,7 @@ class AdditionalContent extends EventsBasePage {
 
     async uploadVenueImage(venueImage) {
         try {
-            const basicInfo = new BasicInfo();
-            const venueImageDropzoneLocator = this.native.locator(this.locators.venueImageDropzone);
-            const venueImageInputLocator = await basicInfo.getHandleInsideShadowRoot(venueImageDropzoneLocator, 'input.img-file-input');
+            const venueImageInputLocator = this.native.locator(this.locators.venueImageDropzone);
             try{
             const venueImagePath = await getFilePath(venueImage);
             await venueImageInputLocator.setInputFiles(venueImagePath);
@@ -242,7 +193,7 @@ class AdditionalContent extends EventsBasePage {
 
     async checkVenueImageCheckbox(venueImageCheckbox) {
         try {
-            if(venueImageCheckbox==='checked'){
+            if(venueImageCheckbox.toLowerCase()==='checked'){
             const venueImageCheckboxLocator = this.native.locator(this.locators.venueImageCheckbox);
             await venueImageCheckboxLocator.click();
             logger.logInfo('Venue image checkbox is checked');
@@ -256,7 +207,11 @@ class AdditionalContent extends EventsBasePage {
         }
     }
 
-
+    // Helper function to convert product name to value
+    convertProductNameToValue(productName) {
+    logger.logInfo(`Converting product name to value: ${productName}`);
+    return productName.toLowerCase().replace(/\s+/g, '-');
+    }
 
 }
 module.exports = { AdditionalContent };

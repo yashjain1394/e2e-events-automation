@@ -2,8 +2,8 @@
 #Run below command to run the test case @registerEvent
 npx run src/e2e -b webkit -p stage -t "@registerEvent"
 
-#Run below command to run the test case @createEventWithRequiredFields
-npx run src/e2e -b webkit -p stage -t "@createEventWithRequiredFields"
+#Run below command to run the test case @createEventRequiredFields
+npx run src/e2e -b webkit -p stage -t "@createEventRequiredFields"
 
-#Run below command to run the test case @createEventWithAllFields
-npx run src/e2e -b webkit -p stage -t "@createEventWithAllFields"
+#Run below command to run the test case @createEventAllFields
+npx run src/e2e -b webkit -p stage -t "@createEventAllFields"

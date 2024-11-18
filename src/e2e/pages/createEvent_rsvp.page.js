@@ -4,7 +4,6 @@ const { EventDetailPage } = require('./eventDetails.page.js');
 const { BasicInfo } = require('./createEvent_basicInfo.page.js');
 const Logger = require('../common-utils/logger.js');
 const logger = new Logger();
-const {removeSpaceFromCategoryName} = require('../common-utils/helper.js');
 
 class Rsvp extends EventsBasePage {
     static eventId = null; // Static variable to store eventId
@@ -13,31 +12,27 @@ class Rsvp extends EventsBasePage {
         super('/ecc/create/t3');
         this.locators = {
             rsvpLabel: '//*[@id="rsvp"]',
-            successToast: 'sp-toast:not(.save-success-msg)[variant="positive"]',
+            eventCreationSuccessToast: 'sp-toast:not(.save-success-msg)[variant="positive"]',
             actionButton: 'sp-button[slot="action"][href^="https://www.stage.adobe.com/ecc/dashboard/t3?newEventId="]',
             attendeeLimit: 'input[id="attendee-count-input"]',
             contactHostCheckbox: 'sp-checkbox[id="registration-contact-host"]',
-            hostEmail: 'sp-textfield[id="event-host-email-input"]',
-            rsvpFormDescription: 'sp-textfield[id="rsvp-form-detail-description"]',
-            includeOnFormFieldCategories: (category) => `sp-checkbox[name="${removeSpaceFromCategoryName(category)}"].check-appear`,
-            makeItRequiredFieldCategories: (category) => `sp-checkbox[name="${removeSpaceFromCategoryName(category)}"].check-require`,
+            hostEmail: 'sp-textfield[id="event-host-email-input"] input[placeholder="Add host email"]',
+            rsvpFormDescription: 'sp-textfield[id="rsvp-form-detail-description"] input[placeholder="Add brief description"]',
+            includeOnFormFieldCategories: (category) => `sp-checkbox[name="${this.removeSpaceFromCategoryName(category)}"].check-appear`,
+            makeItRequiredFieldCategories: (category) => `sp-checkbox[name="${this.removeSpaceFromCategoryName(category)}"].check-require`,
             termsAndConditionCheckbox: 'input[data-field-id="terms-and-condition-check-1"]',
         };
     }
 
-    async verifyEventCreationSuccessToast() {
+    async verifyEventCreationSuccessToast(eventPublishedToastText, eventPublishedToastGoToDashboardText) {
         try {
-            const toastSelector = this.locators.successToast;
+            const toastSelector = this.locators.eventCreationSuccessToast;
             const toast = this.native.locator(toastSelector);
-
-            // Print the outer HTML of the toast element
-            const outerHTML = await toast.evaluate(el => el.outerHTML);
-            // logger.logInfo(`Outer HTML of toast: ${outerHTML}`);
 
             // Extract text from the toast element
             const confirmationMessage = await toast.textContent();
             logger.logInfo(`Confirmation message: ${confirmationMessage}`);
-            if (!confirmationMessage.includes("Success! This event has been published.")) {
+            if (!confirmationMessage.includes(eventPublishedToastText)) {
                 throw new Error("Success message not found.");
             }
 
@@ -45,7 +40,7 @@ class Rsvp extends EventsBasePage {
             const actionButton = toast.locator(this.locators.actionButton);
             const buttonText = await actionButton.textContent();
             logger.logInfo(`Button text: ${buttonText}`);
-            expect(buttonText).toBe('Go to dashboard');
+            expect(buttonText).toBe(eventPublishedToastGoToDashboardText);
 
             const buttonHref = await actionButton.evaluate(el => el.getAttribute('href'));
             logger.logInfo('Button href:', buttonHref);
@@ -105,11 +100,10 @@ class Rsvp extends EventsBasePage {
 
     async fillHostEmail(hostEmail) {
         try {
-            const basicInfo = new BasicInfo();
             const contactHostCheckboxLocator = this.native.locator(this.locators.contactHostCheckbox);
             await contactHostCheckboxLocator.click();
-            const hostEmailLocator = this.native.locator(this.locators.hostEmail);
-            const hostEmailInputLocator = await basicInfo.getHandleInsideShadowRoot(hostEmailLocator, 'input');
+            logger.logInfo('Checked the contact host checkbox');
+            const hostEmailInputLocator = this.native.locator(this.locators.hostEmail);
             await hostEmailInputLocator.fill(hostEmail);
             logger.logInfo(`Filled host email: ${hostEmail}`);
         } catch (error) {
@@ -120,9 +114,7 @@ class Rsvp extends EventsBasePage {
 
     async fillRsvpFormDescription(description) {
         try {
-            const basicInfo = new BasicInfo();
-            const rsvpFormDescription = this.native.locator(this.locators.rsvpFormDescription);
-            const rsvpFormDescriptionInputLocator = await basicInfo.getHandleInsideShadowRoot(rsvpFormDescription, 'input');
+            const rsvpFormDescriptionInputLocator = this.native.locator(this.locators.rsvpFormDescription);
             await rsvpFormDescriptionInputLocator.fill(description);
             logger.logInfo(`Filled RSVP form description: ${description}`);
         } catch (error) {
@@ -134,7 +126,7 @@ class Rsvp extends EventsBasePage {
     async selectIncludeOnFormFieldCategories(fieldCategories) {
         try {
             const fieldCategoriesArray = fieldCategories.split(',').map(category => category.trim());
-            console.log('Field Categories:', fieldCategoriesArray);
+            // console.log('Include on form Field Categories:', fieldCategoriesArray);
             for (const category of fieldCategoriesArray) {
                 const checkboxLocator = this.native.locator(this.locators.includeOnFormFieldCategories(category));
                 await checkboxLocator.click();
@@ -149,7 +141,7 @@ class Rsvp extends EventsBasePage {
     async selectMakeItRequiredFieldcategories(fieldCategories) {
         try {
             const fieldCategoriesArray = fieldCategories.split(',').map(category => category.trim());
-            console.log('Field Categories:', fieldCategoriesArray);
+            // console.log('Make it required Field Categories:', fieldCategoriesArray);
             for (const category of fieldCategoriesArray) {
                 const checkboxLocator = this.native.locator(this.locators.makeItRequiredFieldCategories(category));
                 await checkboxLocator.click();
@@ -178,5 +170,10 @@ class Rsvp extends EventsBasePage {
             throw new Error(`Could not check the terms and condition checkbox: ${error.message}`);
         }
     }
+
+    // Helper function to remove spaces from category names and capitalize the first character after each space
+    removeSpaceFromCategoryName(categoryName) {
+        return categoryName.toLowerCase().replace(/\s+(\w)/g, (match, p1) => p1.toUpperCase());
+        }
 }
 module.exports = { Rsvp };
