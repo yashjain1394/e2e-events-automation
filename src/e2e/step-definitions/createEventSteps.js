@@ -193,8 +193,15 @@ Then('I fill minimum required fields such as event title, event description, dat
   try {
     const eventData = JSON.parse(eventDataJson);
     console.log('Filling out minimum required fields with data:', eventData);
+    if (this.overrideEventName) {
+      logger.logHeading(`Event provided by user: ${this.overrideEventName}`)
+      this.eventTitle = this.overrideEventName
+    } else {
+      this.eventTitle = eventData.title
+    }
+    console.log('Event Title:', this.eventTitle)
     this.context(BasicInfo);
-    await this.page.fillRequiredFields(eventData);
+    await this.page.fillRequiredFields(this.eventTitle, eventData);
 
   } catch (error) {
     console.error("Failed to fill minimum required fields:", error.message);
@@ -356,8 +363,14 @@ Then('I click Next step multiple times', async function () {
       } else {
         logger.logWarning('agendaPostEventCheckbox is not defined in eventData');
       }
-
-      await this.page.fillRequiredFields(eventData);
+      if (this.overrideEventName) {
+        logger.logHeading(`Event provided by user: ${this.overrideEventName}`)
+        this.eventTitle = this.overrideEventName
+      } else {
+        this.eventTitle = eventData.title
+      }
+      console.log('Event Title:', this.eventTitle)
+      await this.page.fillRequiredFields(this.eventTitle, eventData);
       await this.page.clickNextStepButton();
       await this.page.verifyToastMessage(eventSavedToastTxt);
 

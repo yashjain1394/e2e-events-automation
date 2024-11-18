@@ -169,19 +169,12 @@ class BasicInfo extends EventsBasePage {
         }
     }
    
-    async fillRequiredFields(eventData) {
+    async fillRequiredFields(eventTitleName, eventData) {
         try{
-            if (this.overrideEventName) {
-                logger.logHeading(`Event provided by user: ${this.overrideEventName}`)
-                this.eventName = this.overrideEventName
-              } else {
-                this.eventName = eventData.title
-              }
-            
             const titleInput = this.native.locator(this.locators.eventTitle);
-            await titleInput.type(this.eventName);
+            await titleInput.type(eventTitleName);
 
-            BasicInfo.eventName = eventData.title;
+            BasicInfo.eventName = eventTitleName;
 
             const descriptionInput = this.native.locator(this.locators.eventDescription);
             await descriptionInput.type(eventData.description);
