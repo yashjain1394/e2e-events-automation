@@ -294,10 +294,17 @@ Then('I click Next step multiple times', async function () {
     }
   });
 
-  Then('I should be able to delete the event', async function () {
+  Then('I should be able to delete the event with {string}', async function(eventTitle) {
     try{
+        if (this.overrideEventName) {
+          logger.logHeading(`Event provided by user: ${this.overrideEventName}`)
+          this.eventTitle = this.overrideEventName
+        } else {
+          this.eventTitle = eventTitle
+        }
       this.context(EventsDashboard);
-      await this.page.deleteEvent(Rsvp.eventId);
+      await this.page.searchEvent(this.eventTitle);
+      await this.page.deleteEvent(this.eventTitle);
     }catch (error) {
       console.error("Error occured while deleting the event:", error.message);
       throw new Error("Error occured while deleting the event:", error.message);

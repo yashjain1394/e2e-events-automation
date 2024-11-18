@@ -20,8 +20,15 @@ Feature: Event Creation
     Then I click Next step multiple times
     Then I should check that event is created
     Then I should be able to search & validate the event on ECC dashboard
-    And I should be able to delete the event
 
     Examples: DefaultEvents
     | EventDataWithRequiredFields                                              |
     | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "AEEE Test Event", "description": "AEEE Test Event description", "startDate": "26", "endDate": "28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+
+  Scenario Outline: Delete the event
+    Given I am on the ECC dashboard page
+    Then I should be able to delete the event with "<EventName>"
+
+    Examples: DefaultEventName
+    | EventName |
+    | AEEE Test Event |
