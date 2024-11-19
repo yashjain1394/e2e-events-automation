@@ -281,11 +281,8 @@ Then(/^I verify the partners section$/, async function () {
 
 Then('I initiate the RSVP process and handle sign-in if required', async function () {
   try {
-
-    this.context(RegistrationForm);
     await this.page.clickRsvp();
     logger.logInfo("RSVP button clicked");
-    this.context(EventDetailPage)
     const checkFormDisplayed = async () => {
       try {
         await this.page.native.waitForSelector(this.page.locators.eventForm, { state: 'visible', timeout: 10000 });
@@ -308,25 +305,44 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
         await this.page.signIn(this.credentialsRegisterEvent.username, this.credentialsRegisterEvent.password);
         logger.logInfo("Sign-in completed");
 
-        this.context(RegistrationForm);
-        await this.page.clickRsvp();
-        logger.logInfo("RSVP button clicked again after sign-in");
-
-        formDisplayed = await checkFormDisplayed();
-        if (!formDisplayed) {
-          logger.logError("RSVP form did not appear after sign-in");
-          throw new Error("RSVP form did not appear after sign-in");
-        }
       } catch (signInError) {
         console.error(`Sign-in handling failed: ${signInError.message}`);
         throw new Error("RSVP form did not appear and sign-in failed");
       }
     } else {
-      logger.logInfo("RSVP form displayed successfully");
+      logger.logInfo("RSVP form displayed successfully. No sign-in required.");
     }
   } catch (error) {
     console.error(`Failed to initiate the RSVP process: ${error.message}`);
     throw new Error("Error occured while initiating the RSVP process.");
+  }
+});
+
+Then('I check the RSVP status, de-registering if the event is already registered', async function () {
+  try {
+    this.context(RegistrationForm)
+    await this.page.checkRSVPStatus();
+    logger.logInfo("RSVP button clicked again after sign-in");
+    
+    const checkFormDisplayed = async () => {
+      try {
+        await this.page.native.waitForSelector(this.page.locators.eventForm, { state: 'visible', timeout: 10000 });
+        return true;
+      } catch (error) {
+        console.error(`Error checking form visibility: ${error.message}`);
+        return false;
+      }
+    };
+
+    formDisplayed = await checkFormDisplayed();
+    if (!formDisplayed) {
+      logger.logError("RSVP form did not appear after clicking the RSVP button.");
+      throw new Error("RSVP form did not appear after clicking the RSVP button.");
+    }
+    
+  } catch (error) {
+    console.error("Failed to check RSVP status:", error.message);
+    throw new Error("Failed to check RSVP status: ", error.message);
   }
 });
 

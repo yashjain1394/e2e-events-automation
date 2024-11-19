@@ -1,6 +1,7 @@
 const { expect } = require('@playwright/test');
 const { EventsBasePage } = require('./eventsBase.page.js');
 const Logger = require('../common-utils/logger.js');
+const { timeout } = require('puppeteer');
 const logger = new Logger();
 
 class RegistrationForm extends EventsBasePage {
@@ -21,14 +22,12 @@ class RegistrationForm extends EventsBasePage {
             OKbutton: 'text=OK',
             iamgoingRSVPLink: 'a[href*="rsvp-form-1"]:text("I\'m going")',
             RSVPLink: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
-            eventContainer: '.foreground.container',
-            eventRsvp: `//a[(text()="RSVP now" or text()="I'm going") and @href='#rsvp-form-1']`,
         };
     }
 
-    async isElementVisible(elementLocator) {
+    async isElementVisible(elementLocator, timeout = 10000) {
         try {
-            const element = await this.native.waitForSelector(elementLocator);
+            const element = await this.native.waitForSelector(elementLocator,{timeout});
             const isVisible = await element.isVisible();
             expect(isVisible).toBe(true);
             return true;
@@ -368,27 +367,26 @@ class RegistrationForm extends EventsBasePage {
         }
     }
 
-    async clickRsvp() {
-        try {
-            await this.native.waitForSelector(this.locators.eventContainer);
-            await this.native.waitForSelector(this.locators.eventRsvp);
-
-            if((await this.native.locator(this.locators.eventRsvp).textContent()).includes("RSVP now")){
-            await this.native.locator(this.locators.eventRsvp).click();
+    async checkRSVPStatus(){
+        const isRSVPVisible = await this.isElementVisible(this.locators.RSVPLink, 30000);
+        if(isRSVPVisible){
+            await this.native.locator(this.locators.RSVPLink).click();
             logger.logInfo("RSVP button clicked successfully.");
-            } else if((await this.native.locator(this.locators.eventRsvp).textContent()).includes("I'm going")){
+            } else{
+                const isImGoingVisible = await this.isElementVisible(this.locators.iamgoingRSVPLink, 30000);
+                if(isImGoingVisible){
                 logger.logWarning("Event already registered.");
                 // Cancel RSVP
                 await this.cancelRSVP();
                 // Click RSVP button again
-                await this.native.locator(this.locators.eventRsvp).click();
+                await this.native.locator(this.locators.RSVPLink).click();
                 logger.logInfo("RSVP button clicked again after cancelling RSVP.");
+                }
+                else{
+                    logger.logError("RSVP now and I'm going button not found.");
+                    throw new Error("RSVP now and I'm going button not found.");
+                }
             }
-
-        } catch (error) {
-            logger.logError(`Failed to click the RSVP button: ${error.message}`);
-            throw new Error(`Failed to click the RSVP button: ${error.message}`);
-        }
     }
 
 }
