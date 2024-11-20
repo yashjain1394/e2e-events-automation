@@ -16,7 +16,7 @@ Feature: Event Registration
     And I verify the partners section
 
     Then I initiate the RSVP process and handle sign-in if required
-    Then I check the RSVP status, de-registering if the event is already registered
+    Then I check the RSVP status, cancel if the event is already registered
     Then I should see the event title I clicked on
     And I should see my firstname, lastname & email prefilled
     Then I fill all the required information with <FormData>
@@ -28,4 +28,3 @@ Feature: Event Registration
   Examples: DefaultEvents
     | EventName     | FormData                                              |
     | AEEE Test Event     | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
-    

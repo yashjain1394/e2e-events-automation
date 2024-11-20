@@ -1,7 +1,6 @@
 const { expect } = require('@playwright/test');
 const { EventsBasePage } = require('./eventsBase.page.js');
 const Logger = require('../common-utils/logger.js');
-const { RegistrationForm } = require('./registrationForm.page.js');
 const logger = new Logger();
 
 class EventDetailPage extends EventsBasePage {
@@ -28,7 +27,7 @@ class EventDetailPage extends EventsBasePage {
             eventFormSubmit: `//button[text()='Submit']`,
             signInEmailForm: `#EmailForm`,
             dateTimeLocator: `[class*="display-event-date-time"] strong`,
-            descriptionLocator: `.preserve-format`,
+            descriptionLocator: `.preserve-format`
         };
     }
 

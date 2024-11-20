@@ -22,17 +22,19 @@ class RegistrationForm extends EventsBasePage {
             OKbutton: 'text=OK',
             iamgoingRSVPLink: 'a[href*="rsvp-form-1"]:text("I\'m going")',
             RSVPLink: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
+            visibleFirstScreen: '.first-screen:not(.hidden)',
+            visibleSecondScreen: '.second-screen:not(.hidden)',
         };
     }
 
-    async isElementVisible(elementLocator, timeout = 10000) {
+    async isElementVisible(elementLocator) {
         try {
-            const element = await this.native.waitForSelector(elementLocator,{timeout});
+            const element = await this.native.waitForSelector(elementLocator);
             const isVisible = await element.isVisible();
             expect(isVisible).toBe(true);
             return true;
         } catch (error) {
-            console.error(`Element located by ${elementLocator} was not visible within ${timeout} ms: ${error.message}`);
+            console.error(`Element located by ${elementLocator} was not visible: ${error.message}`);
             return false;
         }
     }
@@ -277,7 +279,7 @@ class RegistrationForm extends EventsBasePage {
 
                 if (isDiloagVisible) {
                     const dialog = this.native.locator(dialogSelector)
-                    const visibleFirstScreen = dialog.locator('.first-screen:not(.hidden)');
+                    const visibleFirstScreen = dialog.locator(this.locators.visibleFirstScreen);
                     const cancelLink = await visibleFirstScreen.locator('text=Cancel RSVP');
                     if (!cancelLink) {
                         logger.logError("Cancel RSVP link not found in the confirmation dialog.");
@@ -286,7 +288,7 @@ class RegistrationForm extends EventsBasePage {
                     await cancelLink.click();
                     logger.logInfo("Cancel RSVP button clicked")
 
-                    const visibleSecondScreen = dialog.locator('.second-screen:not(.hidden)');
+                    const visibleSecondScreen = dialog.locator(this.locators.visibleSecondScreen);
                     const okButton = await visibleSecondScreen.locator(this.locators.OKbutton);
                     if (!okButton) {
                         logger.logError("OK button not found in the cancellation dialog.");
@@ -367,27 +369,15 @@ class RegistrationForm extends EventsBasePage {
         }
     }
 
-    async checkRSVPStatus(){
-        const isRSVPVisible = await this.isElementVisible(this.locators.RSVPLink, 30000);
-        if(isRSVPVisible){
-            await this.native.locator(this.locators.RSVPLink).click();
-            logger.logInfo("RSVP button clicked successfully.");
-            } else{
-                const isImGoingVisible = await this.isElementVisible(this.locators.iamgoingRSVPLink, 30000);
-                if(isImGoingVisible){
-                logger.logWarning("Event already registered.");
-                // Cancel RSVP
-                await this.cancelRSVP();
-                // Click RSVP button again
-                await this.native.locator(this.locators.RSVPLink).click();
-                logger.logInfo("RSVP button clicked again after cancelling RSVP.");
-                }
-                else{
-                    logger.logError("RSVP now and I'm going button not found.");
-                    throw new Error("RSVP now and I'm going button not found.");
-                }
-            }
-    }
+    async checkFormDisplayed(){
+        try {
+          await this.native.waitForSelector(this.locators.eventForm, { state: 'visible', timeout: 10000 });
+          return true;
+        } catch (error) {
+          console.error(`Error checking form visibility: ${error.message}`);
+          return false;
+        }
+      };
 
 }
 module.exports = { RegistrationForm };
