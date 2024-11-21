@@ -1,6 +1,7 @@
 const { expect } = require('@playwright/test');
 const { EventsBasePage } = require('./eventsBase.page.js');
 const Logger = require('../common-utils/logger.js');
+const { timeout } = require('puppeteer');
 const logger = new Logger();
 
 class RegistrationForm extends EventsBasePage {
@@ -21,6 +22,8 @@ class RegistrationForm extends EventsBasePage {
             OKbutton: 'text=OK',
             iamgoingRSVPLink: 'a[href*="rsvp-form-1"]:text("I\'m going")',
             RSVPLink: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
+            visibleFirstScreen: '.first-screen:not(.hidden)',
+            visibleSecondScreen: '.second-screen:not(.hidden)',
         };
     }
 
@@ -31,7 +34,7 @@ class RegistrationForm extends EventsBasePage {
             expect(isVisible).toBe(true);
             return true;
         } catch (error) {
-            console.error(`Element located by ${elementLocator} was not visible within ${timeout} ms: ${error.message}`);
+            console.error(`Element located by ${elementLocator} was not visible: ${error.message}`);
             return false;
         }
     }
@@ -276,29 +279,39 @@ class RegistrationForm extends EventsBasePage {
 
                 if (isDiloagVisible) {
                     const dialog = this.native.locator(dialogSelector)
-                    const visibleFirstScreen = dialog.locator('.first-screen:not(.hidden)');
+                    const visibleFirstScreen = dialog.locator(this.locators.visibleFirstScreen);
                     const cancelLink = await visibleFirstScreen.locator('text=Cancel RSVP');
                     if (!cancelLink) {
+                        logger.logError("Cancel RSVP link not found in the confirmation dialog.");
                         throw new Error("Cancel RSVP link not found in the confirmation dialog.");
                     }
                     await cancelLink.click();
-                    console.log("Cancel RSVP button clicked")
+                    logger.logInfo("Cancel RSVP button clicked")
 
-                    // await dialog.waitFor({ state: 'hidden', timeout: 5000 });
-                    // console.log("Registration confirmation dialog closed successfully.");
+                    const visibleSecondScreen = dialog.locator(this.locators.visibleSecondScreen);
+                    const okButton = await visibleSecondScreen.locator(this.locators.OKbutton);
+                    if (!okButton) {
+                        logger.logError("OK button not found in the cancellation dialog.");
+                        throw new Error("OK button not found in the cancellation dialog.");
+                    }
+                    await okButton.click();
+                    logger.logInfo("Clicked OK button in the registration cancellation dialog.");
 
-                    // const RSVPLink = await this.native.locator(this.locators.RSVPLink);
+                    await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+                    logger.logInfo("Registration cancellation dialog closed successfully.");
 
-                    // if (await RSVPLink.isVisible()) {
-                    //     logger.logInfo("Registration cancellation validated successfully.");
-                    // } else {
-                    //     throw new Error("RSVP link not found after cancellation.");
-                    // }
-                    logger.logInfo("RSVP canceled successfully.");
-                }
+                    const rsvpLink = await this.native.locator(this.locators.RSVPLink);
+
+                    if (await rsvpLink.isVisible()) {
+                        logger.logInfo("Registration cancellation validated successfully.");
+                    } else {
+                        logger.logError("'RSVP now' link not found after registration cancellation.");
+                        throw new Error("'RSVP now' link not found after registration cancellation.");
+                    }
+                    }
                 else {
-                    logger.logError("RSVP confirmation dialog not found")
-                    throw new Error("RSVP confirmation dialog not found");
+                    logger.logError("RSVP cancellation dialog not found")
+                    throw new Error("RSVP cancellation dialog not found");
                 }
             }
 
@@ -355,6 +368,16 @@ class RegistrationForm extends EventsBasePage {
             throw error;
         }
     }
+
+    async checkFormDisplayed(){
+        try {
+          await this.native.waitForSelector(this.locators.eventForm, { state: 'visible', timeout: 10000 });
+          return true;
+        } catch (error) {
+          console.error(`Error checking form visibility: ${error.message}`);
+          return false;
+        }
+      };
 
 }
 module.exports = { RegistrationForm };

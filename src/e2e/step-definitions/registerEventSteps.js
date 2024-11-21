@@ -281,25 +281,22 @@ Then(/^I verify the partners section$/, async function () {
 
 Then('I initiate the RSVP process and handle sign-in if required', async function () {
   try {
-
+    this.context(EventDetailPage);
+    const isRSVPVisible = await this.page.isElementVisible(this.page.locators.eventRsvp);
+    //If RSVP now button is not visible, then check for I'm going button in next step
+    if(!isRSVPVisible){
+      logger.logWarning("RSVP now button not found on the page.");
+      return
+    }
     await this.page.clickRsvp();
-    logger.logInfo("RSVP button clicked");
-
-    const checkFormDisplayed = async () => {
-      try {
-        await this.page.native.waitForSelector(this.page.locators.eventForm, { state: 'visible', timeout: 10000 });
-        return true;
-      } catch (error) {
-        console.error(`Error checking form visibility: ${error.message}`);
-        return false;
-      }
-    };
-
-    let formDisplayed = await checkFormDisplayed();
+    logger.logInfo("RSVP now button clicked");
+    this.context(RegistrationForm);
+    const formDisplayed = await this.page.checkFormDisplayed();
     if (!formDisplayed) {
       console.log("RSVP form not displayed, checking for sign-in");
 
       try {
+        this.context(EventDetailPage)
         await this.page.isElementVisible(this.page.locators.signInEmailForm);
         console.log("Sign-in required, proceeding with sign-in");
 
@@ -307,25 +304,63 @@ Then('I initiate the RSVP process and handle sign-in if required', async functio
         await this.page.signIn(this.credentialsRegisterEvent.username, this.credentialsRegisterEvent.password);
         logger.logInfo("Sign-in completed");
 
-        this.context(EventDetailPage);
-        await this.page.clickRsvp();
-        logger.logInfo("RSVP button clicked again after sign-in");
-
-        formDisplayed = await checkFormDisplayed();
-        if (!formDisplayed) {
-          logger.logError("RSVP form did not appear after sign-in");
-          throw new Error("RSVP form did not appear after sign-in");
-        }
       } catch (signInError) {
         console.error(`Sign-in handling failed: ${signInError.message}`);
         throw new Error("RSVP form did not appear and sign-in failed");
       }
     } else {
-      logger.logInfo("RSVP form displayed successfully");
+      logger.logInfo("RSVP form displayed successfully. No sign-in required.");
     }
   } catch (error) {
     console.error(`Failed to initiate the RSVP process: ${error.message}`);
     throw new Error("Error occured while initiating the RSVP process.");
+  }
+});
+
+Then('I check the RSVP status, cancel if the event is already registered', async function () {
+  try {
+    this.context(RegistrationForm)
+    let formDisplayed = await this.page.checkFormDisplayed();
+    const isRSVPVisible = await this.page.isElementVisible(this.page.locators.RSVPLink);
+    // After immediate sign-in RSVP now button need to be clicked again. In already signed-in state, RSVP form is already displayed and RSVP now need not be clicked again.
+        if(isRSVPVisible){
+            this.context(EventDetailPage);
+            if (!formDisplayed) {
+            await this.page.clickRsvp();
+            logger.logInfo("RSVP now button clicked again after sign-in.");
+            }
+          } else{
+                // Check if I'm going button is visible
+                this.context(RegistrationForm);
+                const isImGoingVisible = await this.page.isElementVisible(this.page.locators.iamgoingRSVPLink);
+                if(isImGoingVisible){
+                logger.logWarning("Event already registered.");
+
+                // Cancel RSVP
+                await this.page.cancelRSVP();
+                logger.logInfo("RSVP cancelled as the event was already registered.");
+
+                // Click RSVP button again
+                this.context(EventDetailPage);
+                await this.page.clickRsvp();
+                logger.logInfo("RSVP now button clicked again after cancelling RSVP.");
+                }
+                else{
+                    logger.logError("RSVP now and I'm going button not found.");
+                    throw new Error("RSVP now and I'm going button not found.");
+                }
+            }
+    // Check if RSVP form is displayed after clicking RSVP button
+    this.context(RegistrationForm)
+    formDisplayed = await this.page.checkFormDisplayed();
+    if (!formDisplayed) {
+      logger.logError("RSVP form did not appear after clicking the RSVP button.");
+      throw new Error("RSVP form did not appear after clicking the RSVP button.");
+    }
+    
+  } catch (error) {
+    console.error("Failed to check RSVP status:", error.message);
+    throw new Error("Failed to check RSVP status: ", error.message);
   }
 });
 
