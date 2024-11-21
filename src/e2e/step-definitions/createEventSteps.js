@@ -311,7 +311,15 @@ Then('I click Next step multiple times', async function () {
         }
       this.context(EventsDashboard);
       await this.page.searchEvent(this.eventTitle);
+      this.context(EventDetailPage);
+      const eventsDashboard = new EventsDashboard();
+      const isEventVisible = await this.page.isElementVisible(eventsDashboard.locators.eventRowByEventName(this.eventTitle));
+      this.context(EventsDashboard);
+      if(isEventVisible){
       await this.page.deleteEvent(this.eventTitle);
+      }else{
+        logger.logError("Event not found on ECC dasboard.");
+      }
     }catch (error) {
       console.error("Error occured while deleting the event:", error.message);
       throw new Error("Error occured while deleting the event:", error.message);
@@ -569,4 +577,14 @@ Then('I click Next step multiple times', async function () {
           console.error("Failed to fill out create event Rsvp page with all fields and click Publish event:", error.message);
           throw new Error("Failed to fill out create event Rsvp page with all fields and click Publish event:", error.message);
         }
+    });
+
+    Then('I should get the error toast message', async function () {
+      try {
+        this.context(Rsvp);
+        await this.page.verifyErrorToast();
+      } catch (error) {
+        console.error("Error occured while searching for the event:", error.message);
+        throw new Error("Error occured while searching for the event:", error.message);
+      }
     });

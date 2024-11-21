@@ -21,6 +21,7 @@ class Rsvp extends EventsBasePage {
             includeOnFormFieldCategories: (category) => `sp-checkbox[name="${this.removeSpaceFromCategoryName(category)}"].check-appear`,
             makeItRequiredFieldCategories: (category) => `sp-checkbox[name="${this.removeSpaceFromCategoryName(category)}"].check-require`,
             termsAndConditionCheckbox: 'input[data-field-id="terms-and-condition-check-1"]',
+            errorToast: 'sp-toast[variant="negative"]',
         };
     }
 
@@ -53,6 +54,25 @@ class Rsvp extends EventsBasePage {
         } catch (error) {
             logger.logError(`Error verifying event creation success toast: ${error.message}`);
             throw new Error(`Error verifying event creation success toast: ${error.message}`);
+        }
+    }
+
+    async verifyErrorToast() {
+        try {
+            const errorToast = this.native.locator(this.locators.errorToast);
+
+            // Extract text from the error toast element
+            const errorMessage = await errorToast.textContent();
+            logger.logWarning(`Error message: ${errorMessage}`);
+            if (!errorMessage) {
+                throw new Error("Error message not found.");
+            }
+
+            logger.logInfo('Error toast verified successfully.');
+           
+        } catch (error) {
+            logger.logError(`Error verifying error toast: ${error.message}`);
+            throw new Error(`Error verifying error toast: ${error.message}`);
         }
     }
 
