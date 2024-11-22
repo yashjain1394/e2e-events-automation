@@ -18,7 +18,7 @@ class RegistrationForm extends EventsBasePage {
             contactMethodSelector: 'label[for="contactMethod"]',
             tcCheckbox: '#terms-and-conditions',
             submitButton: 'button:has-text("Submit")',
-            successDialog: '.form-success-msg',
+            successDialog: '.form-success-msg:not(.hidden)',
             OKbutton: 'text=OK',
             iamgoingRSVPLink: 'a[href*="rsvp-form-1"]:text("I\'m going")',
             RSVPLink: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
