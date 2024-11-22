@@ -1,4 +1,4 @@
-const { Before, After, AfterAll } = require('@cucumber/cucumber');
+const { Before, After, AfterAll, Status } = require('@cucumber/cucumber');
 const registerEventTestData = require("../config/test-data/eventRegistration.json");
 const createEventTestData = require("../config/test-data/eventCreation.json");
 const Logger = require('../common-utils/logger.js'); // Adjust the path to your logger file
@@ -7,7 +7,8 @@ const path = require('path');
 const fs = require('fs');
 const argv = require('minimist')(process.argv.slice(2));
 
-let isScenarioExecuted = false;
+let isScenarioExecuted = false; 
+let loginScenarioFailed = false;
 
 Before(async function (scenario) {
   this.env = process.env.ENV || argv.p;
@@ -65,5 +66,17 @@ AfterAll(async function () {
 
   catch (err) {
     console.error(`Error in AfterAll hook: ${err.message}`);
+  }
+});
+
+After(function (scenario) {
+  if (scenario.pickle.name === 'Verify ECC dashboard page content' && scenario.result.status === Status.FAILED) {
+    loginScenarioFailed = true;
+  }
+});
+
+Before(function (scenario) {
+  if (loginScenarioFailed && scenario.pickle.name !== 'Verify ECC dashboard page content') {
+    return 'skipped';
   }
 });

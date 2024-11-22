@@ -282,10 +282,10 @@ Then(/^I verify the partners section$/, async function () {
 Then('I initiate the RSVP process and handle sign-in if required', async function () {
   try {
     this.context(EventDetailPage);
-    const isRSVPVisible = await this.page.isElementVisible(this.page.locators.eventRsvp);
+    const isRSVPVisible = await this.page.isElementVisible(this.page.locators.eventRsvp, 10000);
     //If RSVP now button is not visible, then check for I'm going button in next step
     if(!isRSVPVisible){
-      logger.logWarning("RSVP now button not found on the page.");
+      logger.logWarning("RSVP now button not found on the page within 10 seconds. Checking for I'm going button.");
       return
     }
     await this.page.clickRsvp();
