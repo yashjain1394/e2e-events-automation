@@ -1,7 +1,7 @@
 @registerEvent
 Feature: Event Registration
     
-  Scenario Outline: Validate and register events
+  Scenario Outline: Validate and register events "<span style="color:black;"><b><EventName></b></span>"
     Given I am on the events page
     When I select the event card with title "<EventName>"
     Then the banners on the event card should be displayed correctly
@@ -27,4 +27,10 @@ Feature: Event Registration
 
   Examples: DefaultEvents
     | EventName     | FormData                                              |
-    | AEEE Test Event     | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
+    # Event with Agenda
+    | Auto Events - With Agenda | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
+    # Event with Partner
+    | Auto Events - With Partner | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
+    # Event with multiple profiles
+    | Auto Events - With Multiple Profiles | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
+    
