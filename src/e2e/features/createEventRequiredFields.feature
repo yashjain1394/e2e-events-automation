@@ -10,7 +10,7 @@ Feature: Event Creation Required Fields
     Then I should see pagination container
     Then I should see the footer section on the page
 
-  Scenario Outline: Create event with required fields and validate
+  Scenario Outline: Create event with required fields and validate "<span style="color:black;"><b><Description></b></span>"
     Given I am on the ECC dashboard page
     And I should see the Create new event button on the page
     Then I should be able to click on Create new event button
@@ -22,17 +22,17 @@ Feature: Event Creation Required Fields
     Then I should be able to search & validate the event on ECC dashboard
 
     Examples: DefaultEvents
-    | EventDataWithRequiredFields                                              |
+    | Description | EventDataWithRequiredFields                                              |
     # Event with required fields
-    | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "AEEE Event - Required Fields", "description": "AEEE Test Event description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+    | Auto Events - Required Fields | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events - Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
     # Event with special characters & numbers
-    | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "AEEE Event - Spl chars !@#$%^&*()_+ & numbers 123.9", "description": "AEEE Test Event description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+    | Auto Events - Spl chars !@#$%^&*()_+ & numbers 123.9 | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events - Spl chars !@#$%^&*()_+ & numbers 123.9", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
     
-  Scenario Outline: Delete the event
+  Scenario Outline: Delete the event "<span style="color:black;"><b><EventName></b></span>"
     Given I am on the ECC dashboard page
     Then I should be able to delete the event with "<EventName>"
 
     Examples: DefaultEventName
     | EventName |
-    | AEEE Event - Required Fields |
-    | AEEE Event - Spl chars !@#$%^&*()_+ & numbers 123.9 |
+    | Auto Events - Required Fields |
+    | Auto Events - Spl chars !@#$%^&*()_+ & numbers 123.9 |
