@@ -257,6 +257,11 @@ class BasicInfo extends EventsBasePage {
                 await this.native.locator(this.locators.nextStepButtonEnabled).click();
                 logger.logWarning('Next Step button clicked successfully after dismissing the failure toast');
                 }
+                else{
+                // Click the Next Step button again
+                await this.native.locator(this.locators.nextStepButtonEnabled).click();
+                logger.logWarning('Sucess & Failure toast does not appear. Therefore, Next Step button clicked again');
+                }
              } 
         }catch (error) {
             logger.logError(`Failed to get the success/failure toast message: ${error.message}`);
