@@ -40,6 +40,8 @@
     "@amwp/platform-ui-automation": "^0.0.6",
     "@amwp/platform-ui-lib-adobe": "^0.0.7",
     "axios": "^1.7.7",
+    "cliui": "^8.0.1",
+    "dotenv": "^16.4.7",
     "puppeteer": "^23.5.0"
   }
 }
