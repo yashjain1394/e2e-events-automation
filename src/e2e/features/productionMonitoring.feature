@@ -3,7 +3,7 @@ Feature: Event Registration
 
   Scenario Outline: Validate and register events "<EventName>"
     Given I go to "<URL>"
-    Then I wait for 5 seconds
+    Then I wait for 2 seconds
     Then I navigate to Event Detail page "<EventName>"
     And I should see the event details on the page
     And I should see the Venue on the event details page

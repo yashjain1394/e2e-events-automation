@@ -56,6 +56,7 @@ class EventDetailPage extends EventsBasePage {
             await this.native.waitForURL(new RegExp(expectedUrlPart));
             const currentUrl = this.native.url();
             expect(currentUrl).toContain(expectedUrlPart);
+            expect(currentUrl).not.toContain('404')
             logger.logInfo(`"View Event" navigated to ${expectedTitle} event details page successfully. URL : "${currentUrl}"`);
         } catch (error) {
             logger.logError(`Failed to verify navigation to event detail page with title "${expectedTitle}":`, error.message);
