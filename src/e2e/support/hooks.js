@@ -33,12 +33,10 @@ let globalSeriesName = null;
 dotenv.config();
 
 BeforeAll(async function() {
-  // 1) Determine environment
-  this.env = process.env.ENV || argv.p || 'stage'; // default to stage (adjust if needed)
+  this.env = process.env.ENV || argv.p || 'stage'; 
   
-  // 2) Prepare to retrieve bearer token
-  const authUrl = 'https://ims-na1-stg1.adobelogin.com/ims/token/v1'; // TODO: fill this with your Auth URL
-  const FormData = require('form-data'); // Only require here if you do not need it globally
+  const authUrl = 'https://ims-na1-stg1.adobelogin.com/ims/token/v1'; 
+  const FormData = require('form-data'); 
 
   const formData = new FormData();
   formData.append('client_id',     process.env.client_id);
@@ -57,7 +55,6 @@ BeforeAll(async function() {
     throw error;
   }
 
-  // 3) Create a "series" and store the returned seriesId
   const BASE_URL = BASE_URL_MAP[this.env] || BASE_URL_MAP.stage; 
   const randomSixDigits = ("000000" + Math.floor(Math.random() * 1000000)).slice(-3); // 6 digits
   const seriesNameRand = `automationSeriesTest${randomSixDigits}`;
@@ -75,7 +72,7 @@ BeforeAll(async function() {
       'x-api-key': X_API_KEY,
       'x-client-identity': X_CLIENT_IDENTITY
     },
-    timeout: 10000 // 10 seconds timeout
+    timeout: 10000 
   });
 
   try {
@@ -104,11 +101,10 @@ BeforeAll(async function() {
  *   3) Conditional checks (e.g., skipping scenarios, etc.)
  ********************************************************************/
 Before(async function (scenario) {
-  // 1) Basic setup
   this.env     = process.env.ENV || argv.p || 'stage';
   this.browser = process.env.BROWSER || argv.b || 'chrome';
   this.seriesName = globalSeriesName
-  // 2) Prepare credentials
+
   this.credentialsRegisterEvent = {
     username: process.env.USERNAME || registerEventTestData.userInfo.username,
     password: process.env.PASSWORD || registerEventTestData.userInfo.password,
@@ -118,15 +114,12 @@ Before(async function (scenario) {
     password: process.env.PASSWORD || createEventTestData.eventCreationUserInfo.password,
   };
 
-  // If the user passed in a specific EVENT name
   this.overrideEventName = process.env.EVENT || null;
 
   const scenarioName = scenario.pickle.name;
   logger.logHeading(`Starting Scenario: ${scenarioName}`);
 
-  // 3) Skip logic if previous scenario caused a "login" failure
   if (loginScenarioFailed && scenarioName !== 'Verify ECC dashboard page content') {
-    // This scenario will be skipped
     return 'skipped';
   }
 
