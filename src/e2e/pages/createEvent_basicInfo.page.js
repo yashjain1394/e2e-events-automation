@@ -81,8 +81,10 @@ class BasicInfo extends EventsBasePage {
 
     async selectSeriesType(seriesType) {
         try{
-        
         await this.native.locator(this.locators.seriesTypeDropdown).click()
+        if(seriesType === "automate"){
+            seriesType == this.seriesName
+        }
         await this.native.locator(this.locators.seriesTypeOption(seriesType)).click()
         
     } catch (error) {
