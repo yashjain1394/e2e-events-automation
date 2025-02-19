@@ -1,5 +1,7 @@
 const { Before, Given, Then, When } = require("@cucumber/cucumber");
 const { EventsHubPage } = require("../pages/eventsHub.page.js");
+const { EventsProdHubPage } = require("../pages/eventsProdHub.page.js");
+
 const { EventDetailPage } = require("../pages/eventDetails.page.js");
 const { RegistrationForm } = require("../pages/registrationForm.page.js");
 const testData = require("../config/test-data/eventRegistration.json");
@@ -7,10 +9,11 @@ const { expect } = require('@playwright/test');
 const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/page-objects/adobeidsingin.page.js');
 const Logger = require('../common-utils/logger.js');
 const logger = new Logger();
+const puppeteer = require('puppeteer');
 
-Given('I am on the events hub page', async function () {
+Given('I am on the prod events hub page', async function () {
   try {
-    this.page = new EventsHubPage();
+    this.page = new EventsProdHubPage();
     await this.page.open();
     logger.logInfo("Navigated to the Events Hub page successfully.")
   } catch (error) {
@@ -432,6 +435,17 @@ Then('I cancel the RSVP', async function () {
   }
 });
 
+Then('I navigate to Event Detail page {string}', async function (eventTitle) {
+  try {
+    this.context(EventDetailPage);
+    const expectedTitle = eventTitle;
+    await this.page.verifyNavigationToEventDetailPage(expectedTitle);
+    await this.page.verifyOnEventDetailPage(expectedTitle);
+  } catch (error) {
+    console.error(`Failed to verify navigation to the event detail page for the event with title "${this.eventTitle}":`, error.message);
+    throw new Error('Navigation to the event detail page did not happen as expected.');
+  }
+});
 
 
 
