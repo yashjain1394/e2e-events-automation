@@ -39,11 +39,11 @@ BeforeAll(async function() {
   const FormData = require('form-data'); 
 
   const formData = new FormData();
-  formData.append('client_id',     process.env.client_id);
-  formData.append('client_secret', process.env.client_secret);
+  formData.append('client_id',     process.env.CLIENT_ID);
+  formData.append('client_secret', process.env.CLIENT_SECRET);
   formData.append('grant_type',    'password');
-  formData.append('password',      process.env.password);
-  formData.append('username',      process.env.username);
+  formData.append('password',      process.env.PASSWORD);
+  formData.append('username',      process.env.USERNAME);
   
   try {
     const authResponse = await axios.post(authUrl, formData, {

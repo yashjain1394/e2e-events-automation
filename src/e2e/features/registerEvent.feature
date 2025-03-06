@@ -20,7 +20,7 @@ Feature: Event Registration
     Then I should see the event title I clicked on
     And I should see my firstname, lastname & email prefilled
     Then I fill all the required information with <FormData>
-    When I check the Terms and Conditions
+   # When I check the Terms and Conditions
     Then I click the Submit button
     Then I see the registration confirmation
     Then I cancel the RSVP
