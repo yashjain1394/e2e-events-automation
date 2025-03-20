@@ -12,7 +12,7 @@ Feature: Event Creation Required Fields
 
   Scenario Outline: Create event with required fields and validate "<span style="color:black;"><b><Description></b></span>"
     Given I am on the ECC dashboard page
-    When I sign-in on the ECC dashboard page
+  #  When I sign-in on the ECC dashboard page
     And I should see the Create new event button on the page
     Then I should be able to click on Create new event button
     Then I am in the create event flow and Basic info page
@@ -25,15 +25,18 @@ Feature: Event Creation Required Fields
     Examples: DefaultEvents
     | Description | EventDataWithRequiredFields                                              |
     # Event with required fields
-    | Auto Events - Required Fields | '{"cloudType": "Creative Cloud", "series": "automate", "title": "Auto Events - Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+    | Auto Events Required Fields | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
     # Event with special characters & numbers
-    | Auto Events - Spl chars !@#$%^&*()_+ & numbers 123.9 | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events - Spl chars !@#$%^&*()_+ & numbers 123.9", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
-    
+    | Auto Events Spl chars !@#$%^&*()_+ & numbers 123.9 | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Spl chars !@#$%^&*()_+ & numbers 123.9", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+    #Event with Different Timezone
+    | Auto Events Timezone | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-01:00 - Europe/Berlin", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+
   Scenario Outline: Delete the event "<span style="color:black;"><b><EventName></b></span>"
     Given I am on the ECC dashboard page
     Then I should be able to delete the event with "<EventName>"
 
     Examples: DefaultEventName
     | EventName |
-    | Auto Events - Required Fields |
-    | Auto Events - Spl chars !@#$%^&*()_+ & numbers 123.9 |
+    | Auto Events Required Fields |
+    | Auto Events Spl chars !@#$%^&*()_+ & numbers 123.9 |
+    | Auto Events Timezone |

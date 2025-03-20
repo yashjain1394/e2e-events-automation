@@ -18,10 +18,14 @@ class Rsvp extends EventsBasePage {
             contactHostCheckbox: 'sp-checkbox[id="registration-contact-host"]',
             hostEmail: 'sp-textfield[id="event-host-email-input"] input[placeholder="Add host email"]',
             rsvpFormDescription: 'sp-textfield[id="rsvp-form-detail-description"] input[placeholder="Add brief description"]',
-            includeOnFormFieldCategories: (category) => `sp-checkbox[name="${this.removeSpaceFromCategoryName(category)}"].check-appear`,
-            makeItRequiredFieldCategories: (category) => `sp-checkbox[name="${this.removeSpaceFromCategoryName(category)}"].check-require`,
+            includeOnFormToggle: (fieldName) => `.field-row:has(.cat-text:text-is("${fieldName}")) td:nth-child(2) .custom-switch`,
+            makeRequiredToggle: (fieldName) => `.field-row:has(.cat-text:text-is("${fieldName}")) td:nth-child(3) .custom-switch`,
             termsAndConditionCheckbox: 'input[data-field-id="terms-and-condition-check-1"]',
             errorToast: 'sp-toast[variant="negative"]',
+            rsvpFieldsTable: '.rsvp-checkboxes .field-config-table',
+            contactHostToggle: '.host-contact-wrapper .switch-wrapper .custom-switch',
+            hostEmailInput: 'sp-textfield[id="event-host-email-input"] input',
+            hostEmailWrapper: '.host-contact-wrapper',
         };
     }
 
@@ -120,12 +124,29 @@ class Rsvp extends EventsBasePage {
 
     async fillHostEmail(hostEmail) {
         try {
-            const contactHostCheckboxLocator = this.native.locator(this.locators.contactHostCheckbox);
-            await contactHostCheckboxLocator.click();
-            logger.logInfo('Checked the contact host checkbox');
-            const hostEmailInputLocator = this.native.locator(this.locators.hostEmail);
-            await hostEmailInputLocator.fill(hostEmail);
+            // Wait for the host contact wrapper to be visible
+            await this.native.locator(this.locators.hostEmailWrapper).waitFor({ state: 'visible' });
+
+            // Click the contact host toggle
+            const toggleLocator = this.native.locator(this.locators.contactHostToggle);
+            await toggleLocator.waitFor({ state: 'visible' });
+            await toggleLocator.click();
+            logger.logInfo('Enabled contact host toggle');
+
+            // Wait for the email input to become enabled
+            const emailInput = this.native.locator(this.locators.hostEmailInput);
+            await emailInput.waitFor({ state: 'visible' });
+            
+            // Fill the email
+            await emailInput.fill(hostEmail);
             logger.logInfo(`Filled host email: ${hostEmail}`);
+
+            // Verify the email was entered correctly
+            const enteredEmail = await emailInput.inputValue();
+            if (enteredEmail !== hostEmail) {
+                throw new Error(`Email verification failed. Expected: ${hostEmail}, Got: ${enteredEmail}`);
+            }
+
         } catch (error) {
             logger.logError(`Failed to fill host email: ${error.message}`);
             throw new Error(`Could not fill host email: ${error.message}`);
@@ -145,31 +166,57 @@ class Rsvp extends EventsBasePage {
 
     async selectIncludeOnFormFieldCategories(fieldCategories) {
         try {
+            // Wait for the RSVP fields table to be visible
+            await this.native.locator(this.locators.rsvpFieldsTable).waitFor({ state: 'visible' });
+
             const fieldCategoriesArray = fieldCategories.split(',').map(category => category.trim());
-            // console.log('Include on form Field Categories:', fieldCategoriesArray);
+            logger.logInfo('Processing Include on Form field categories:', fieldCategoriesArray);
+
             for (const category of fieldCategoriesArray) {
-                const checkboxLocator = this.native.locator(this.locators.includeOnFormFieldCategories(category));
-                await checkboxLocator.click();
-                logger.logInfo(`Selected Include on form field category checkbox for ${category}`);
+                const toggleLocator = this.locators.includeOnFormToggle(category);
+                const toggle = this.native.locator(toggleLocator);
+                
+                // Wait for the toggle to be visible
+                await toggle.waitFor({ state: 'visible' });
+                
+                // Click the toggle label
+                await toggle.click();
+                logger.logInfo(`Toggled Include on Form for category: ${category}`);
             }
         } catch (error) {
-            logger.logError(`Failed to select Include on form field categories checkboxes: ${error.message}`);
-            throw new Error(`Could not select Include on form field categories checkboxes: ${error.message}`);
+            logger.logError(`Failed to select Include on Form field categories: ${error.message}`);
+            throw new Error(`Could not select Include on Form field categories: ${error.message}`);
         }
     }
 
     async selectMakeItRequiredFieldcategories(fieldCategories) {
         try {
+            // Wait for the RSVP fields table to be visible
+            await this.native.locator(this.locators.rsvpFieldsTable).waitFor({ state: 'visible' });
+
             const fieldCategoriesArray = fieldCategories.split(',').map(category => category.trim());
-            // console.log('Make it required Field Categories:', fieldCategoriesArray);
+            logger.logInfo('Processing Make it Required field categories:', fieldCategoriesArray);
+
             for (const category of fieldCategoriesArray) {
-                const checkboxLocator = this.native.locator(this.locators.makeItRequiredFieldCategories(category));
-                await checkboxLocator.click();
-                logger.logInfo(`Selected Make it required field category checkbox for ${category}`);
+                const toggleLocator = this.locators.makeRequiredToggle(category);
+                const toggle = this.native.locator(toggleLocator);
+                
+                // Add explicit wait for the specific toggle
+                await toggle.waitFor({ state: 'visible', timeout: 5000 });
+                
+                // Verify we have a unique match before clicking
+                const count = await toggle.count();
+                if (count !== 1) {
+                    throw new Error(`Expected 1 toggle for ${category}, found ${count}`);
+                }
+                
+                // Click the toggle and verify the action
+                await toggle.click();
+                logger.logInfo(`Toggled Make it Required for category: ${category}`);
             }
         } catch (error) {
-            logger.logError(`Failed to select Make it required field categories checkboxes: ${error.message}`);
-            throw new Error(`Could not select Make it required field categories checkboxes: ${error.message}`);
+            logger.logError(`Failed to select Make it Required field categories: ${error.message}`);
+            throw new Error(`Could not select Make it Required field categories: ${error.message}`);
         }
     }
 
