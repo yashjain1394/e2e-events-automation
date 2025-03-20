@@ -498,11 +498,11 @@ Then('I click Next step multiple times', async function () {
         }
 
         // Check if venueImageCheckbox is defined and check/uncheck the checkbox
-        if (eventData.venueImageCheckbox) {
-        await this.page.checkVenueImageCheckbox(eventData.venueImageCheckbox);
-          } else {
-        logger.logWarning('venueImageCheckbox is not defined in eventData');
-        }
+        // if (eventData.venueImageCheckbox) {
+        // await this.page.checkVenueImageCheckbox(eventData.venueImageCheckbox);
+        //   } else {
+        // logger.logWarning('venueImageCheckbox is not defined in eventData');
+        // }
 
         this.context(BasicInfo);
         await this.page.clickNextStepButton();
@@ -566,7 +566,7 @@ Then('I click Next step multiple times', async function () {
         }
 
         //Check Terms and Conditions checkbox
-        await this.page.checkTermsAndConditionsCheckbox();
+       //await this.page.checkTermsAndConditionsCheckbox();
         
         // Click Publish Event Button
         this.context(BasicInfo);

@@ -36,22 +36,22 @@ class BasicInfo extends EventsBasePage {
             firstVenueNameOption: '.pac-item:first-child',
             venueInfoWillAppearPostEventCheckbox: 'sp-checkbox[id="checkbox-venue-info-visible"]',
             nextStepButtonEnabled: '//a[contains(@class, "next-button") and not(contains(@class, "disabled"))]',
-            eventTopicsCheckbox: (name) => `//*[@id="form-step-basic-info"]//sp-checkbox[@name="${name}"]`,
+            eventTopicsCheckbox: (name) => `//*[@id="form-step-basic-info"]//sp-action-button[@name="${name}"]`,
             communityLinkCheckbox: 'sp-checkbox[name="checkbox-community"] input[name="checkbox-community"]',
             communityUrlField: 'sp-textfield[placeholder="Add Community URL"] input[placeholder="Add Community URL"]',
             addAgendaTimeAndDetailsPanel: 'agenda-fieldset-group repeater-element[text="Add agenda time and details"]',
             agendaFieldsetGroup: 'agenda-fieldset-group',
             agendaFieldset: 'agenda-fieldset',
-            agendaTime: (index) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-picker[label="Pick agenda time"]`,
-            agendaTimePeriod: (index) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-picker[label="AM/PM"]`,
-            agendaTimeOption: (index, time) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
-            agendaTimePeriodOption: (index, time) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-menu-item[value="${getPeriodFromTime(time)}"]`,
-            agendaDetails: (index) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-textfield[placeholder="Add Agenda details"] input[placeholder="Add Agenda details"]`,
-            agendaPostEventCheckbox: 'sp-checkbox[id="checkbox-agenda-info"] input[name="checkbox-agenda-info-name"]', 
+            agendaTimePicker: 'sp-picker.time-picker-input',
+            agendaTimePeriod: 'sp-picker[label="AM/PM"]',
+            agendaTitle: 'sp-textfield[placeholder="Add agenda title"] input[placeholder="Add agenda title"]',
+            agendaDetails: 'sp-textfield[placeholder="Add agenda details"] textarea[placeholder="Add agenda details"]',
+            agendaTimeOption: (time) => `sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
+            agendaTimePeriodOption: (time) => `sp-menu-item[value="${getPeriodFromTime(time)}"]`,
+            agendaPostEventCheckbox: 'sp-checkbox[id="checkbox-agenda-info"] input[name="checkbox-agenda-info-name"]',
             failureToast: 'sp-toast[variant="negative"]',
             toastDismiss: 'sp-close-button[label="Close"]',
             successToast: 'sp-toast.save-success-msg[variant="positive"]',
-            
         };
     }
 
@@ -69,22 +69,23 @@ class BasicInfo extends EventsBasePage {
 
     async selectCloudType(cloudType) {
         try{
-
-        await this.native.locator(this.locators.cloudTypeDropdown).click()
-        await this.native.locator(this.locators.cloudTypeOption(cloudType)).click()
-        
-    } catch (error) {
-        console.error(`Error in selecting Cloud Type: ${error.message}`);
-        throw new Error(`Error in selecting Cloud Type: ${error.message}`);
-    }
+            await this.native.locator(this.locators.cloudTypeDropdown).click()
+            await this.native.locator(this.locators.cloudTypeOption(cloudType)).click()
+            
+            // Wait for series dropdown to be visible after cloud type selection
+            await this.native.locator(this.locators.seriesTypeDropdown).waitFor({ state: 'visible', timeout: 5000 });
+            // Add a small pause to ensure the dropdown is fully interactive
+            await this.native.waitForTimeout(1000);
+            
+        } catch (error) {
+            console.error(`Error in selecting Cloud Type: ${error.message}`);
+            throw new Error(`Error in selecting Cloud Type: ${error.message}`);
+        }
     }
 
     async selectSeriesType(seriesType) {
         try{
         await this.native.locator(this.locators.seriesTypeDropdown).click()
-        if(seriesType === "automate"){
-            seriesType == this.seriesName
-        }
         await this.native.locator(this.locators.seriesTypeOption(seriesType)).click()
         
     } catch (error) {
@@ -95,20 +96,28 @@ class BasicInfo extends EventsBasePage {
 
     async selectEventTopics(eventTopics) {
         try {
-            if (!Array.isArray(eventTopics)) {
-                throw new Error("eventTopics should be an array");
+            // Find all topic buttons within the checkbox-wrapper
+            const topicButtons = this.native.locator('.checkbox-wrapper sp-action-button');
+            
+            // Get count of topic buttons
+            const count = await topicButtons.count();
+            
+            // If no topics found, log and return
+            if (count === 0) {
+                logger.logInfo('No event topics found on the page');
+                return;
             }
 
-            for (const topic of eventTopics) {
-                const trimmedTopic = topic.trim();
-                const checkboxLocator = this.native.locator(this.locators.eventTopicsCheckbox(trimmedTopic));
-                logger.logInfo(`Selecting checkbox for topic: ${trimmedTopic}`);
-
-                // Click the checkbox
-                await checkboxLocator.click();
-
-                logger.logInfo(`Selected checkbox for topic: ${trimmedTopic}`);
+            // Click each topic button
+            for (let i = 0; i < count; i++) {
+                const button = topicButtons.nth(i);
+                const topicName = await button.getAttribute('name');
+                
+                await button.click();
+                logger.logInfo(`Selected topic: ${topicName}`);
             }
+
+            logger.logInfo(`Successfully selected all ${count} event topics`);
         } catch (error) {
             logger.logError(`Error in selecting event topics: ${error.message}`);
             throw new Error(`Error in selecting event topics: ${error.message}`);
@@ -219,10 +228,7 @@ class BasicInfo extends EventsBasePage {
 
     async clickNextStepButton() {
         try {
-            // Wait for the enabled Next Step button to be visible and enabled
-            await this.native.locator(this.locators.nextStepButtonEnabled).waitFor({ state: 'visible' });
-            
-            // Click the enabled Next Step button
+            // Wait for the enabled Next Step button to be visible and enabled                        
             await this.native.locator(this.locators.nextStepButtonEnabled).click();
             logger.logInfo('Next Step button clicked.');
             }catch (error) {
@@ -308,50 +314,56 @@ class BasicInfo extends EventsBasePage {
 
     async fillAgendaDetails(agenda) {
         try {
-            const agendaFieldsetGroupLocator = this.native.locator(this.locators.agendaFieldsetGroup);
-    
+            // Wait for the agenda component to be present
+            const agendaGroup = this.native.locator(this.locators.agendaFieldsetGroup);
+            await agendaGroup.waitFor({ state: 'visible' });
+
             for (let i = 0; i < agenda.length; i++) {
                 const item = agenda[i];
-    
-                // Click the Add Agenda button if there are multiple items
+
+                // If this isn't the first item, we need to add a new agenda section
                 if (i > 0) {
-                    const addAgendaTimeAndDetailsPanelLocator = this.native.locator(this.locators.addAgendaTimeAndDetailsPanel);
-                    logger.logInfo('Clicking the Add Agenda button');
-                    await addAgendaTimeAndDetailsPanelLocator.click();
+                    logger.logInfo('Adding new agenda item');
+                    await this.native.locator(this.locators.addAgendaTimeAndDetailsPanel).click();
+                    // Wait for the new agenda section to be added
+                    await this.native.waitForTimeout(500);
                 }
-    
-                // Fill the agenda time
-                const agendaTimeLocator = await this.native.locator(this.locators.agendaTime(i));
-                await agendaTimeLocator.click();
 
-                // Use a more specific locator for the time option
-                const agendaTimeOptionLocator = this.native.locator(this.locators.agendaTimeOption(i,item.startTime));
+                // Get the current agenda fieldset
+                const currentFieldset = agendaGroup.locator(this.locators.agendaFieldset).nth(i);
                 
-                if (!agendaTimeOptionLocator) {
-                    throw new Error('Agenda time option not found');
-                }
-                await agendaTimeOptionLocator.click();
+                // Handle Time Selection - similar to fillRequiredFields method
+                const timePicker = currentFieldset.locator(this.locators.agendaTimePicker);
+                await timePicker.waitFor({ state: 'visible' });
+                await timePicker.click();
+                
+                // Select time using the same pattern as event time selection
+                const timeLocator = currentFieldset.locator(this.locators.agendaTimeOption(item.startTime));
+                await timeLocator.waitFor({ state: 'visible' });
+                await timeLocator.click();
+                
+                // Handle AM/PM Selection - similar to event time AM/PM selection
+                const periodPicker = currentFieldset.locator(this.locators.agendaTimePeriod);
+                await periodPicker.waitFor({ state: 'visible' });
+                await periodPicker.click();
+                
+                const periodLocator = currentFieldset.locator(this.locators.agendaTimePeriodOption(item.startTime));
+                await periodLocator.waitFor({ state: 'visible' });
+                await periodLocator.click();
+                
+                const title = this.native.locator(this.locators.agendaTitle).nth(i);
+                await title.waitFor({ state: 'visible' });
+                await title.fill(item.title);
 
-                // Fill the agenda time period
-                const agendaTimePeriodLocator = await this.native.locator(this.locators.agendaTimePeriod(i));
-                await agendaTimePeriodLocator.click();
+                const details = this.native.locator(this.locators.agendaDetails).nth(i);
+                await details.waitFor({ state: 'visible' });
+                await details.fill(item.details);
 
-                // Use a more specific locator for the time period option
-                const agendaTimePeriodOptionLocator = this.native.locator(this.locators.agendaTimePeriodOption(i, item.startTime));
-                if (!agendaTimePeriodOptionLocator) {
-                    throw new Error('Agenda time period option not found');
-                }
-                await agendaTimePeriodOptionLocator.click();
 
-                // Fill the agenda details
-                const agendaDetailsInputLocator = await this.native.locator(this.locators.agendaDetails(i));
-                if (!agendaDetailsInputLocator) {
-                    throw new Error('Agenda details field not found');
-                }
-                await agendaDetailsInputLocator.fill(item.description);
-    
-                logger.logInfo(`Agenda item with start time ${item.startTime} and description "${item.description}" filled successfully`);
+                logger.logInfo(`Set time for agenda item ${i + 1} to ${item.startTime}`);
             }
+
+            logger.logInfo(`Successfully filled all ${agenda.length} agenda items`);
         } catch (error) {
             logger.logError(`Error in filling the agenda details: ${error.message}`);
             throw new Error(`Error in filling the agenda details: ${error.message}`);

@@ -7,4 +7,4 @@ stage:
   baseUrl: https://www.stage.adobe.com
 
 dev: 
-  baseUrl: https://dev--events-milo--adobecom.hlx.page
+  baseUrl: https://dev--ecc-milo--adobecom.hlx.live
