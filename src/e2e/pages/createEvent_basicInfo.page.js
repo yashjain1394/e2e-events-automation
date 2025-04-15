@@ -3,7 +3,7 @@ const { EventsBasePage } = require('./eventsBase.page.js');
 const Logger = require('../common-utils/logger.js');
 const { EventDetailPage } = require('./eventDetails.page.js');
 const logger = new Logger();
-const { getTimeWithoutPeriod, getPeriodFromTime } = require('../common-utils/helper.js');
+const { getTimeWithoutPeriod, getPeriodFromTime, getFilePath } = require('../common-utils/helper.js');
 const { timeout } = require('puppeteer');
 
 class BasicInfo extends EventsBasePage {
@@ -52,6 +52,12 @@ class BasicInfo extends EventsBasePage {
             failureToast: 'sp-toast[variant="negative"]',
             toastDismiss: 'sp-close-button[label="Close"]',
             successToast: 'sp-toast.save-success-msg[variant="positive"]',
+            languageDropdown: '//*[@id="language-picker"]',
+            languageOption: (language) => `//sp-menu-item[@value='${language}' and @role='option']`,
+            venueAdditionalInfoImageDropzone: 'image-dropzone[id="add-imagefile-dimensions-1920px-wide."] input.img-file-input',
+            venueAdditionalInfoRTE: 'input[id="venue-additional-info-rte-output"]',
+            venueAdditionalInfoCheckbox: 'sp-checkbox[id="checkbox-venue-additional-info-visible"]',
+            
         };
     }
 
@@ -179,7 +185,14 @@ class BasicInfo extends EventsBasePage {
             throw new Error(`Error opening date picker: ${error.message}`);
         }
     }
-   
+   async selectLanguage(language) {
+    try {
+        await this.native.locator(this.locators.languageDropdown).click();
+        await this.native.locator(this.locators.languageOption(language)).click();
+    } catch (error) {
+        console.error(`Error selecting language: ${error.message}`);
+   }
+    }
     async fillRequiredFields(eventTitleName, eventData) {
         try{
             const titleInput = this.native.locator(this.locators.eventTitle);
@@ -205,6 +218,12 @@ class BasicInfo extends EventsBasePage {
             await this.native.locator(this.locators.timezone).click()
             await this.native.locator(this.locators.timezoneOption(eventData.timezone)).click()
 
+            // Select language if provided
+            if (eventData.language) {
+                await this.selectLanguage(eventData.language);
+                logger.logInfo(`Language ${eventData.language} selected successfully`);
+            }
+
             const venueInput = await this.native.locator(this.locators.venueName);
             await venueInput.click();
             await venueInput.type(eventData.venue);
@@ -228,10 +247,11 @@ class BasicInfo extends EventsBasePage {
 
     async clickNextStepButton() {
         try {
-            // Wait for the enabled Next Step button to be visible and enabled                        
-            await this.native.locator(this.locators.nextStepButtonEnabled).click();
-            logger.logInfo('Next Step button clicked.');
-            }catch (error) {
+            const nextButton = this.native.locator(this.locators.nextStepButtonEnabled);
+            await nextButton.waitFor({ state: 'visible', timeout: 10000 });
+            await nextButton.click();
+            logger.logInfo('Next Step button clicked successfully.');
+        } catch (error) {
             logger.logError(`Failed to click the Next Step button: ${error.message}`);
             throw new Error(`Failed to click the Next Step button: ${error.message}`);
         }
@@ -404,5 +424,33 @@ class BasicInfo extends EventsBasePage {
             throw new Error(`Error occurred while verifying the text content: ${error.message}`);
         }
     }
+
+    async fillAdditionalVenueInfo(additionalInfo) {
+        try {
+            // Upload image
+            const imageInputLocator = this.native.locator(this.locators.venueAdditionalInfoImageDropzone);
+
+            const additionalInfoImagePath = await getFilePath("https://cormenfornh.com/Headshot-small.jpg");
+            await imageInputLocator.setInputFiles(additionalInfoImagePath);
+
+            logger.logInfo('Uploaded venue additional info image');
+
+            //TODO Fill rich text editor
+            // const rteLocator = this.native.locator(this.locators.venueAdditionalInfoRTE);
+            // await rteLocator.click();
+            // await rteLocator.type(additionalInfo);
+            // logger.logInfo('Filled venue additional info text');
+
+            // Check the checkbox to make it visible post-event
+            const checkboxLocator = this.native.locator(this.locators.venueAdditionalInfoCheckbox);
+            await checkboxLocator.click();
+            logger.logInfo('Checked venue additional info visibility checkbox');
+
+        } catch (error) {
+            logger.logError(`Error in filling additional venue information: ${error.message}`);
+            throw new Error(`Error in filling additional venue information: ${error.message}`);
+        }
+    }
+   
 }
 module.exports = { BasicInfo };
