@@ -10,6 +10,7 @@ const { AdobeIdSigninPage } = require('@amwp/platform-ui-lib-adobe/lib/common/pa
 const Logger = require('../common-utils/logger.js');
 const logger = new Logger();
 const puppeteer = require('puppeteer');
+const { EventsBasePage } = require("../pages/eventsBase.page.js");
 
 Given('I am on the prod events hub page', async function () {
   try {
@@ -30,6 +31,17 @@ Given('I am on the events page', async function () {
   } catch (error) {
     logger.logError("Failed to open the Events Hub page:", error.message);
     throw new Error("Could not navigate to the Events Hub page. Please check the URL or connectivity.");
+  }
+});
+
+Given('I go to the event with title {string}', async function (urlPath) {
+  try {
+    this.page = new EventsBasePage(urlPath);
+    await this.page.open();
+    logger.logInfo(`Navigated to event at path: ${urlPath}`);
+  } catch (error) {
+    logger.logError(`Failed to navigate to event at path "${urlPath}":`, error.message);
+    throw new Error(`Could not navigate to the event at path "${urlPath}". Please check the URL or connectivity.`);
   }
 });
 

@@ -11,6 +11,8 @@ class EventsDashboard extends EventsBasePage {
             dashboardHeading: '.dashboard-header-heading',
             searchBox: '//input[@placeholder="Search"]',
             createNewEventButton: '//a[text()="Create new event"]',
+            createInpersonEventButton: 'a.dropdown-item[href="/ecc/create/t3"]',
+            createWebinarEventButton: 'a.dropdown-item[href="/ecc/create/t3/webinar"]',
             footerSection: '.feds-footer-privacySection',
             paginationContainer: '.pagination-container',
             tableHeaders: '//th/span',
@@ -23,7 +25,10 @@ class EventsDashboard extends EventsBasePage {
             confirmDeleteButton: 'sp-button:has-text("Yes, I want to delete this event")',
             deleteConfirmationToast: 'sp-toast:has-text("Your event has been deleted.")',
             eventTitleLink: '.event-title-link',
-
+            secondaryLinkCheckbox: '#checkbox-secondary-url',
+            secondaryLinkLabel: '#secondary-cta-label',
+            secondaryLinkUrl: '#secondary-cta-url',
+            urlErrorMessage: '#url-error-message'
         };
     }
 
@@ -90,21 +95,32 @@ class EventsDashboard extends EventsBasePage {
         }
     }
     
-    async clickCreateNewEventButton() {
+    async clickCreateNewEventButton(eventType) {
         try {
             await this.native.locator(this.locators.createNewEventButton).click();
             logger.logInfo('Create New Event button clicked successfully.');
+
+            // Wait for the dropdown to be visible and click the appropriate button
+            if (eventType === 'In-Person') {
+                await this.native.locator(this.locators.createInpersonEventButton).click();
+                logger.logInfo('Clicked on Create In-Person Event button');
+            } else if (eventType === 'Webinar') {
+                await this.native.locator(this.locators.createWebinarEventButton).click();
+                logger.logInfo('Clicked on Create Webinar Event button');
+            } else {
+                throw new Error(`Invalid event type: ${eventType}. Must be either 'In-Person' or 'Webinar'`);
+            }
         } catch (error) {
             logger.logError(`Failed to click the Create New Event button: ${error.message}`);
             throw new Error(`Failed to click the Create New Event button: ${error.message}`);
         }
     
         try {
-            const expectedUrlPart = `/ecc/create/t3`;
+            const expectedUrlPart = eventType === 'Webinar' ? '/ecc/create/t3/webinar' : '/ecc/create/t3';
             const currentUrl = await this.native.url();
             
             if (currentUrl.includes(expectedUrlPart)) {
-                logger.logInfo(`"ECC dashboard" navigated to create events page successfully. URL: "${currentUrl}"`);
+                logger.logInfo(`"ECC dashboard" navigated to create ${eventType.toLowerCase()} events page successfully. URL: "${currentUrl}"`);
             } else {
                 throw new Error(`Current URL "${currentUrl}" does not contain the expected part "${expectedUrlPart}".`);
             }

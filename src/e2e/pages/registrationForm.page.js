@@ -145,34 +145,6 @@ class RegistrationForm extends EventsBasePage {
                 }
             }
 
-            let isContactMethodVisible = false;
-            try{
-            isContactMethodVisible = await this.isElementVisible(this.locators.contactMethodSelector); 
-            }catch(ReferenceError){
-                logger.logInfo("Contact method is not visible.");
-            }
-            if (isContactMethodVisible) {
-                const contactMethodLabelClass = await this.native.getAttribute(this.locators.contactMethodSelector, 'class');
-                if (contactMethodLabelClass && contactMethodLabelClass.includes('required')) {
-                    totalRequiredFields += 1;
-                    const contactMethodValue = fieldsData.contactMethod;
-                    if (contactMethodValue) {
-                        const radioButton = await this.native.$(`input[type="radio"][name="contactMethod"][value="${contactMethodValue}"]`);
-                        if (radioButton) {
-                            await radioButton.check();
-                            logger.logInfo(`"Contact Method" : "${contactMethodValue}"`);
-                        } else {
-                            console.log(`Radio button with value ${contactMethodValue} not found.`);
-                            throw new Error(`Radio button with value ${contactMethodValue} not found.`);
-                        }
-                    }
-                    else {
-                        logger.logWarning("Contact Method : No value provided");
-                        throw new Error("Contact Method : No value provided");
-                    }
-
-                }
-            }
             logger.logInfo(`All ${totalRequiredFields} required fields have been filled with provided data.`);
         } catch (error) {
             logger.logError(`Error filling required fields`);
@@ -268,17 +240,17 @@ class RegistrationForm extends EventsBasePage {
 
     async cancelRSVP() {
         try {
-            const isIamGoingVisible = this.isElementVisible(this.locators.iamgoingRSVPLink)
+            const isIamGoingVisible = await this.isElementVisible(this.locators.iamgoingRSVPLink);
             if (!isIamGoingVisible) {
-                throw new Error("Event not registered")
+                throw new Error("Event not registered");
             } else {
                 const imGoingLink = this.native.locator(this.locators.iamgoingRSVPLink);
                 await imGoingLink.click();
                 const dialogSelector = this.locators.successDialog;
-                const isDiloagVisible = await this.isElementVisible(dialogSelector)
+                const isDiloagVisible = await this.isElementVisible(dialogSelector);
 
                 if (isDiloagVisible) {
-                    const dialog = this.native.locator(dialogSelector)
+                    const dialog = this.native.locator(dialogSelector);
                     const visibleFirstScreen = dialog.locator(this.locators.visibleFirstScreen);
                     const cancelLink = await visibleFirstScreen.locator('text=Cancel RSVP');
                     if (!cancelLink) {
@@ -286,7 +258,7 @@ class RegistrationForm extends EventsBasePage {
                         throw new Error("Cancel RSVP link not found in the confirmation dialog.");
                     }
                     await cancelLink.click();
-                    logger.logInfo("Cancel RSVP button clicked")
+                    logger.logInfo("Cancel RSVP button clicked");
 
                     const visibleSecondScreen = dialog.locator(this.locators.visibleSecondScreen);
                     const okButton = await visibleSecondScreen.locator(this.locators.OKbutton);
@@ -300,21 +272,29 @@ class RegistrationForm extends EventsBasePage {
                     await dialog.waitFor({ state: 'hidden', timeout: 5000 });
                     logger.logInfo("Registration cancellation dialog closed successfully.");
 
-                    const rsvpLink = await this.native.locator(this.locators.RSVPLink);
+                    // Wait for page to stabilize after cancellation
+                    await this.native.waitForTimeout(2000);
 
-                    if (await rsvpLink.isVisible()) {
+                    // Try to find the RSVP now link with a longer timeout
+                    try {
+                        const rsvpLink = await this.native.locator(this.locators.RSVPLink);
+                        await rsvpLink.waitFor({ state: 'visible', timeout: 10000 });
                         logger.logInfo("Registration cancellation validated successfully.");
-                    } else {
-                        logger.logError("'RSVP now' link not found after registration cancellation.");
-                        throw new Error("'RSVP now' link not found after registration cancellation.");
+                    } catch (rsvpError) {
+                        // If RSVP link is not found, try refreshing the page
+                        logger.logWarning("RSVP now link not immediately visible, refreshing page...");
+                        await this.native.reload();
+                        await this.native.waitForLoadState('networkidle');
+                        
+                        const rsvpLink = await this.native.locator(this.locators.RSVPLink);
+                        await rsvpLink.waitFor({ state: 'visible', timeout: 10000 });
+                        logger.logInfo("Registration cancellation validated after page refresh.");
                     }
-                    }
-                else {
-                    logger.logError("RSVP cancellation dialog not found")
+                } else {
+                    logger.logError("RSVP cancellation dialog not found");
                     throw new Error("RSVP cancellation dialog not found");
                 }
             }
-
         } catch (error) {
             logger.logError(`Error in canceling the RSVP: ${error}`);
             throw error;

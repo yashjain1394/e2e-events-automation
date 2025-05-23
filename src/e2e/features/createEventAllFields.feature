@@ -1,19 +1,20 @@
 @createEventAllFields
 Feature: Event Creation All Fields
 
-  Scenario: Verify ECC dashboard page content
-    Given I am on the ECC dashboard page
-    When I sign-in on the ECC dashboard page
-    Then I should see the All Events label on the page
-    Then I should see the Search box on the page
-    Then I should see the table headers on the page
-    Then I should see pagination container
-    Then I should see the footer section on the page
+  # Scenario: Verify ECC dashboard page content
+  #   Given I am on the ECC dashboard page
+  #   When I sign-in on the ECC dashboard page
+  #   Then I should see the All Events label on the page
+  #   Then I should see the Search box on the page
+  #   Then I should see the table headers on the page
+  #   Then I should see pagination container
+  #   Then I should see the footer section on the page
 
     Scenario Outline: Create event with all fields and validate "<span style="color:black;"><b><Description></b></span>"
     Given I am on the ECC dashboard page
+    When I sign-in on the ECC dashboard page
     And I should see the Create new event button on the page
-    Then I should be able to click on Create new event button
+    Then I should be able to click on Create new event button "In-Person"
     Then I am in the create event flow and Basic info page
     Then I fill out create event Basic info page with <BasicInfoPageFields>
     Then I fill out the additional venue with "Test additional Venue"

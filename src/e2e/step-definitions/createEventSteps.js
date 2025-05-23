@@ -147,13 +147,13 @@ Then('I should see the Create new event button on the page', async function () {
   }
 });
 
-Then('I should be able to click on Create new event button', async function () {
+Then('I should be able to click on Create new event button {string}', async function (eventType) {
   try {
     this.context(EventsDashboard);
-    await this.page.clickCreateNewEventButton();
+    await this.page.clickCreateNewEventButton(eventType);
   } catch (error) {
-    console.error('Failed to click Create new event button:', error.message);
-    throw new Error('Failed to click Create new event button:', error.message);
+    logger.logError(`Failed to click Create ${eventType} event button:`, error.message);
+    throw new Error(`Failed to click Create ${eventType} event button: ${error.message}`);
   }
 });
 
@@ -366,18 +366,30 @@ Then('I click Next step multiple times', async function () {
         logger.logError('eventTopics is not defined in eventData');
       }
 
-      // Check if communityLink is defined and check the checkbox
-      if (eventData.communityLink) {
-          await this.page.checkCommunityLinkCheckbox(eventData.communityLink);
-      } else {
-          logger.logWarning('communityLink is not defined in eventData');
-      }
+      // Handle secondary link if provided
+      if (eventData.secondaryLink) {
+        // Check the secondary link checkbox
+        await this.page.native.locator(this.page.locators.secondaryLinkCheckbox).click();
+        logger.logInfo('Clicked secondary link checkbox');
 
-      // Check if communityUrl is defined and fill it
-      if (eventData.communityUrl) {
-          await this.page.fillCommunityUrl(eventData.communityUrl);
-      } else {
-          logger.logWarning('communityUrl is not defined in eventData');
+        // Fill in the secondary link label if provided
+        if (eventData.secondaryLink.label) {
+          await this.page.native.locator(this.page.locators.secondaryLinkLabel).fill(eventData.secondaryLink.label);
+          logger.logInfo(`Filled secondary link label: ${eventData.secondaryLink.label}`);
+        }
+
+        // Fill in the secondary link URL if provided
+        if (eventData.secondaryLink.url) {
+          await this.page.native.locator(this.page.locators.secondaryLinkUrl).fill(eventData.secondaryLink.url);
+          logger.logInfo(`Filled secondary link URL: ${eventData.secondaryLink.url}`);
+
+          // Verify URL format
+          const errorMessage = await this.page.native.locator(this.page.locators.urlErrorMessage).textContent();
+          if (errorMessage.includes('Please enter a valid URL')) {
+            logger.logError('Invalid URL format provided for secondary link');
+            throw new Error('Invalid URL format provided for secondary link');
+          }
+        }
       }
 
       // Check if agenda is defined and fill it

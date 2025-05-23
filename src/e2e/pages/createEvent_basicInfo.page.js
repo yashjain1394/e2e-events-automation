@@ -45,7 +45,7 @@ class BasicInfo extends EventsBasePage {
             agendaTimePicker: 'sp-picker.time-picker-input',
             agendaTimePeriod: 'sp-picker[label="AM/PM"]',
             agendaTitle: 'sp-textfield[placeholder="Add agenda title"] input[placeholder="Add agenda title"]',
-            agendaDetails: 'sp-textfield[placeholder="Add agenda details"] textarea[placeholder="Add agenda details"]',
+            agendaDetails: 'div.agenda-container div[contenteditable="true"].tiptap.ProseMirrors',
             agendaTimeOption: (time) => `sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
             agendaTimePeriodOption: (time) => `sp-menu-item[value="${getPeriodFromTime(time)}"]`,
             agendaPostEventCheckbox: 'sp-checkbox[id="checkbox-agenda-info"] input[name="checkbox-agenda-info-name"]',
