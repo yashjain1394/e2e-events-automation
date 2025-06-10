@@ -235,6 +235,16 @@ Then('I should see the Venue on the event details page', async function () {
   }
 });
 
+Then('I RSVP using the marketo form', async function () {
+  try {
+    await this.page.verifyMarketoForm();
+  } catch (error) {
+    console.error("Failed to verify Marketo form:", error.message);
+    throw new Error("Failed to verify Marketo form.");
+  } 
+});
+
+
 
 Then('I should see profile cards for speakers and host', async function () {
   try {
@@ -399,11 +409,20 @@ Then('I should see my firstname, lastname & email prefilled', async function () 
   }
 });
 
+Then('I click the Register button', async function () {
+  try {
+    this.context(RegistrationForm);
+    await this.page.clickRegisterButton();
+  } catch (error) {
+    console.error("Failed to click Register button:", error.message);
+    throw new Error("Failed to click Register button.");
+  }
+});
+
 Then('I fill all the required information with {string}', async function(formDataJson) {
   try {
     const formData = JSON.parse(formDataJson);
-    //console.log('Filling out form with data:', formData);
-    this.context(RegistrationForm)
+    this.context(RegistrationForm);
     await this.page.fillRequiredFields(formData);
   } catch (error) {
     console.error("Failed to fill required fields:", error.message);
@@ -457,6 +476,47 @@ Then('I navigate to Event Detail page {string}', async function (eventTitle) {
     console.error(`Failed to verify navigation to the event detail page for the event with title "${this.eventTitle}":`, error.message);
     throw new Error('Navigation to the event detail page did not happen as expected.');
   }
+});
+
+When('I click the Webinar Register button', async function () {
+    try {
+        this.context(RegistrationForm);
+        await this.page.clickWebinarRegisterButton();
+    } catch (error) {
+        logger.logError("Failed to click Webinar Register button:", error.message);
+        throw new Error("Failed to click Webinar Register button.");
+    }
+});
+
+When('I fill out the webinar registration form with the following details', async function (dataTable) {
+    try {
+        this.context(RegistrationForm);
+        const fieldsData = dataTable.hashes()[0];
+        await this.page.fillWebinarRegistrationForm(fieldsData);
+    } catch (error) {
+        logger.logError("Failed to fill webinar registration form:", error.message);
+        throw new Error("Failed to fill webinar registration form.");
+    }
+});
+
+When('I click the webinar submit button', async function () {
+    try {
+        this.context(RegistrationForm);
+        await this.page.clickWebinarSubmitButton();
+    } catch (error) {
+        logger.logError("Failed to click webinar submit button:", error.message);
+        throw new Error("Failed to click webinar submit button.");
+    }
+});
+
+Then('I should see the webinar registration thank you message', async function () {
+    try {
+        this.context(RegistrationForm);
+        await this.page.verifyWebinarThankYouMessage();
+    } catch (error) {
+        logger.logError("Failed to verify webinar thank you message:", error.message);
+        throw new Error("Failed to verify webinar thank you message.");
+    }
 });
 
 

@@ -24,7 +24,7 @@ Feature: Event Creation Required Fields
 
     Examples: DefaultEvents
     | Description | EventDataWithRequiredFields                                              |
-    | Auto Events Required Fields | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York","language":"en-US", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+    | Auto Events Required Fields | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "eventDetails":"TEST RTE", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York","language":"en-US", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
     | Auto Events Required Fields | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York","language":"de-DE", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
 
   Scenario Outline: Delete the event "<span style="color:black;"><b><EventName></b></span>"

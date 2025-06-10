@@ -18,7 +18,8 @@ class BasicInfo extends EventsBasePage {
             cloudTypeOption: (value) => `//sp-picker[@id='bu-select-input']//sp-menu-item[text()='${value}']`,
             seriesTypeOption: (value) => `//sp-picker[@id='series-select-input']//sp-menu-item[text()='${value}']`,
             eventTitle: 'sp-textfield[placeholder="Event title"] input[placeholder="Event title"]',
-            eventDescription: 'sp-textfield[placeholder="Event description"] textarea[placeholder="Event description"]',
+            eventDescription: 'sp-textfield[placeholder="Event description for Events Hub and SEO"] textarea[placeholder="Event description for Events Hub and SEO"]',
+            eventDetails: 'rte-tiptap[id="event-info-details-rte"] div[contenteditable="true"]',
             eventDate: '//*[@name="event-date"]',
             enabledDatesClass: '.calendar-day:not(.disabled):not(.empty)',
             iconCalendar: '//*[@class="icon icon-calendar-add"]',
@@ -45,17 +46,17 @@ class BasicInfo extends EventsBasePage {
             agendaTimePicker: 'sp-picker.time-picker-input',
             agendaTimePeriod: 'sp-picker[label="AM/PM"]',
             agendaTitle: 'sp-textfield[placeholder="Add agenda title"] input[placeholder="Add agenda title"]',
-            agendaDetails: 'div.agenda-container div[contenteditable="true"].tiptap.ProseMirrors',
+            agendaDetails: 'rte-tiptap[placeholder="Add agenda details"] div[class="tiptap ProseMirror"]',
             agendaTimeOption: (time) => `sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
             agendaTimePeriodOption: (time) => `sp-menu-item[value="${getPeriodFromTime(time)}"]`,
-            agendaPostEventCheckbox: 'sp-checkbox[id="checkbox-agenda-info"] input[name="checkbox-agenda-info-name"]',
+            agendaPostEventCheckbox: 'input[id="input"][name="mobilePhone"][role="switch"]',
             failureToast: 'sp-toast[variant="negative"]',
             toastDismiss: 'sp-close-button[label="Close"]',
             successToast: 'sp-toast.save-success-msg[variant="positive"]',
             languageDropdown: '//*[@id="language-picker"]',
             languageOption: (language) => `//sp-menu-item[@value='${language}' and @role='option']`,
             venueAdditionalInfoImageDropzone: 'image-dropzone[id="add-imagefile-dimensions-1920px-wide."] input.img-file-input',
-            venueAdditionalInfoRTE: 'input[id="venue-additional-info-rte-output"]',
+            venueAdditionalInfoRTE: 'rte-tiptap[id="venue-additional-info-rte"] div[class="tiptap ProseMirror"]',
             venueAdditionalInfoCheckbox: 'sp-checkbox[id="checkbox-venue-additional-info-visible"]',
             
         };
@@ -194,29 +195,53 @@ class BasicInfo extends EventsBasePage {
    }
     }
     async fillRequiredFields(eventTitleName, eventData) {
-        try{
-            const titleInput = this.native.locator(this.locators.eventTitle);
-            await titleInput.type(eventTitleName);
+        try {
+            // Validate required fields
+            if (!eventData) {
+                throw new Error('eventData is required');
+            }
 
+            const requiredFields = ['description', 'eventDetails', 'startDate', 'endDate', 'startTime', 'endTime', 'timezone', 'venue'];
+            const missingFields = requiredFields.filter(field => !eventData[field]);
+            
+            if (missingFields.length > 0) {
+                throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+            }
+
+            // Fill title
+            const titleInput = this.native.locator(this.locators.eventTitle);
+            await titleInput.waitFor({ state: 'visible' });
+            await titleInput.type(eventTitleName);
             BasicInfo.eventName = eventTitleName;
 
+            // Fill description
             const descriptionInput = this.native.locator(this.locators.eventDescription);
+            await descriptionInput.waitFor({ state: 'visible' });
             await descriptionInput.type(eventData.description);
 
+            // Fill event details
+            const eventDetailsInput = this.native.locator(this.locators.eventDetails);
+            await eventDetailsInput.waitFor({ state: 'visible' });
+            await eventDetailsInput.type(eventData.eventDetails);
+
+            // Select date
             await this.selectDate(eventData.startDate, eventData.endDate);
 
-            await this.native.locator(this.locators.startTime).click()
-            await this.native.locator(this.locators.startTimeOption(eventData.startTime)).click()
-            await this.native.locator(this.locators.startTimePeriod).click()
-            await this.native.locator(this.locators.startTimePeriodOption(eventData.startTime)).click()
+            // Select start time
+            await this.native.locator(this.locators.startTime).click();
+            await this.native.locator(this.locators.startTimeOption(eventData.startTime)).click();
+            await this.native.locator(this.locators.startTimePeriod).click();
+            await this.native.locator(this.locators.startTimePeriodOption(eventData.startTime)).click();
 
-            await this.native.locator(this.locators.endTime).click()
-            await this.native.locator(this.locators.endTimeOption(eventData.endTime)).click()
-            await this.native.locator(this.locators.endTimePeriod).click()
-            await this.native.locator(this.locators.endTimePeriodOption(eventData.endTime)).click()
+            // Select end time
+            await this.native.locator(this.locators.endTime).click();
+            await this.native.locator(this.locators.endTimeOption(eventData.endTime)).click();
+            await this.native.locator(this.locators.endTimePeriod).click();
+            await this.native.locator(this.locators.endTimePeriodOption(eventData.endTime)).click();
 
-            await this.native.locator(this.locators.timezone).click()
-            await this.native.locator(this.locators.timezoneOption(eventData.timezone)).click()
+            // Select timezone
+            await this.native.locator(this.locators.timezone).click();
+            await this.native.locator(this.locators.timezoneOption(eventData.timezone)).click();
 
             // Select language if provided
             if (eventData.language) {
@@ -224,25 +249,28 @@ class BasicInfo extends EventsBasePage {
                 logger.logInfo(`Language ${eventData.language} selected successfully`);
             }
 
+            // Fill venue
             const venueInput = await this.native.locator(this.locators.venueName);
+            await venueInput.waitFor({ state: 'visible' });
             await venueInput.click();
             await venueInput.type(eventData.venue);
 
+            // Select first venue option
             await this.native.locator(this.locators.firstVenueNameOption).waitFor({ state: 'visible' });
-
             await this.native.locator(this.locators.firstVenueNameOption).click();
 
-            if(eventData.venueInfoWillAppearPostEventCheckbox && eventData.venueInfoWillAppearPostEventCheckbox.toLowerCase() === "checked"){
+            // Handle venue info checkbox
+            if (eventData.venueInfoWillAppearPostEventCheckbox && eventData.venueInfoWillAppearPostEventCheckbox.toLowerCase() === "checked") {
                 await this.native.locator(this.locators.venueInfoWillAppearPostEventCheckbox).click();
                 logger.logInfo('Checked checkbox and Venue info will appear post event');
-            }else{
+            } else {
                 logger.logInfo('Checkbox not checked and Venue info will not appear post event');
             }
         
-    } catch (error) {
-        console.error(`Error in filling Minimum Required Fields: ${error.message}`);
-        throw new Error(`Error in filling Minimum Required Fields: ${error.message}`);
-    }
+        } catch (error) {
+            logger.logError(`Error in filling Minimum Required Fields: ${error.message}`);
+            throw new Error(`Error in filling Minimum Required Fields: ${error.message}`);
+        }
     }
 
     async clickNextStepButton() {
@@ -435,11 +463,11 @@ class BasicInfo extends EventsBasePage {
 
             logger.logInfo('Uploaded venue additional info image');
 
-            //TODO Fill rich text editor
-            // const rteLocator = this.native.locator(this.locators.venueAdditionalInfoRTE);
-            // await rteLocator.click();
-            // await rteLocator.type(additionalInfo);
-            // logger.logInfo('Filled venue additional info text');
+            // Fill rich text editor
+            const rteLocator = this.native.locator(this.locators.venueAdditionalInfoRTE);
+            await rteLocator.waitFor({ state: 'visible', timeout: 5000 });
+            await rteLocator.fill(additionalInfo);
+            logger.logInfo('Filled venue additional info text');
 
             // Check the checkbox to make it visible post-event
             const checkboxLocator = this.native.locator(this.locators.venueAdditionalInfoCheckbox);

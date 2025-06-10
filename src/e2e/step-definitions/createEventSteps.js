@@ -199,13 +199,17 @@ Then('I fill minimum required fields such as event title, event description, dat
     } else {
       this.eventTitle = eventData.title
     }
-    console.log('Event Title:', this.eventTitle)
+
+    if (!this.eventTitle) {
+      throw new Error('Event title is required but was not provided');
+    }
+
     this.context(BasicInfo);
     await this.page.fillRequiredFields(this.eventTitle, eventData);
-
+    logger.logInfo('Successfully filled minimum required fields');
   } catch (error) {
-    console.error("Failed to fill minimum required fields:", error.message);
-    throw new Error("Failed to fill minimum required fields:", error.message);
+    logger.logError(`Failed to fill minimum required fields: ${error.message}`);
+    throw new Error(`Failed to fill minimum required fields: ${error.message}`);
   }
 });
 

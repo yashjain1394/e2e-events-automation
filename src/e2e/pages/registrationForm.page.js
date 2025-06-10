@@ -11,9 +11,13 @@ class RegistrationForm extends EventsBasePage {
             eventForm: '#rsvp-form-1',
             eventFormTitle: `//*[@id='rsvp-form-1']//*[@id='event-title']`,
             fieldsSelector: (field) => `#${field}`,
-            firstName: 'input#firstName:disabled',
-            lastName: 'input#lastName:disabled',
-            email: 'input#email:disabled',
+            firstName: '#FirstName',
+            lastName: '#LastName',
+            email: '#Email',
+            jobTitle: '#mktoFormsJobTitle',
+            functionalArea: '#mktoFormsFunctionalArea',
+            company: '#mkto_FormsCompany',
+            country: '#Country',
             requiredFields: '[required="required"]:not(:disabled)',
             contactMethodSelector: 'label[for="contactMethod"]',
             tcCheckbox: '#terms-and-conditions',
@@ -24,6 +28,17 @@ class RegistrationForm extends EventsBasePage {
             RSVPLink: `//a[text()='RSVP now' and @href='#rsvp-form-1']`,
             visibleFirstScreen: '.first-screen:not(.hidden)',
             visibleSecondScreen: '.second-screen:not(.hidden)',
+            registerButton: 'a.con-button.blue[daa-ll*="Register"]',
+            webinarRegisterButton: 'a.con-button.blue[daa-ll*="Register"]',
+            webinarFirstName: '#FirstName',
+            webinarLastName: '#LastName',
+            webinarEmail: '#Email',
+            webinarJobTitle: '#mktoFormsJobTitle',
+            webinarFunctionalArea: '#mktoFormsFunctionalArea',
+            webinarCompany: '#mkto_FormsCompany',
+            webinarCountry: '#Country',
+            webinarSubmitButton: '#mktoButton_new',
+            webinarThankYouMessage: 'p.ty-message'
         };
     }
 
@@ -80,74 +95,33 @@ class RegistrationForm extends EventsBasePage {
 
     async fillRequiredFields(fieldsData) {
         try {
-            await this.native.waitForSelector(this.locators.requiredFields);
-            const requiredFields = this.native.locator(this.locators.requiredFields);
-            let totalRequiredFields = await requiredFields.count();
-            logger.logInfo("totalRequiredFields=",totalRequiredFields)
+            // Fill First Name
+            await this.native.locator(this.locators.firstName).fill(fieldsData.firstName);
+            logger.logInfo(`Filled First Name: ${fieldsData.firstName}`);
 
-            for (let i = 0; i < totalRequiredFields; i++) {
-                const field = requiredFields.nth(i);
-                const fieldId = await field.getAttribute('id');
+            // Fill Last Name
+            await this.native.locator(this.locators.lastName).fill(fieldsData.lastName);
+            logger.logInfo(`Filled Last Name: ${fieldsData.lastName}`);
 
-                let value;
+            // Fill Email
+            await this.native.locator(this.locators.email).fill(fieldsData.email);
+            logger.logInfo(`Filled Email: ${fieldsData.email}`);
 
-                switch (fieldId) {
-                    case 'companyName':
-                        value = fieldsData.companyName;
-                        await field.fill(value);
-                        break;
+            // Select Job Title
+            await this.native.locator(this.locators.jobTitle).selectOption({ value: fieldsData.jobTitle });
+            logger.logInfo(`Selected Job Title: ${fieldsData.jobTitle}`);
 
-                    case 'jobTitle':
-                        value = fieldsData.jobTitle;
-                        await field.selectOption({ value });
-                        break;
+            // Select Functional Area
+            await this.native.locator(this.locators.functionalArea).selectOption({ value: fieldsData.functionalArea });
+            logger.logInfo(`Selected Functional Area: ${fieldsData.functionalArea}`);
 
-                    case 'mobilePhone':
-                        value = fieldsData.phoneNumber;
-                        await field.fill(value);
-                        break;
+            // Fill Company
+            await this.native.locator(this.locators.company).fill(fieldsData.company);
+            logger.logInfo(`Filled Company: ${fieldsData.company}`);
 
-                    case 'industry':
-                        value = fieldsData.industry;
-                        await field.selectOption({ value });
-                        break;
-
-                    case 'productOfInterest':
-                        value = fieldsData.interest;
-                        await field.selectOption({ value });
-                        break;
-
-                    case 'companySize':
-                        value = fieldsData.companySize;
-                        await field.selectOption({ value });
-                        break;
-
-                    case 'age':
-                        value = fieldsData.ageRange;
-                        await field.selectOption({ value });
-                        break;
-
-                    case 'jobLevel':
-                        value = fieldsData.jobLevel;
-                        await field.selectOption({ value });
-                        break;
-
-                    default:
-                        logger.logWarning(`${fieldId} not handled`);
-                        break;
-                }
-
-                if (value) {
-                    console.log(`"${fieldId}" : "${value}"`);
-                } else {
-                    logger.logWarning(`"${fieldId}" : "No value provided"`);
-                    throw new Error(`"${fieldId}" : "No value provided"`);
-                }
-            }
-
-            logger.logInfo(`All ${totalRequiredFields} required fields have been filled with provided data.`);
+            logger.logInfo('All required fields have been filled successfully.');
         } catch (error) {
-            logger.logError(`Error filling required fields`);
+            logger.logError(`Error filling required fields: ${error.message}`);
             throw error;
         }
     }
@@ -358,6 +332,108 @@ class RegistrationForm extends EventsBasePage {
           return false;
         }
       };
+
+    async clickRegisterButton() {
+        try {
+            const registerButton = await this.native.locator(this.locators.registerButton);
+            await registerButton.waitFor({ state: 'visible', timeout: 10000 });
+            await registerButton.click();
+            logger.logInfo('Clicked Register button successfully');
+        } catch (error) {
+            logger.logError(`Error clicking Register button: ${error.message}`);
+            throw error;
+        }
+    }
+
+    async clickWebinarRegisterButton() {
+        try {
+            const registerButton = await this.native.locator(this.locators.webinarRegisterButton);
+            await registerButton.waitFor({ state: 'visible', timeout: 10000 });
+            const isDisabled = await registerButton.evaluate(button => button.disabled);
+            if (isDisabled) {
+                throw new Error("Webinar Register button is disabled and cannot be clicked.");
+            }
+            await registerButton.click();
+            logger.logInfo('Clicked Webinar Register button successfully');
+        } catch (error) {
+            logger.logError(`Error clicking Webinar Register button: ${error.message}`);
+            throw error;
+        }
+    }
+
+    async fillWebinarRegistrationForm(fieldsData) {
+        try {
+            // Fill First Name
+            await this.native.locator(this.locators.webinarFirstName).fill(fieldsData.firstName);
+            logger.logInfo(`Filled Webinar First Name: ${fieldsData.firstName}`);
+
+            // Fill Last Name
+            await this.native.locator(this.locators.webinarLastName).fill(fieldsData.lastName);
+            logger.logInfo(`Filled Webinar Last Name: ${fieldsData.lastName}`);
+
+            // Fill Email
+            await this.native.locator(this.locators.webinarEmail).fill(fieldsData.email);
+            logger.logInfo(`Filled Webinar Email: ${fieldsData.email}`);
+
+            // Select Job Title
+            await this.native.locator(this.locators.webinarJobTitle).selectOption({ value: fieldsData.jobTitle });
+            logger.logInfo(`Selected Webinar Job Title: ${fieldsData.jobTitle}`);
+
+            // Select Functional Area
+            await this.native.locator(this.locators.webinarFunctionalArea).selectOption({ value: fieldsData.functionalArea });
+            logger.logInfo(`Selected Webinar Functional Area: ${fieldsData.functionalArea}`);
+
+            // Fill Company
+            await this.native.locator(this.locators.webinarCompany).fill(fieldsData.company);
+            logger.logInfo(`Filled Webinar Company: ${fieldsData.company}`);
+
+            // Select Country
+            if (fieldsData.country) {
+                await this.native.locator(this.locators.webinarCountry).selectOption({ value: fieldsData.country });
+                logger.logInfo(`Selected Webinar Country: ${fieldsData.country}`);
+            }
+
+            logger.logInfo('All webinar registration fields have been filled successfully.');
+        } catch (error) {
+            logger.logError(`Error filling webinar registration fields: ${error.message}`);
+            throw error;
+        }
+    }
+
+    async clickWebinarSubmitButton() {
+        try {
+            const submitButton = await this.native.locator(this.locators.webinarSubmitButton);
+            await submitButton.waitFor({ state: 'visible', timeout: 10000 });
+            const isDisabled = await submitButton.evaluate(button => button.disabled);
+            if (isDisabled) {
+                throw new Error("Webinar submit button is disabled and cannot be clicked.");
+            }
+            await submitButton.click();
+            logger.logInfo('Clicked Webinar submit button successfully');
+        } catch (error) {
+            logger.logError(`Error clicking Webinar submit button: ${error.message}`);
+            throw error;
+        }
+    }
+
+    async verifyWebinarThankYouMessage() {
+        try {
+            const thankYouMessage = await this.native.locator(this.locators.webinarThankYouMessage);
+            await thankYouMessage.waitFor({ state: 'visible', timeout: 10000 });
+            
+            const messageText = await thankYouMessage.textContent();
+            const expectedText = "Thank you for your interest in ExperienceCloud. Your seat is saved!";
+            
+            if (!messageText.includes(expectedText)) {
+                throw new Error(`Expected thank you message to contain "${expectedText}", but got: "${messageText}"`);
+            }
+            
+            logger.logInfo('Verified webinar thank you message successfully');
+        } catch (error) {
+            logger.logError(`Error verifying webinar thank you message: ${error.message}`);
+            throw error;
+        }
+    }
 
 }
 module.exports = { RegistrationForm };
