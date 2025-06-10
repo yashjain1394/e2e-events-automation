@@ -19,7 +19,7 @@ Then(
   }
 );
 
-Then("I click the Register button", async function () {
+Then("I click the Marketo Register button", async function () {
   await this.page.submitForm();
 });
 

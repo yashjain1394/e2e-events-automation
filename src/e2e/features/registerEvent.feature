@@ -36,7 +36,7 @@ Feature: Event Registration
       | Department        | <department>   |
       | Organization      | <organization> |
       | Country           | <country>      |
-    Then I click the Register button
+    Then I click the Marketo Register button
     Then I see the successful registration confirmation
 
     Examples:
@@ -56,7 +56,7 @@ Feature: Event Registration
       | Department        | <department>   |
       | Organization      | <organization> |
       | Country           | <country>      |
-    Then I click the Register button
+    Then I click the Marketo Register button
     Then I see the successful registration confirmation
 
     Examples:
