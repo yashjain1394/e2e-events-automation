@@ -17,7 +17,7 @@ class Rsvp extends EventsBasePage {
             attendeeLimit: 'input[id="attendee-count-input"]',
             contactHostCheckbox: 'sp-checkbox[id="registration-contact-host"]',
             hostEmail: 'sp-textfield[id="event-host-email-input"] input[placeholder="Add host email"]',
-            rsvpFormDescription: 'sp-textfield[id="rsvp-form-detail-description"] input[placeholder="Add brief description"]',
+            rsvpFormDescription: 'rte-tiptap[id="rsvp-description-rte"] div[contenteditable="true"]',
             includeOnFormToggle: (fieldName) => `.field-row:has(.cat-text:text-is("${fieldName}")) td:nth-child(2) .custom-switch`,
             makeRequiredToggle: (fieldName) => `.field-row:has(.cat-text:text-is("${fieldName}")) td:nth-child(3) .custom-switch`,
             termsAndConditionCheckbox: 'input[data-field-id="terms-and-condition-check-1"]',

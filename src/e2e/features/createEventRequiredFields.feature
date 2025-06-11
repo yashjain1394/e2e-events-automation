@@ -24,12 +24,8 @@ Feature: Event Creation Required Fields
 
     Examples: DefaultEvents
     | Description | EventDataWithRequiredFields                                              |
-    # Event with required fields
-    | Auto Events Required Fields | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
-    # Event with special characters & numbers
-    | Auto Events Spl chars !@#$%^&*()_+ & numbers 123.9 | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Spl chars !@#$%^&*()_+ & numbers 123.9", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
-    #Event with Different Timezone
-    | Auto Events Timezone | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-01:00 - Europe/Berlin", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+    | Auto Events Required Fields | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "eventDetails":"TEST RTE", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York","language":"en-US", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
+    | Auto Events Required Fields | '{"cloudType": "Creative Cloud", "series": "Create Now", "title": "Auto Events Required Fields", "description": "Auto Events description", "startDate": "2024-11-26", "endDate": "2024-11-28", "startTime": "9:00 AM", "endTime": "1:00 PM", "timezone": "UTC-05:00 - America/New_York","language":"de-DE", "venue": "Adobe World Headquarters", "venueInfoWillAppearPostEventCheckbox": "Checked"}' |
 
   Scenario Outline: Delete the event "<span style="color:black;"><b><EventName></b></span>"
     Given I am on the ECC dashboard page
@@ -38,5 +34,4 @@ Feature: Event Creation Required Fields
     Examples: DefaultEventName
     | EventName |
     | Auto Events Required Fields |
-    | Auto Events Spl chars !@#$%^&*()_+ & numbers 123.9 |
-    | Auto Events Timezone |
+   

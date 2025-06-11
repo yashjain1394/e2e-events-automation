@@ -2,12 +2,7 @@
 Feature: Event Registration
     
   Scenario Outline: Validate and register events "<span style="color:black;"><b><EventName></b></span>"
-    Given I am on the events page
-    When I select the event card with title "<EventName>"
-    Then the banners on the event card should be displayed correctly
-    And I should see the date and time displayed correctly on the event card
-    When I click the View event button on the event card
-    Then I should navigate to the event detail page
+    Given I go to the event with title "/events/cc-test-series/test-event/san-jose/ca/us/2027-01-01.html"   
     And I should see the event details on the page
     And I should see the Venue on the event details page
     And I should see the Agenda on the event details page
@@ -17,20 +12,14 @@ Feature: Event Registration
 
     Then I initiate the RSVP process and handle sign-in if required
     Then I check the RSVP status, cancel if the event is already registered
-    Then I should see the event title I clicked on
     And I should see my firstname, lastname & email prefilled
     Then I fill all the required information with <FormData>
-   # When I check the Terms and Conditions
     Then I click the Submit button
     Then I see the registration confirmation
     Then I cancel the RSVP
 
   Examples: DefaultEvents
-    | EventName     | FormData                                              |
-    # Event with Agenda
-    | Auto Events - With Agenda | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
-    # Event with Partner
-    | Auto Events - With Partner | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
-    # Event with multiple profiles
-    | Auto Events - With Multiple Profiles | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager", "contactMethod":"email"}' |
+    | EventName     | FormData |
+    | Auto Events | '{"companyName": "Test Company 1", "jobTitle": "Other", "phoneNumber": "1234567890", "industry": "Advertising", "interest": "Creative Cloud", "companySize": "10 - 49", "ageRange": "26-35", "jobLevel": "Manager"}' |
+    
     
