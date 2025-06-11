@@ -4,8 +4,8 @@ const Logger = require('../common-utils/logger.js');
 const logger = new Logger();
 
 class EventDetailPage extends EventsBasePage {
-    constructor() {
-        super();
+    constructor(contentPath) {
+        super(contentPath);
         this.locators = {
             pageHeader: 'h1#event-title',
             eventTitle: `#event-title`,
