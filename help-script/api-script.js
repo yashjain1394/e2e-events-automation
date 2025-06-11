@@ -12,15 +12,7 @@ async function getBearerToken() {
         formData.append('password', process.env.PASSWORD);
         formData.append('username', 'rea71768+US+Free+VISA+events+1@adobetest.com');
         formData.append('scope', 'openid,AdobeID');
-        // Debug logging for form data
-        console.log('Form Data:', {
-            client_id: 'events-milo',
-            client_secret: 's8e-yYvS3gxVhcUmqWzQd2n9tsE1kzfiHlaT',
-            grant_type: 'password',
-            password: process.env.PASSWORD,
-            username: 'rea71768+US+Free+VISA+events+1@adobetest.com',
-            scope: 'openid,AdobeID'
-        });
+       
 
         const response = await axios({
             method: 'post',
