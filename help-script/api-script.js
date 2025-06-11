@@ -4,16 +4,30 @@ const path = require('path');
 
 async function getBearerToken() {
     try {
+ 
+       const formData = new URLSearchParams();
+        formData.append('client_id', 'events-milo');
+        formData.append('client_secret', process.env.CLIENT_SECRET);
+        formData.append('grant_type', 'password');
+        formData.append('password', process.env.PASSWORD);
+        formData.append('username', 'rea71768+US+Free+VISA+events+1@adobetest.com');
+        formData.append('scope', 'openid,AdobeID');
+        // Debug logging for form data
+        console.log('Form Data:', {
+            client_id: 'events-milo',
+            client_secret: 's8e-yYvS3gxVhcUmqWzQd2n9tsE1kzfiHlaT',
+            grant_type: 'password',
+            password: process.env.PASSWORD,
+            username: 'rea71768+US+Free+VISA+events+1@adobetest.com',
+            scope: 'openid,AdobeID'
+        });
+
         const response = await axios({
             method: 'post',
             url: 'https://ims-na1.adobelogin.com/ims/token/v1',
-            data: {
-                client_id: 'events-milo',
-                CLIENT_SECRET: process.env.CLIENT_SECRET,
-                grant_type: 'password',
-                PASSWORD: process.env.PASSWORD,
-                username: 'rea71768+US+Free+VISA+events+1@adobetest.com',
-                scope: 'openid,AdobeID'
+            data: formData,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
         return response.data.access_token;
@@ -159,7 +173,6 @@ async function makeApiCall() {
     } catch (error) {
         console.error('Error making API call:', error.message);
         if (error.response) {
-            console.error('Error response data:', error.response.data);
             console.error('Error response status:', error.response.status);
         }
         throw error;
