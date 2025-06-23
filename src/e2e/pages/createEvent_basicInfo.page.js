@@ -49,7 +49,7 @@ class BasicInfo extends EventsBasePage {
             agendaDetails: 'rte-tiptap[placeholder="Add agenda details"] div[class="tiptap ProseMirror"]',
             agendaTimeOption: (time) => `sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
             agendaTimePeriodOption: (time) => `sp-menu-item[value="${getPeriodFromTime(time)}"]`,
-            agendaPostEventCheckbox: 'input[id="input"][name="checkbox-agenda-info-name"][role="switch"]',
+            agendaPostEventCheckbox: 'input[id="input"][name="mobilePhone"][role="switch"]',
             failureToast: 'sp-toast[variant="negative"]',
             toastDismiss: 'sp-close-button[label="Close"]',
             successToast: 'sp-toast.save-success-msg[variant="positive"]',
