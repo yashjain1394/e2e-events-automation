@@ -12,7 +12,7 @@ class BasicInfo extends EventsBasePage {
     constructor() {
         super('/ecc/create/t3');
         this.locators = {
-            basicInfoLabel: '//*[@id="basic-info"]',
+            basicInfoLabel: '//*[@id="in-person-event-basic-info"]',
             cloudTypeDropdown: '//*[@id="bu-select-input"]',
             seriesTypeDropdown: '//*[@id="series-select-input"]',
             cloudTypeOption: (value) => `//sp-picker[@id='bu-select-input']//sp-menu-item[text()='${value}']`,
@@ -49,7 +49,7 @@ class BasicInfo extends EventsBasePage {
             agendaDetails: 'rte-tiptap[placeholder="Add agenda details"] div[class="tiptap ProseMirror"]',
             agendaTimeOption: (time) => `sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
             agendaTimePeriodOption: (time) => `sp-menu-item[value="${getPeriodFromTime(time)}"]`,
-            agendaPostEventCheckbox: 'input[id="input"][name="mobilePhone"][role="switch"]',
+            agendaPostEventCheckbox: 'input[id="input"][name="checkbox-agenda-info-name"][role="switch"]',
             failureToast: 'sp-toast[variant="negative"]',
             toastDismiss: 'sp-close-button[label="Close"]',
             successToast: 'sp-toast.save-success-msg[variant="positive"]',

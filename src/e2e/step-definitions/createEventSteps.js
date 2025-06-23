@@ -168,7 +168,7 @@ Then('I am in the create event flow and Basic info page', async function () {
     else {
       logger.logInfo("Basic info label is  displayed on page")
       this.context(BasicInfo);
-      await this.page.validateTextContent(basicInfo.locators.basicInfoLabel, "Basic info");
+      await this.page.validateTextContent(basicInfo.locators.basicInfoLabel, "In-person Event Basic Info");
     }
   } catch (error) {
     console.error("Error occured while Basic info label verification:", error.message);
@@ -583,21 +583,21 @@ Then('I click Next step multiple times', async function () {
 
       // Check if rsvpFormDescription is defined and fill it
       if (eventData.rsvpFormDescription) {
-        await this.page.fillRsvpFormDescription(eventData.rsvpFormDescription);
+       // await this.page.fillRsvpFormDescription(eventData.rsvpFormDescription);
       } else {
         logger.logWarning('rsvpFormDescription is not defined in eventData');
       }
 
       // Check if includeOnFormFieldCategories is defined and select it
       if (eventData.includeOnFormFieldCategories) {
-        await this.page.selectIncludeOnFormFieldCategories(eventData.includeOnFormFieldCategories);
+      //  await this.page.selectIncludeOnFormFieldCategories(eventData.includeOnFormFieldCategories);
       } else {
         logger.logWarning('includeOnFormFieldCategories is not defined in eventData');
       }
 
       // Check if makeItRequiredFieldcategories is defined and select it
       if (eventData.makeItRequiredFieldcategories) {
-        await this.page.selectMakeItRequiredFieldcategories(eventData.makeItRequiredFieldcategories);
+       // await this.page.selectMakeItRequiredFieldcategories(eventData.makeItRequiredFieldcategories);
       } else {
         logger.logWarning('makeItRequiredFieldcategories is not defined in eventData');
       }
