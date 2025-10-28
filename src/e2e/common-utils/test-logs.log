@@ -1,0 +1,54 @@
+2025-03-06T06:40:34.295Z [HEADING] Starting Scenario: Validate and register events "<span style="color:black;"><b>Auto Events - With Agenda</b></span>"
+2025-03-06T06:40:35.784Z [INFO] Navigated to the Events Hub page successfully.
+2025-03-06T06:40:38.109Z [INFO] Event Card with title Auto Events - With Agenda is present
+2025-03-06T06:40:38.124Z [INFO] Banner background image URL on the event card titled "Auto Events - With Agenda" is: https://www.adobe.com/events/assets/static/images/series/6211a2a1-3c5c-4d49-b3a5-58ebd70efed9/events/b1a46d4d-534e-4664-a17e-619e8f4db758/media_186dc85bccb725703f57ca7fb53aebfb24676a8ac.png
+2025-03-06T06:40:38.135Z [INFO] Date and time on the event card are displayed correctly: Wed, Dec 31 | 06:00 AM - 02:00 PM PST
+2025-03-06T06:40:38.936Z [INFO] "View Event" navigated to Auto Events - With Agenda event details page successfully. URL : "https://www.stage.adobe.com/events/create-now/auto-events-with-agenda/san-jose/ca/2025-12-31.html"
+2025-03-06T06:40:39.731Z [INFO] Event detail page heading verified as: "Auto Events - With Agenda"
+2025-03-06T06:40:41.050Z [INFO] Verified event title "Auto Events - With Agenda" is displayed.
+2025-03-06T06:40:41.060Z [INFO] Verfied event date "Wednesday, December 31 2025 9:00 AM - 5:00 PM" is in the expected format.
+2025-03-06T06:40:41.066Z [INFO] Verfied event description is present.
+2025-03-06T06:40:41.071Z [INFO] Verfied event venue is displayed.
+2025-03-06T06:40:41.077Z [INFO] Verified event agenda is displayed.
+2025-03-06T06:40:41.084Z [INFO] Found 4 profile cards for speakers.
+2025-03-06T06:40:41.102Z [INFO] Carousel navigation buttons are present and enabled.
+2025-03-06T06:40:43.105Z [WARNING] Host section is not visible : No Host added for the event
+2025-03-06T06:40:45.110Z [WARNING] Related products blade does not exist on the page.
+2025-03-06T06:40:47.113Z [WARNING] Partners does not exist on the page.
+2025-03-06T06:40:47.509Z [INFO] RSVP now button clicked
+2025-03-06T06:41:01.929Z [INFO] Sign-in completed
+2025-03-06T06:41:12.006Z [INFO] RSVP now button clicked again after sign-in.
+2025-03-06T06:41:13.015Z [INFO] Event title on RSVP form is correct: Auto Events - With Agenda
+2025-03-06T06:41:13.023Z [INFO] Verified prefilled first name : first
+2025-03-06T06:41:13.028Z [INFO] Verified prefilled last name : last
+2025-03-06T06:41:13.034Z [INFO] Verified prefilled email : adgaur+US+Complete+VISA+event-attendee+1@adobetest.com
+2025-03-06T06:41:13.038Z [INFO] totalRequiredFields=
+2025-03-06T06:41:43.051Z [INFO] All 2 required fields have been filled with provided data.
+2025-03-06T06:42:13.061Z [ERROR] Terms and Conditions checkbox not found.
+2025-03-06T06:42:13.113Z [INFO] Submit button clicked
+2025-03-06T06:42:17.507Z [ERROR] Error in verifying registration confirmation: 'I'm going' link not found after registration confirmation.
+2025-03-06T06:42:17.784Z [HEADING] Starting Scenario: Validate and register events "<span style="color:black;"><b>Auto Events - With Partner</b></span>"
+2025-03-06T06:42:18.073Z [INFO] Navigated to the Events Hub page successfully.
+2025-03-06T06:42:18.410Z [INFO] Event Card with title Auto Events - With Partner is present
+2025-03-06T06:42:18.458Z [INFO] Banner background image URL on the event card titled "Auto Events - With Partner" is: https://www.adobe.com/events/assets/static/images/series/6211a2a1-3c5c-4d49-b3a5-58ebd70efed9/events/c45942e4-9ef7-4eef-a64d-24ca1d9e42b4/media_186dc85bccb725703f57ca7fb53aebfb24676a8ac.png
+2025-03-06T06:42:18.468Z [INFO] Date and time on the event card are displayed correctly: Wed, Dec 31 | 06:00 AM - 02:00 PM PST
+2025-03-06T06:42:19.167Z [INFO] "View Event" navigated to Auto Events - With Partner event details page successfully. URL : "https://www.stage.adobe.com/events/create-now/auto-events-with-partner/san-jose/ca/2025-12-31.html"
+2025-03-06T06:42:19.953Z [INFO] Event detail page heading verified as: "Auto Events - With Partner"
+2025-03-06T06:42:20.765Z [INFO] Verified event title "Auto Events - With Partner" is displayed.
+2025-03-06T06:42:20.775Z [INFO] Verfied event date "Wednesday, December 31 2025 9:00 AM - 5:00 PM" is in the expected format.
+2025-03-06T06:42:20.781Z [INFO] Verfied event description is present.
+2025-03-06T06:42:20.788Z [INFO] Verfied event venue is displayed.
+2025-03-06T06:42:22.790Z [INFO] Verified event agenda is displayed.
+2025-03-06T06:42:22.807Z [INFO] Found 3 profile cards for speakers.
+2025-03-06T06:42:22.816Z [INFO] Profile cards are not in a carousel as the count is 3 or less.
+2025-03-06T06:42:24.820Z [WARNING] Host section is not visible : No Host added for the event
+2025-03-06T06:42:26.825Z [WARNING] Related products blade does not exist on the page.
+2025-03-06T06:42:26.834Z [INFO] Found 1 partner links.
+2025-03-06T06:42:26.842Z [INFO] "Google" link is clickable.
+2025-03-06T06:42:36.849Z [WARNING] RSVP now button not found on the page within 10 seconds. Checking for I'm going button.
+2025-03-06T06:43:04.916Z [INFO] RSVP now button clicked again after sign-in.
+2025-03-06T06:43:04.927Z [INFO] Event title on RSVP form is correct: Auto Events - With Partner
+2025-03-06T06:43:05.221Z [INFO] Verified prefilled first name : first
+2025-03-06T06:43:05.228Z [INFO] Verified prefilled last name : last
+2025-03-06T06:43:05.235Z [INFO] Verified prefilled email : adgaur+US+Complete+VISA+event-attendee+1@adobetest.com
+2025-03-06T06:43:05.241Z [INFO] totalRequiredFields=

@@ -3,7 +3,7 @@ const { EventsBasePage } = require('./eventsBase.page.js');
 const Logger = require('../common-utils/logger.js');
 const { EventDetailPage } = require('./eventDetails.page.js');
 const logger = new Logger();
-const { getTimeWithoutPeriod, getPeriodFromTime } = require('../common-utils/helper.js');
+const { getTimeWithoutPeriod, getPeriodFromTime, getFilePath } = require('../common-utils/helper.js');
 const { timeout } = require('puppeteer');
 
 class BasicInfo extends EventsBasePage {
@@ -12,13 +12,14 @@ class BasicInfo extends EventsBasePage {
     constructor() {
         super('/ecc/create/t3');
         this.locators = {
-            basicInfoLabel: '//*[@id="basic-info"]',
+            basicInfoLabel: '//*[@id="in-person-event-basic-info"]',
             cloudTypeDropdown: '//*[@id="bu-select-input"]',
             seriesTypeDropdown: '//*[@id="series-select-input"]',
             cloudTypeOption: (value) => `//sp-picker[@id='bu-select-input']//sp-menu-item[text()='${value}']`,
             seriesTypeOption: (value) => `//sp-picker[@id='series-select-input']//sp-menu-item[text()='${value}']`,
             eventTitle: 'sp-textfield[placeholder="Event title"] input[placeholder="Event title"]',
-            eventDescription: 'sp-textfield[placeholder="Event description"] textarea[placeholder="Event description"]',
+            eventDescription: 'sp-textfield[placeholder="Event description for Events Hub and SEO"] textarea[placeholder="Event description for Events Hub and SEO"]',
+            eventDetails: 'rte-tiptap[id="event-info-details-rte"] div[contenteditable="true"]',
             eventDate: '//*[@name="event-date"]',
             enabledDatesClass: '.calendar-day:not(.disabled):not(.empty)',
             iconCalendar: '//*[@class="icon icon-calendar-add"]',
@@ -36,21 +37,27 @@ class BasicInfo extends EventsBasePage {
             firstVenueNameOption: '.pac-item:first-child',
             venueInfoWillAppearPostEventCheckbox: 'sp-checkbox[id="checkbox-venue-info-visible"]',
             nextStepButtonEnabled: '//a[contains(@class, "next-button") and not(contains(@class, "disabled"))]',
-            eventTopicsCheckbox: (name) => `//*[@id="form-step-basic-info"]//sp-checkbox[@name="${name}"]`,
+            eventTopicsCheckbox: (name) => `//*[@id="form-step-basic-info"]//sp-action-button[@name="${name}"]`,
             communityLinkCheckbox: 'sp-checkbox[name="checkbox-community"] input[name="checkbox-community"]',
             communityUrlField: 'sp-textfield[placeholder="Add Community URL"] input[placeholder="Add Community URL"]',
             addAgendaTimeAndDetailsPanel: 'agenda-fieldset-group repeater-element[text="Add agenda time and details"]',
             agendaFieldsetGroup: 'agenda-fieldset-group',
             agendaFieldset: 'agenda-fieldset',
-            agendaTime: (index) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-picker[label="Pick agenda time"]`,
-            agendaTimePeriod: (index) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-picker[label="AM/PM"]`,
-            agendaTimeOption: (index, time) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
-            agendaTimePeriodOption: (index, time) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-menu-item[value="${getPeriodFromTime(time)}"]`,
-            agendaDetails: (index) => `agenda-fieldset-group agenda-fieldset:nth-of-type(${index+1}) sp-textfield[placeholder="Add Agenda details"] input[placeholder="Add Agenda details"]`,
-            agendaPostEventCheckbox: 'sp-checkbox[id="checkbox-agenda-info"] input[name="checkbox-agenda-info-name"]', 
+            agendaTimePicker: 'sp-picker.time-picker-input',
+            agendaTimePeriod: 'sp-picker[label="AM/PM"]',
+            agendaTitle: 'sp-textfield[placeholder="Add agenda title"] input[placeholder="Add agenda title"]',
+            agendaDetails: 'rte-tiptap[placeholder="Add agenda details"] div[class="tiptap ProseMirror"]',
+            agendaTimeOption: (time) => `sp-menu-item[value="${getTimeWithoutPeriod(time)}"]`,
+            agendaTimePeriodOption: (time) => `sp-menu-item[value="${getPeriodFromTime(time)}"]`,
+            agendaPostEventCheckbox: 'input[id="input"][name="mobilePhone"][role="switch"]',
             failureToast: 'sp-toast[variant="negative"]',
             toastDismiss: 'sp-close-button[label="Close"]',
             successToast: 'sp-toast.save-success-msg[variant="positive"]',
+            languageDropdown: '//*[@id="language-picker"]',
+            languageOption: (language) => `//sp-menu-item[@value='${language}' and @role='option']`,
+            venueAdditionalInfoImageDropzone: 'image-dropzone[id="add-imagefile-dimensions-1920px-wide."] input.img-file-input',
+            venueAdditionalInfoRTE: 'rte-tiptap[id="venue-additional-info-rte"] div[class="tiptap ProseMirror"]',
+            venueAdditionalInfoCheckbox: 'sp-checkbox[id="checkbox-venue-additional-info-visible"]',
             
         };
     }
@@ -69,19 +76,22 @@ class BasicInfo extends EventsBasePage {
 
     async selectCloudType(cloudType) {
         try{
-
-        await this.native.locator(this.locators.cloudTypeDropdown).click()
-        await this.native.locator(this.locators.cloudTypeOption(cloudType)).click()
-        
-    } catch (error) {
-        console.error(`Error in selecting Cloud Type: ${error.message}`);
-        throw new Error(`Error in selecting Cloud Type: ${error.message}`);
-    }
+            await this.native.locator(this.locators.cloudTypeDropdown).click()
+            await this.native.locator(this.locators.cloudTypeOption(cloudType)).click()
+            
+            // Wait for series dropdown to be visible after cloud type selection
+            await this.native.locator(this.locators.seriesTypeDropdown).waitFor({ state: 'visible', timeout: 5000 });
+            // Add a small pause to ensure the dropdown is fully interactive
+            await this.native.waitForTimeout(1000);
+            
+        } catch (error) {
+            console.error(`Error in selecting Cloud Type: ${error.message}`);
+            throw new Error(`Error in selecting Cloud Type: ${error.message}`);
+        }
     }
 
     async selectSeriesType(seriesType) {
         try{
-        
         await this.native.locator(this.locators.seriesTypeDropdown).click()
         await this.native.locator(this.locators.seriesTypeOption(seriesType)).click()
         
@@ -93,20 +103,28 @@ class BasicInfo extends EventsBasePage {
 
     async selectEventTopics(eventTopics) {
         try {
-            if (!Array.isArray(eventTopics)) {
-                throw new Error("eventTopics should be an array");
+            // Find all topic buttons within the checkbox-wrapper
+            const topicButtons = this.native.locator('.checkbox-wrapper sp-action-button');
+            
+            // Get count of topic buttons
+            const count = await topicButtons.count();
+            
+            // If no topics found, log and return
+            if (count === 0) {
+                logger.logInfo('No event topics found on the page');
+                return;
             }
 
-            for (const topic of eventTopics) {
-                const trimmedTopic = topic.trim();
-                const checkboxLocator = this.native.locator(this.locators.eventTopicsCheckbox(trimmedTopic));
-                logger.logInfo(`Selecting checkbox for topic: ${trimmedTopic}`);
-
-                // Click the checkbox
-                await checkboxLocator.click();
-
-                logger.logInfo(`Selected checkbox for topic: ${trimmedTopic}`);
+            // Click each topic button
+            for (let i = 0; i < count; i++) {
+                const button = topicButtons.nth(i);
+                const topicName = await button.getAttribute('name');
+                
+                await button.click();
+                logger.logInfo(`Selected topic: ${topicName}`);
             }
+
+            logger.logInfo(`Successfully selected all ${count} event topics`);
         } catch (error) {
             logger.logError(`Error in selecting event topics: ${error.message}`);
             throw new Error(`Error in selecting event topics: ${error.message}`);
@@ -168,62 +186,100 @@ class BasicInfo extends EventsBasePage {
             throw new Error(`Error opening date picker: ${error.message}`);
         }
     }
-   
+   async selectLanguage(language) {
+    try {
+        await this.native.locator(this.locators.languageDropdown).click();
+        await this.native.locator(this.locators.languageOption(language)).click();
+    } catch (error) {
+        console.error(`Error selecting language: ${error.message}`);
+   }
+    }
     async fillRequiredFields(eventTitleName, eventData) {
-        try{
-            const titleInput = this.native.locator(this.locators.eventTitle);
-            await titleInput.type(eventTitleName);
+        try {
+            // Validate required fields
+            if (!eventData) {
+                throw new Error('eventData is required');
+            }
 
+            const requiredFields = ['description', 'eventDetails', 'startDate', 'endDate', 'startTime', 'endTime', 'timezone', 'venue'];
+            const missingFields = requiredFields.filter(field => !eventData[field]);
+            
+            if (missingFields.length > 0) {
+                throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+            }
+
+            // Fill title
+            const titleInput = this.native.locator(this.locators.eventTitle);
+            await titleInput.waitFor({ state: 'visible' });
+            await titleInput.type(eventTitleName);
             BasicInfo.eventName = eventTitleName;
 
+            // Fill description
             const descriptionInput = this.native.locator(this.locators.eventDescription);
+            await descriptionInput.waitFor({ state: 'visible' });
             await descriptionInput.type(eventData.description);
 
+            // Fill event details
+            const eventDetailsInput = this.native.locator(this.locators.eventDetails);
+            await eventDetailsInput.waitFor({ state: 'visible' });
+            await eventDetailsInput.type(eventData.eventDetails);
+
+            // Select date
             await this.selectDate(eventData.startDate, eventData.endDate);
 
-            await this.native.locator(this.locators.startTime).click()
-            await this.native.locator(this.locators.startTimeOption(eventData.startTime)).click()
-            await this.native.locator(this.locators.startTimePeriod).click()
-            await this.native.locator(this.locators.startTimePeriodOption(eventData.startTime)).click()
+            // Select start time
+            await this.native.locator(this.locators.startTime).click();
+            await this.native.locator(this.locators.startTimeOption(eventData.startTime)).click();
+            await this.native.locator(this.locators.startTimePeriod).click();
+            await this.native.locator(this.locators.startTimePeriodOption(eventData.startTime)).click();
 
-            await this.native.locator(this.locators.endTime).click()
-            await this.native.locator(this.locators.endTimeOption(eventData.endTime)).click()
-            await this.native.locator(this.locators.endTimePeriod).click()
-            await this.native.locator(this.locators.endTimePeriodOption(eventData.endTime)).click()
+            // Select end time
+            await this.native.locator(this.locators.endTime).click();
+            await this.native.locator(this.locators.endTimeOption(eventData.endTime)).click();
+            await this.native.locator(this.locators.endTimePeriod).click();
+            await this.native.locator(this.locators.endTimePeriodOption(eventData.endTime)).click();
 
-            await this.native.locator(this.locators.timezone).click()
-            await this.native.locator(this.locators.timezoneOption(eventData.timezone)).click()
+            // Select timezone
+            await this.native.locator(this.locators.timezone).click();
+            await this.native.locator(this.locators.timezoneOption(eventData.timezone)).click();
 
+            // Select language if provided
+            if (eventData.language) {
+                await this.selectLanguage(eventData.language);
+                logger.logInfo(`Language ${eventData.language} selected successfully`);
+            }
+
+            // Fill venue
             const venueInput = await this.native.locator(this.locators.venueName);
+            await venueInput.waitFor({ state: 'visible' });
             await venueInput.click();
             await venueInput.type(eventData.venue);
 
+            // Select first venue option
             await this.native.locator(this.locators.firstVenueNameOption).waitFor({ state: 'visible' });
-
             await this.native.locator(this.locators.firstVenueNameOption).click();
 
-            if(eventData.venueInfoWillAppearPostEventCheckbox && eventData.venueInfoWillAppearPostEventCheckbox.toLowerCase() === "checked"){
+            // Handle venue info checkbox
+            if (eventData.venueInfoWillAppearPostEventCheckbox && eventData.venueInfoWillAppearPostEventCheckbox.toLowerCase() === "checked") {
                 await this.native.locator(this.locators.venueInfoWillAppearPostEventCheckbox).click();
                 logger.logInfo('Checked checkbox and Venue info will appear post event');
-            }else{
+            } else {
                 logger.logInfo('Checkbox not checked and Venue info will not appear post event');
             }
         
-    } catch (error) {
-        console.error(`Error in filling Minimum Required Fields: ${error.message}`);
-        throw new Error(`Error in filling Minimum Required Fields: ${error.message}`);
-    }
+        } catch (error) {
+            logger.logError(`Error in filling Minimum Required Fields: ${error.message}`);
+            throw new Error(`Error in filling Minimum Required Fields: ${error.message}`);
+        }
     }
 
     async clickNextStepButton() {
         try {
-            // Wait for the enabled Next Step button to be visible and enabled
-            await this.native.locator(this.locators.nextStepButtonEnabled).waitFor({ state: 'visible' });
-            
-            // Click the enabled Next Step button
-            await this.native.locator(this.locators.nextStepButtonEnabled).click();
-            logger.logInfo('Next Step button clicked.');
-            }catch (error) {
+            const nextButton = this.native.locator(this.locators.nextStepButtonEnabled);
+            await nextButton.waitFor({ state: 'visible', timeout: 10000 });
+            await nextButton.click();
+            logger.logInfo('Next Step button clicked successfully.');
+        } catch (error) {
             logger.logError(`Failed to click the Next Step button: ${error.message}`);
             throw new Error(`Failed to click the Next Step button: ${error.message}`);
         }
@@ -256,6 +312,11 @@ class BasicInfo extends EventsBasePage {
                 // Click the Next Step button again
                 await this.native.locator(this.locators.nextStepButtonEnabled).click();
                 logger.logWarning('Next Step button clicked successfully after dismissing the failure toast');
+                }
+                else{
+                // Click the Next Step button again
+                await this.native.locator(this.locators.nextStepButtonEnabled).click();
+                logger.logWarning('Sucess & Failure toast does not appear. Therefore, Next Step button clicked again');
                 }
              } 
         }catch (error) {
@@ -301,50 +362,56 @@ class BasicInfo extends EventsBasePage {
 
     async fillAgendaDetails(agenda) {
         try {
-            const agendaFieldsetGroupLocator = this.native.locator(this.locators.agendaFieldsetGroup);
-    
+            // Wait for the agenda component to be present
+            const agendaGroup = this.native.locator(this.locators.agendaFieldsetGroup);
+            await agendaGroup.waitFor({ state: 'visible' });
+
             for (let i = 0; i < agenda.length; i++) {
                 const item = agenda[i];
-    
-                // Click the Add Agenda button if there are multiple items
+
+                // If this isn't the first item, we need to add a new agenda section
                 if (i > 0) {
-                    const addAgendaTimeAndDetailsPanelLocator = this.native.locator(this.locators.addAgendaTimeAndDetailsPanel);
-                    logger.logInfo('Clicking the Add Agenda button');
-                    await addAgendaTimeAndDetailsPanelLocator.click();
+                    logger.logInfo('Adding new agenda item');
+                    await this.native.locator(this.locators.addAgendaTimeAndDetailsPanel).click();
+                    // Wait for the new agenda section to be added
+                    await this.native.waitForTimeout(500);
                 }
-    
-                // Fill the agenda time
-                const agendaTimeLocator = await this.native.locator(this.locators.agendaTime(i));
-                await agendaTimeLocator.click();
 
-                // Use a more specific locator for the time option
-                const agendaTimeOptionLocator = this.native.locator(this.locators.agendaTimeOption(i,item.startTime));
+                // Get the current agenda fieldset
+                const currentFieldset = agendaGroup.locator(this.locators.agendaFieldset).nth(i);
                 
-                if (!agendaTimeOptionLocator) {
-                    throw new Error('Agenda time option not found');
-                }
-                await agendaTimeOptionLocator.click();
+                // Handle Time Selection - similar to fillRequiredFields method
+                const timePicker = currentFieldset.locator(this.locators.agendaTimePicker);
+                await timePicker.waitFor({ state: 'visible' });
+                await timePicker.click();
+                
+                // Select time using the same pattern as event time selection
+                const timeLocator = currentFieldset.locator(this.locators.agendaTimeOption(item.startTime));
+                await timeLocator.waitFor({ state: 'visible' });
+                await timeLocator.click();
+                
+                // Handle AM/PM Selection - similar to event time AM/PM selection
+                const periodPicker = currentFieldset.locator(this.locators.agendaTimePeriod);
+                await periodPicker.waitFor({ state: 'visible' });
+                await periodPicker.click();
+                
+                const periodLocator = currentFieldset.locator(this.locators.agendaTimePeriodOption(item.startTime));
+                await periodLocator.waitFor({ state: 'visible' });
+                await periodLocator.click();
+                
+                const title = this.native.locator(this.locators.agendaTitle).nth(i);
+                await title.waitFor({ state: 'visible' });
+                await title.fill(item.title);
 
-                // Fill the agenda time period
-                const agendaTimePeriodLocator = await this.native.locator(this.locators.agendaTimePeriod(i));
-                await agendaTimePeriodLocator.click();
+                const details = this.native.locator(this.locators.agendaDetails).nth(i);
+                await details.waitFor({ state: 'visible' });
+                await details.fill(item.details);
 
-                // Use a more specific locator for the time period option
-                const agendaTimePeriodOptionLocator = this.native.locator(this.locators.agendaTimePeriodOption(i, item.startTime));
-                if (!agendaTimePeriodOptionLocator) {
-                    throw new Error('Agenda time period option not found');
-                }
-                await agendaTimePeriodOptionLocator.click();
 
-                // Fill the agenda details
-                const agendaDetailsInputLocator = await this.native.locator(this.locators.agendaDetails(i));
-                if (!agendaDetailsInputLocator) {
-                    throw new Error('Agenda details field not found');
-                }
-                await agendaDetailsInputLocator.fill(item.description);
-    
-                logger.logInfo(`Agenda item with start time ${item.startTime} and description "${item.description}" filled successfully`);
+                logger.logInfo(`Set time for agenda item ${i + 1} to ${item.startTime}`);
             }
+
+            logger.logInfo(`Successfully filled all ${agenda.length} agenda items`);
         } catch (error) {
             logger.logError(`Error in filling the agenda details: ${error.message}`);
             throw new Error(`Error in filling the agenda details: ${error.message}`);
@@ -385,5 +452,33 @@ class BasicInfo extends EventsBasePage {
             throw new Error(`Error occurred while verifying the text content: ${error.message}`);
         }
     }
+
+    async fillAdditionalVenueInfo(additionalInfo) {
+        try {
+            // Upload image
+            const imageInputLocator = this.native.locator(this.locators.venueAdditionalInfoImageDropzone);
+
+            const additionalInfoImagePath = await getFilePath("https://cormenfornh.com/Headshot-small.jpg");
+            await imageInputLocator.setInputFiles(additionalInfoImagePath);
+
+            logger.logInfo('Uploaded venue additional info image');
+
+            // Fill rich text editor
+            const rteLocator = this.native.locator(this.locators.venueAdditionalInfoRTE);
+            await rteLocator.waitFor({ state: 'visible', timeout: 5000 });
+            await rteLocator.fill(additionalInfo);
+            logger.logInfo('Filled venue additional info text');
+
+            // Check the checkbox to make it visible post-event
+            const checkboxLocator = this.native.locator(this.locators.venueAdditionalInfoCheckbox);
+            await checkboxLocator.click();
+            logger.logInfo('Checked venue additional info visibility checkbox');
+
+        } catch (error) {
+            logger.logError(`Error in filling additional venue information: ${error.message}`);
+            throw new Error(`Error in filling additional venue information: ${error.message}`);
+        }
+    }
+   
 }
 module.exports = { BasicInfo };
